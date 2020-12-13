@@ -1,5 +1,5 @@
 # The welp files
-Depedency free single-header files all under Unlicense license to welp you when needed.
+Depedency free single-header files all under Unlicense license that could be welpful some day.
 
 ### Description of the files
 - welp_chrono.hpp : Provides classes for measuring timings.
