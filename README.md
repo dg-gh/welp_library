@@ -1,2 +1,2 @@
 # welp
-depedency free single-header files
+Depedency free single-header files all under Unlicense license.
