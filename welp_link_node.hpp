@@ -1,4 +1,4 @@
-// welp_link_node.h - last update : 12 / 12 / 2020
+// welp_link_node.hpp - last update : 12 / 12 / 2020
 // License <http://unlicense.org/> (statement below at the end of the file)
 
 
@@ -230,7 +230,7 @@ std::size_t welp::link_node<msg_Ty, label_Ty, _Allocator>::observer_node_count(P
 #endif // WELP_LINK_NODE_H
 
 
-// welp_link_node.h
+// welp_link_node.hpp
 // 
 // This is free software released into the public domain.
 // 
