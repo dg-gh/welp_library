@@ -1,4 +1,4 @@
-# The C++ welp files
+# The C++ welp library
 Depedency free single-header files all under the Unlicense license that could be welpful some day.
 
 ### Description of the files
