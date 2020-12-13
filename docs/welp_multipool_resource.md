@@ -1,6 +1,6 @@
 # welp_multipool_resource.hpp
 
-welp_multipool_resource.h provides two classes :
+welp_multipool_resource.hpp provides two classes :
 
 - welp::multipool_resource is a class containing several pools of memory storing blocks to give to allocators. Two blocks in the same pool will have the same size. However, different pools will accomodate blocks of different sizes.
 - welp::multipool_resource_sync is the same as welp::multipool_resource except that it contains a mutex that prevents block attribution/restitution issues when dealing with multiple threads. This class is only accessible if the macro WELP_MULTIPOOL_INCLUDE_MUTEX is defined before the inclusion of the header.
