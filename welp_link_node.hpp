@@ -17,7 +17,7 @@
 namespace welp
 {
 	// the allocator must have std::pair<char* const, label_Ty>> as template parameter
-	// link_nodes can add both observer_nodes and link_nodes with the method add_observer_node
+	// link_node can add both an observer_node and a link_node with the method add_observer_node
 	template<class msg_Ty, class label_Ty = int, class _Allocator = std::allocator<std::pair<char* const, label_Ty>>> class link_node
 	{
 
