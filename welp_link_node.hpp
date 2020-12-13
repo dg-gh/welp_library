@@ -27,19 +27,19 @@ namespace welp
 
 	public:
 
-		// GETTING NOTIFICATIONS
+		// getting notifications
 
 		virtual void on_notification_from_node(const msg_Ty& msg) {}
 
 
-		// SENDING NOTIFICATIONS
+		// sending notifications
 
 		void notify_all_observer_nodes(const msg_Ty& msg);
 		void notify_all_observer_nodes(const msg_Ty& msg, const label_Ty& compare_label);
 		template <class Predicate> void notify_all_observer_nodes(const msg_Ty& msg, Predicate Pr);
 
 
-		// NODES MANAGEMENT
+		// observer nodes management
 
 		template <class Ty> void add_observer_node(Ty* target_ptr);
 		template <class Ty> void add_observer_node(Ty* target_ptr, const label_Ty& target_label);
