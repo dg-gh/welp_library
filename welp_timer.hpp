@@ -23,13 +23,13 @@ namespace welp
 
 		template <std::size_t offset> inline void set_timeframe(float_Ty timeframe) noexcept;
 
-		inline void start_frame() noexcept;
+		inline void start_timer() noexcept;
 
-		template <std::size_t offset> inline void finish_frame() noexcept;
-		inline void finish_frame(float_Ty timeframe) noexcept;
+		template <std::size_t offset> inline void finish_timeframe() noexcept;
+		inline void finish_timeframe(float_Ty timeframe) noexcept;
 
-		template <std::size_t offset> inline void finish_frame_and_restart() noexcept;
-		inline void finish_frame_and_restart(float_Ty timeframe) noexcept;
+		template <std::size_t offset> inline void finish_timeframe_restart_timer() noexcept;
+		inline void finish_timeframe_restart_timer(float_Ty timeframe) noexcept;
 
 		timer_steady() = default;
 		timer_steady(const welp::timer_steady<float_Ty, set_number>&) = default;
@@ -52,13 +52,13 @@ namespace welp
 
 		template <std::size_t offset> inline void set_timeframe(float_Ty timeframe) noexcept;
 
-		inline void start_frame() noexcept;
+		inline void start_timer() noexcept;
 
-		template <std::size_t offset> inline void finish_frame() noexcept;
-		inline void finish_frame(float_Ty timeframe) noexcept;
+		template <std::size_t offset> inline void finish_timeframe() noexcept;
+		inline void finish_timeframe(float_Ty timeframe) noexcept;
 
-		template <std::size_t offset> inline void finish_frame_and_restart() noexcept;
-		inline void finish_frame_and_restart(float_Ty timeframe) noexcept;
+		template <std::size_t offset> inline void finish_timeframe_restart_timer() noexcept;
+		inline void finish_timeframe_restart_timer(float_Ty timeframe) noexcept;
 
 		timer_system() = default;
 		timer_system(const welp::timer_system<float_Ty, set_number>&) = default;
@@ -89,19 +89,19 @@ inline void welp::timer_steady<float_Ty, set_number>::set_timeframe(float_Ty tim
 }
 
 template <typename float_Ty, std::size_t set_number>
-inline void welp::timer_steady<float_Ty, set_number>::start_frame() noexcept
+inline void welp::timer_steady<float_Ty, set_number>::start_timer() noexcept
 {
 	_fstart = std::chrono::steady_clock::now();
 }
 
 template <typename float_Ty, std::size_t set_number> template <std::size_t offset>
-inline void welp::timer_steady<float_Ty, set_number>::finish_frame() noexcept
+inline void welp::timer_steady<float_Ty, set_number>::finish_timeframe() noexcept
 {
 	while ((std::chrono::steady_clock::now() - _fstart).count() < clock_sleep_time[offset]) {}
 }
 
 template <typename float_Ty, std::size_t set_number>
-inline void welp::timer_steady<float_Ty, set_number>::finish_frame(float_Ty timeframe) noexcept
+inline void welp::timer_steady<float_Ty, set_number>::finish_timeframe(float_Ty timeframe) noexcept
 {
 	constexpr float_Ty factor_s_to_tick = static_cast<float_Ty>(
 		std::chrono::steady_clock::duration::period::den / std::chrono::steady_clock::duration::period::num);
@@ -111,14 +111,14 @@ inline void welp::timer_steady<float_Ty, set_number>::finish_frame(float_Ty time
 }
 
 template <typename float_Ty, std::size_t set_number> template <std::size_t offset>
-inline void welp::timer_steady<float_Ty, set_number>::finish_frame_and_restart() noexcept
+inline void welp::timer_steady<float_Ty, set_number>::finish_timeframe_restart_timer() noexcept
 {
 	while ((std::chrono::steady_clock::now() - _fstart).count() < clock_sleep_time[offset]) {}
 	_fstart = std::chrono::steady_clock::now();
 }
 
 template <typename float_Ty, std::size_t set_number>
-inline void welp::timer_steady<float_Ty, set_number>::finish_frame_and_restart(float_Ty timeframe) noexcept
+inline void welp::timer_steady<float_Ty, set_number>::finish_timeframe_restart_timer(float_Ty timeframe) noexcept
 {
 	constexpr float_Ty factor_s_to_tick = static_cast<float_Ty>(
 		std::chrono::steady_clock::duration::period::den / std::chrono::steady_clock::duration::period::num);
@@ -141,19 +141,19 @@ inline void welp::timer_system<float_Ty, set_number>::set_timeframe(float_Ty tim
 }
 
 template <typename float_Ty, std::size_t set_number>
-inline void welp::timer_system<float_Ty, set_number>::start_frame() noexcept
+inline void welp::timer_system<float_Ty, set_number>::start_timer() noexcept
 {
 	_fstart = std::chrono::system_clock::now();
 }
 
 template <typename float_Ty, std::size_t set_number> template <std::size_t offset>
-inline void welp::timer_system<float_Ty, set_number>::finish_frame() noexcept
+inline void welp::timer_system<float_Ty, set_number>::finish_timeframe() noexcept
 {
 	while ((std::chrono::system_clock::now() - _fstart).count() < clock_sleep_time[offset]) {}
 }
 
 template <typename float_Ty, std::size_t set_number>
-inline void welp::timer_system<float_Ty, set_number>::finish_frame(float_Ty timeframe) noexcept
+inline void welp::timer_system<float_Ty, set_number>::finish_timeframe(float_Ty timeframe) noexcept
 {
 	constexpr float_Ty factor_s_to_tick = static_cast<float_Ty>(
 		std::chrono::system_clock::duration::period::den / std::chrono::system_clock::duration::period::num);
@@ -163,14 +163,14 @@ inline void welp::timer_system<float_Ty, set_number>::finish_frame(float_Ty time
 }
 
 template <typename float_Ty, std::size_t set_number> template <std::size_t offset>
-inline void welp::timer_system<float_Ty, set_number>::finish_frame_and_restart() noexcept
+inline void welp::timer_system<float_Ty, set_number>::finish_timeframe_restart_timer() noexcept
 {
 	while ((std::chrono::system_clock::now() - _fstart).count() < clock_sleep_time[offset]) {}
 	_fstart = std::chrono::system_clock::now();
 }
 
 template <typename float_Ty, std::size_t set_number>
-inline void welp::timer_system<float_Ty, set_number>::finish_frame_and_restart(float_Ty timeframe) noexcept
+inline void welp::timer_system<float_Ty, set_number>::finish_timeframe_restart_timer(float_Ty timeframe) noexcept
 {
 	constexpr float_Ty factor_s_to_tick = static_cast<float_Ty>(
 		std::chrono::system_clock::duration::period::den / std::chrono::system_clock::duration::period::num);
