@@ -18,4 +18,3 @@ Incoming ...
         std::cin.get();
         return 0;
     }
-a
