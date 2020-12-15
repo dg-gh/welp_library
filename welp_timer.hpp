@@ -1,4 +1,4 @@
-// welp_timer.hpp - last update : 14 / 12 / 2020
+// welp_timer.hpp - last update : 15 / 12 / 2020
 // License <http://unlicense.org/> (statement below at the end of the file)
 
 
