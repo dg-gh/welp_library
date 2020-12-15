@@ -1,4 +1,4 @@
-// welp_global_type.hpp - last update : 12 / 12 / 2020
+// welp_global_type.hpp - last update : 15 / 12 / 2020
 // License <http://unlicense.org/> (statement below at the end of the file)
 
 
@@ -68,8 +68,10 @@ namespace welp
 		template <class base_type2, unsigned int id_number2, class _Allocator2, class ... _Args>
 		friend inline _global_instance<base_type2, id_number2, _Allocator2>& make_global_type(_Args&& ... args);
 
+#ifdef WELP_GLOBAL_TYPE_INCLUDE_MUTEX
 		template <class base_type2, unsigned int id_number2, class _Allocator2, class ... _Args>
 		friend inline _global_instance<base_type2, id_number2, _Allocator2>& make_global_type_sync(std::mutex&, _Args&& ... args);
+#endif // WELP_GLOBAL_TYPE_INCLUDE_MUTEX
 
 		template <class base_type2, unsigned int id_number2, class _Allocator2> friend inline bool is_global_type_created() noexcept;
 	};
