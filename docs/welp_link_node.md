@@ -2,7 +2,7 @@
 
 Incoming ...
 
-### Code example with std::pmr::memory_resource (requires C++17)
+### Code example
 
 	#include <iostream>
 	#include "welp_link_node.hpp"
