@@ -1,4 +1,4 @@
-// welp_threads.hpp - last update : 12 / 12 / 2020
+// welp_threads.hpp - last update : 15 / 12 / 2020
 // License <http://unlicense.org/> (statement below at the end of the file)
 
 
@@ -117,7 +117,8 @@ namespace welp
 		template <class return_Ty, class function_Ty, class ... _Args>
 		void force_priority_async_task(welp::async_task_result<return_Ty>& package, const function_Ty& task, _Args&& ... args);
 
-		void finish_all_tasks();
+		void finish_all_tasks() noexcept;
+		inline std::size_t unfinished_task_count() const noexcept;
 
 		inline std::size_t number_of_threads() const noexcept;
 		inline std::size_t task_buffer_size() const noexcept;
@@ -545,11 +546,17 @@ void welp::threads<_Allocator>::force_priority_async_task(welp::async_task_resul
 
 
 template <class _Allocator>
-void welp::threads<_Allocator>::finish_all_tasks()
+void welp::threads<_Allocator>::finish_all_tasks() noexcept
 {
 	waiting_for_finish.store(true);
 	while (unfinished_tasks.load() != 0) {}
 	waiting_for_finish.store(false);
+}
+
+template <class _Allocator>
+inline std::size_t welp::threads<_Allocator>::unfinished_task_count() const noexcept
+{
+	return unfinished_tasks.load();
 }
 
 
