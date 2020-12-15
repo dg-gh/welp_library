@@ -80,9 +80,7 @@ Same and displays message msg. Overloads can display up to 4 messages.
 	public:
 
 		using value_type = Ty;
-		using size_type = size_t;
-		using difference_type = ptrdiff_t;
-	
+		
 		inline Ty* allocate(size_t instances)
 		{
 			return R.allocate_type<Ty>(instances);
@@ -119,7 +117,7 @@ Same and displays message msg. Overloads can display up to 4 messages.
 		return 0;
 	}
 
-### Code example with std::pmr::memory_resource
+### Code example with std::pmr::memory_resource (requires C++17)
 
 	#define WELP_CYCLIC_DEBUG_MODE
 	#include "welp_cyclic_resource.h"
