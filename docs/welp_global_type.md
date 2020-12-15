@@ -1,0 +1,3 @@
+# welp_global_type.hpp
+
+Incoming ...
