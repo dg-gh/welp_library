@@ -40,6 +40,8 @@ namespace welp
 		inline welp::bit_flags<bits>& operator|=(const welp::bit_flags<bits>& rhs) noexcept;
 		inline welp::bit_flags<bits>& operator^=(const welp::bit_flags<bits>& rhs) noexcept;
 		inline welp::bit_flags<bits>& flip() noexcept;
+		
+		constexpr std::size_t size() const noexcept { return bits; }
 
 #ifdef WELP_BIT_FLAGS_INCLUDE_IOSTREAM
 		const welp::bit_flags<bits>& say() const;
