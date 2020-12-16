@@ -13767,7 +13767,7 @@ namespace welp
 ////// display //////
 
 #ifdef WELP_MATRIX_INCLUDE_IOSTREAM
-template <typename Ty, class _Allocator> std::ostream& operator << (std::ostream & out, const welp::matrix<Ty, _Allocator> & A)
+template <typename Ty, class _Allocator> std::ostream& operator<<(std::ostream& out, const welp::matrix<Ty, _Allocator>& A)
 {
 	A.say(); return out;
 }
