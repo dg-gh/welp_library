@@ -144,7 +144,7 @@ inline welp::bit_flags<bits>& welp::bit_flags<bits>::cpy(const Ty& rhs) noexcept
 	constexpr std::size_t remainder_bits = bits & 7;
 	const std::uint8_t* rhs_ptr = static_cast<const std::uint8_t*>(static_cast<const void*>(&rhs));
 	std::memcpy(static_cast<std::uint8_t*>(field), rhs_ptr, bytes);
-	*(static_cast<std::uint8_t*>(field) + bytes) |= (*(rhs_ptr + bytes) & bitmask_true(remainder_bits));
+	field[bytes] |= (*(rhs_ptr + bytes) & bitmask_true(remainder_bits));
 	return *this;
 }
 
@@ -244,10 +244,7 @@ inline welp::bit_flags<bits>& welp::bit_flags<bits>::operator=(const welp::bit_f
 {
 	constexpr std::size_t bytes = bits >> 3;
 	constexpr std::size_t remainder_bits = bits & 7;
-	for (std::size_t k = 0; k < bytes; k++)
-	{
-		field[k] = rhs.field[k];
-	}
+	std::memcpy(static_cast<std::uint8_t*>(field), static_cast<const std::uint8_t*>(rhs.field), bytes);
 	field[bytes] &= bitmask_false(remainder_bits);
 	field[bytes] |= (rhs.field[bytes] & bitmask_true(remainder_bits));
 	return *this;
@@ -258,10 +255,7 @@ inline welp::bit_flags<bits>& welp::bit_flags<bits>::operator=(welp::bit_flags<b
 {
 	constexpr std::size_t bytes = bits >> 3;
 	constexpr std::size_t remainder_bits = bits & 7;
-	for (std::size_t k = 0; k < bytes; k++)
-	{
-		field[k] = rhs.field[k];
-	}
+	std::memcpy(static_cast<std::uint8_t*>(field), static_cast<const std::uint8_t*>(rhs.field), bytes);
 	field[bytes] &= bitmask_false(remainder_bits);
 	field[bytes] |= (rhs.field[bytes] & bitmask_true(remainder_bits));
 	return *this;
