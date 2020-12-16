@@ -10,6 +10,7 @@
 
 #include <cstdlib>
 #include <cstdint>
+#include <cstring>
 
 #ifdef WELP_BIT_FLAGS_DEBUG_MODE
 #include <cassert>
@@ -33,6 +34,7 @@ namespace welp
 		inline welp::bit_flags<bits>& store(std::size_t offset, bool flag) noexcept;
 
 		inline welp::bit_flags<bits>& set(bool flag) noexcept;
+		template <class Ty> inline welp::bit_flags<bits>& cpy(const Ty& rhs) noexcept;
 
 		inline welp::bit_flags<bits>& operator&=(const welp::bit_flags<bits>& rhs) noexcept;
 		inline welp::bit_flags<bits>& operator|=(const welp::bit_flags<bits>& rhs) noexcept;
@@ -45,24 +47,24 @@ namespace welp
 #endif // WELP_BIT_FLAGS_INCLUDE_IOSTREAM
 
 		bit_flags() noexcept;
-		bit_flags(const welp::bit_flags<bits>&) = default;
-		welp::bit_flags<bits>& operator=(const welp::bit_flags<bits>&) = default;
-		bit_flags(welp::bit_flags<bits>&&) = default;
-		welp::bit_flags<bits>& operator=(welp::bit_flags<bits>&&) = default;
+		bit_flags(const welp::bit_flags<bits>&) noexcept = default;
+		welp::bit_flags<bits>& operator=(const welp::bit_flags<bits>&) noexcept;
+		bit_flags(welp::bit_flags<bits>&&) noexcept = default;
+		welp::bit_flags<bits>& operator=(welp::bit_flags<bits>&&) noexcept;
 		~bit_flags() = default;
 
 		template <std::size_t bits2>
-		friend inline bool operator==(const welp::bit_flags<bits2>&, const welp::bit_flags<bits2>&);
+		friend inline bool operator==(const welp::bit_flags<bits2>&, const welp::bit_flags<bits2>&) noexcept;
 		template <std::size_t bits2>
-		friend inline bool operator!=(const welp::bit_flags<bits2>&, const welp::bit_flags<bits2>&);
+		friend inline bool operator!=(const welp::bit_flags<bits2>&, const welp::bit_flags<bits2>&) noexcept;
 		template <std::size_t bits2>
-		friend inline welp::bit_flags<bits2> operator&(const welp::bit_flags<bits2>&, const welp::bit_flags<bits2>&);
+		friend inline welp::bit_flags<bits2> operator&(const welp::bit_flags<bits2>&, const welp::bit_flags<bits2>&) noexcept;
 		template <std::size_t bits2>
-		friend inline welp::bit_flags<bits2> operator|(const welp::bit_flags<bits2>&, const welp::bit_flags<bits2>&);
+		friend inline welp::bit_flags<bits2> operator|(const welp::bit_flags<bits2>&, const welp::bit_flags<bits2>&) noexcept;
 		template <std::size_t bits2>
-		friend inline welp::bit_flags<bits2> operator^(const welp::bit_flags<bits2>&, const welp::bit_flags<bits2>&);
+		friend inline welp::bit_flags<bits2> operator^(const welp::bit_flags<bits2>&, const welp::bit_flags<bits2>&) noexcept;
 		template <std::size_t bits2>
-		friend inline welp::bit_flags<bits2> operator~(const welp::bit_flags<bits2>&);
+		friend inline welp::bit_flags<bits2> operator~(const welp::bit_flags<bits2>&) noexcept;
 
 	private:
 
@@ -74,12 +76,12 @@ namespace welp
 		inline std::uint8_t bitmask_false(std::size_t digits) const noexcept;
 	};
 
-	template <std::size_t bits> inline welp::bit_flags<bits> operator&(const welp::bit_flags<bits>& A, const welp::bit_flags<bits>& B);
-	template <std::size_t bits> inline welp::bit_flags<bits> operator|(const welp::bit_flags<bits>& A, const welp::bit_flags<bits>& B);
+	template <std::size_t bits> inline bool operator==(const welp::bit_flags<bits>& A, const welp::bit_flags<bits>& B) noexcept;
+	template <std::size_t bits> inline bool operator!=(const welp::bit_flags<bits>& A, const welp::bit_flags<bits>& B) noexcept;
 
-	template <std::size_t bits> inline welp::bit_flags<bits> operator&(const welp::bit_flags<bits>& A, const welp::bit_flags<bits>& B);
-	template <std::size_t bits> inline welp::bit_flags<bits> operator|(const welp::bit_flags<bits>& A, const welp::bit_flags<bits>& B);
-	template <std::size_t bits> inline welp::bit_flags<bits> operator^(const welp::bit_flags<bits>& A, const welp::bit_flags<bits>& B);
+	template <std::size_t bits> inline welp::bit_flags<bits> operator&(const welp::bit_flags<bits>& A, const welp::bit_flags<bits>& B) noexcept;
+	template <std::size_t bits> inline welp::bit_flags<bits> operator|(const welp::bit_flags<bits>& A, const welp::bit_flags<bits>& B) noexcept;
+	template <std::size_t bits> inline welp::bit_flags<bits> operator^(const welp::bit_flags<bits>& A, const welp::bit_flags<bits>& B) noexcept;
 
 	template <std::size_t bits, class Ty> inline const welp::bit_flags<bits>& as_bit_flags(const Ty& rhs) noexcept;
 	template <std::size_t bits, class Ty> inline welp::bit_flags<bits>& as_bit_flags(Ty& rhs) noexcept;
@@ -115,6 +117,7 @@ inline welp::bit_flags<bits>& welp::bit_flags<bits>::store(std::size_t offset, b
 	}
 }
 
+
 template <std::size_t bits>
 inline welp::bit_flags<bits>& welp::bit_flags<bits>::set(bool flag) noexcept
 {
@@ -133,6 +136,18 @@ inline welp::bit_flags<bits>& welp::bit_flags<bits>::set(bool flag) noexcept
 		return *this;
 	}
 }
+
+template <std::size_t bits> template <class Ty>
+inline welp::bit_flags<bits>& welp::bit_flags<bits>::cpy(const Ty& rhs) noexcept
+{
+	constexpr std::size_t bytes = bits >> 3;
+	constexpr std::size_t remainder_bits = bits & 7;
+	const std::uint8_t* rhs_ptr = static_cast<const std::uint8_t*>(static_cast<const void*>(&rhs));
+	std::memcpy(static_cast<std::uint8_t*>(field), rhs_ptr, bytes);
+	*(static_cast<std::uint8_t*>(field) + bytes) |= (*(rhs_ptr + bytes) & bitmask_true(remainder_bits));
+	return *this;
+}
+
 
 template <std::size_t bits>
 inline welp::bit_flags<bits>& welp::bit_flags<bits>::operator&=(const welp::bit_flags<bits>& rhs) noexcept
@@ -183,7 +198,7 @@ inline welp::bit_flags<bits>& welp::bit_flags<bits>::flip() noexcept
 	{
 		field[k] ^= ones;
 	}
-	field[bytes] ^= (rhs.field[bytes] & bitmask_true(remainder_bits));
+	field[bytes] ^= bitmask_true(remainder_bits);
 	return *this;
 }
 
@@ -221,7 +236,35 @@ welp::bit_flags<bits>::bit_flags() noexcept
 	constexpr std::size_t bytes = bits >> 3;
 	constexpr std::size_t remainder_bits = bits & 7;
 	std::memset(static_cast<std::uint8_t*>(field), static_cast<std::uint8_t>(0), bytes);
-	*(static_cast<std::uint8_t*>(field) + bytes) &= bitmask_false(remainder_bits);
+	field[bytes] &= bitmask_false(remainder_bits);
+}
+
+template <std::size_t bits>
+inline welp::bit_flags<bits>& welp::bit_flags<bits>::operator=(const welp::bit_flags<bits>& rhs) noexcept
+{
+	constexpr std::size_t bytes = bits >> 3;
+	constexpr std::size_t remainder_bits = bits & 7;
+	for (std::size_t k = 0; k < bytes; k++)
+	{
+		field[k] = rhs.field[k];
+	}
+	field[bytes] &= bitmask_false(remainder_bits);
+	field[bytes] |= (rhs.field[bytes] & bitmask_true(remainder_bits));
+	return *this;
+}
+
+template <std::size_t bits>
+inline welp::bit_flags<bits>& welp::bit_flags<bits>::operator=(welp::bit_flags<bits>&& rhs) noexcept
+{
+	constexpr std::size_t bytes = bits >> 3;
+	constexpr std::size_t remainder_bits = bits & 7;
+	for (std::size_t k = 0; k < bytes; k++)
+	{
+		field[k] = rhs.field[k];
+	}
+	field[bytes] &= bitmask_false(remainder_bits);
+	field[bytes] |= (rhs.field[bytes] & bitmask_true(remainder_bits));
+	return *this;
 }
 
 
@@ -400,7 +443,7 @@ inline std::uint8_t welp::bit_flags<bits>::bitmask_false(std::size_t digits) con
 
 namespace welp
 {
-	template <std::size_t bits> inline bool operator==(const welp::bit_flags<bits>& A, const welp::bit_flags<bits>& B)
+	template <std::size_t bits> inline bool operator==(const welp::bit_flags<bits>& A, const welp::bit_flags<bits>& B) noexcept
 	{
 		constexpr std::size_t bytes = bits >> 3;
 		constexpr std::size_t remainder_bits = bits & 7;
@@ -413,7 +456,7 @@ namespace welp
 		if ((A.field[bytes] & bitmask) != (B.field[bytes] & bitmask)) { return false; }
 		else { return true; }
 	}
-	template <std::size_t bits> inline bool operator!=(const welp::bit_flags<bits>& A, const welp::bit_flags<bits>& B)
+	template <std::size_t bits> inline bool operator!=(const welp::bit_flags<bits>& A, const welp::bit_flags<bits>& B) noexcept
 	{
 		constexpr std::size_t bytes = bits >> 3;
 		constexpr std::size_t remainder_bits = bits & 7;
@@ -427,8 +470,8 @@ namespace welp
 		else { return true; }
 	}
 
-	template <std::size_t bits> inline welp::bit_flags<bits> operator&(const welp::bit_flags<bits>& A, const welp::bit_flags<bits>& B)
-	{		
+	template <std::size_t bits> inline welp::bit_flags<bits> operator&(const welp::bit_flags<bits>& A, const welp::bit_flags<bits>& B) noexcept
+	{
 		constexpr std::size_t bytes = (bits + ((8 - (bits & 7)) & 7)) >> 3;
 		welp::bit_flags<bits> C;
 		for (std::size_t k = 0; k < bytes; k++)
@@ -437,7 +480,7 @@ namespace welp
 		}
 		return C;
 	}
-	template <std::size_t bits> inline welp::bit_flags<bits> operator|(const welp::bit_flags<bits>& A, const welp::bit_flags<bits>& B)
+	template <std::size_t bits> inline welp::bit_flags<bits> operator|(const welp::bit_flags<bits>& A, const welp::bit_flags<bits>& B) noexcept
 	{
 		constexpr std::size_t bytes = (bits + ((8 - (bits & 7)) & 7)) >> 3;
 		welp::bit_flags<bits> C;
@@ -447,7 +490,7 @@ namespace welp
 		}
 		return C;
 	}
-	template <std::size_t bits> inline welp::bit_flags<bits> operator^(const welp::bit_flags<bits>& A, const welp::bit_flags<bits>& B)
+	template <std::size_t bits> inline welp::bit_flags<bits> operator^(const welp::bit_flags<bits>& A, const welp::bit_flags<bits>& B) noexcept
 	{
 		constexpr std::size_t bytes = (bits + ((8 - (bits & 7)) & 7)) >> 3;
 		welp::bit_flags<bits> C;
@@ -457,7 +500,7 @@ namespace welp
 		}
 		return C;
 	}
-	template <std::size_t bits> inline welp::bit_flags<bits> operator~(const welp::bit_flags<bits>& A)
+	template <std::size_t bits> inline welp::bit_flags<bits> operator~(const welp::bit_flags<bits>& A) noexcept
 	{
 		constexpr std::size_t bytes = (bits + ((8 - (bits & 7)) & 7)) >> 3;
 		welp::bit_flags<bits> C;
