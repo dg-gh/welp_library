@@ -2,6 +2,7 @@
 Depedency free single-header files all under the Unlicense license that could be welpful some day.
 
 ### Description of the files
+- **welp_bit_flags.hpp** : Bit flags, starting from a space of one byte.
 - **welp_chrono.hpp** : Provides classes for measuring timings.
 - **welp_cyclic_resource.hpp** : Provides a cyclic memory buffer that acts a a resource backing an allocator.
 - **welp_global_type.hpp** : Wraps any class into a unique and globally accessible instance.
