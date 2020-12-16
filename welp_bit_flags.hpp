@@ -40,7 +40,7 @@ namespace welp
 		inline welp::bit_flags<bits>& operator|=(const welp::bit_flags<bits>& rhs) noexcept;
 		inline welp::bit_flags<bits>& operator^=(const welp::bit_flags<bits>& rhs) noexcept;
 		inline welp::bit_flags<bits>& flip() noexcept;
-		
+
 		constexpr std::size_t size() const noexcept { return bits; }
 
 #ifdef WELP_BIT_FLAGS_INCLUDE_IOSTREAM
@@ -85,6 +85,8 @@ namespace welp
 	template <std::size_t bits> inline welp::bit_flags<bits> operator|(const welp::bit_flags<bits>& A, const welp::bit_flags<bits>& B) noexcept;
 	template <std::size_t bits> inline welp::bit_flags<bits> operator^(const welp::bit_flags<bits>& A, const welp::bit_flags<bits>& B) noexcept;
 
+	template <class Ty> inline const welp::bit_flags<8 * sizeof(Ty)>& as_bit_flags(const Ty& rhs) noexcept;
+	template <class Ty> inline welp::bit_flags<8 * sizeof(Ty)>& as_bit_flags(Ty& rhs) noexcept;
 	template <std::size_t bits, class Ty> inline const welp::bit_flags<bits>& as_bit_flags(const Ty& rhs) noexcept;
 	template <std::size_t bits, class Ty> inline welp::bit_flags<bits>& as_bit_flags(Ty& rhs) noexcept;
 }
@@ -507,6 +509,14 @@ namespace welp
 		return C;
 	}
 
+	template <class Ty> inline const welp::bit_flags<8 * sizeof(Ty)>& as_bit_flags(const Ty& rhs) noexcept
+	{
+		return reinterpret_cast<const welp::bit_flags<8 * sizeof(Ty)>&>(rhs);
+	}
+	template <class Ty> inline welp::bit_flags<8 * sizeof(Ty)>& as_bit_flags(Ty& rhs) noexcept
+	{
+		return reinterpret_cast<welp::bit_flags<8 * sizeof(Ty)>&>(rhs);
+	}
 	template <std::size_t bits, class Ty> inline const welp::bit_flags<bits>& as_bit_flags(const Ty& rhs) noexcept
 	{
 		return reinterpret_cast<const welp::bit_flags<bits>&>(rhs);
