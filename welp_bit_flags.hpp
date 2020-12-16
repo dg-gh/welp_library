@@ -478,6 +478,13 @@ namespace welp
 	}
 }
 
+#ifdef WELP_BIT_FLAGS_INCLUDE_IOSTREAM
+template <std::size_t bits> std::ostream& operator<<(std::ostream& out, const welp::bit_flags<bits>& A)
+{
+	A.say(); return out;
+}
+#endif // WELP_BIT_FLAGS_INCLUDE_IOSTREAM
+
 
 #endif // WELP_BIT_FLAGS_H
 
