@@ -519,10 +519,16 @@ namespace welp
 	}
 	template <std::size_t bits, class Ty> inline const welp::bit_flags<bits>& as_bit_flags(const Ty& rhs) noexcept
 	{
+#ifdef WELP_BIT_FLAGS_DEBUG_MODE
+		assert(bits <= 8 * sizeof(Ty));
+#endif // WELP_BIT_FLAGS_DEBUG_MODE
 		return reinterpret_cast<const welp::bit_flags<bits>&>(rhs);
 	}
 	template <std::size_t bits, class Ty> inline welp::bit_flags<bits>& as_bit_flags(Ty& rhs) noexcept
 	{
+#ifdef WELP_BIT_FLAGS_DEBUG_MODE
+		assert(bits <= 8 * sizeof(Ty));
+#endif // WELP_BIT_FLAGS_DEBUG_MODE
 		return reinterpret_cast<welp::bit_flags<bits>&>(rhs);
 	}
 }
