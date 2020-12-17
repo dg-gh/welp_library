@@ -23,7 +23,7 @@ Creates n threads and a queue with a capacity for m tasks.
 
 Deletes all the threads and the queue.
 
-### Queuing tasks of the type (arg1, ... , argn) -> void or (arg1, ... , argn) -> Ty (discards the return)
+### Queuing tasks of the type f(arg1, ... , argn) -> void or f(arg1, ... , argn) -> Ty (discards the return)
 
 	T.async_task(f, arg1, ... , argn); 
 
@@ -41,7 +41,7 @@ Attemps to queue the function f(arg1, ... , argn) -> void as the next task in th
 
 Will queue the function f(arg1, ... , argn) -> void as the next task in the buffer to execute as soon as the buffer gets one free spot.
 
-### Queuing tasks of the type f(arg1, ... , argn) -> void or (arg1, ... , argn) -> Ty (discards the return) with welp::async_task_end A
+### Queuing tasks of the type f(arg1, ... , argn) -> void or f(arg1, ... , argn) -> Ty (discards the return) with welp::async_task_end A
 
 	welp::async_task_end A;
 	T.async_task(A, f, arg1, ... , argn);
