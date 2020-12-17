@@ -4,7 +4,7 @@ welp_bit_flags.hpp provides one class :
 
 - welp::bit_flags<N> is a class that can store n booleans packed as 8 booleas per byte.
 
-# Member functions of welp::bit_flags<N> B
+# Member functions of welp::bit_flags<NN> B
 
 Template parameter N is the number of booleans stored in welp::bit_flags<N>.
 
