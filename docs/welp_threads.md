@@ -2,7 +2,7 @@
 
 welp_threads.hpp provides the main class :
 
-- welp::threads< Allocator> is a class that can store n booleans packed as 8 booleas per byte.
+- welp::threads< Allocator> is a thread pool that works with a fixed size circular buffer working like a queue for tasks.
 
 # Member functions of welp::bit_flags<number_of_bits> B
 
