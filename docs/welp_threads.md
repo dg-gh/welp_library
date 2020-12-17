@@ -36,7 +36,7 @@ Attemps to queue the function f(arg1, ... , argn) -> void as the next task in th
 
 Will queue the function f(arg1, ... , argn) -> void as the next task in the buffer to execute as soon as the buffer gets one free spot.
 
-### Queuing tasks of the type (arg1, ... , argn) -> void with welp::async_task_end A
+### Queuing tasks of the type f(arg1, ... , argn) -> void with welp::async_task_end A
 
 	welp::async_task_end A;
 	T.async_task(A, f, arg1, ... , argn);
