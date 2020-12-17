@@ -133,3 +133,7 @@ Returns true if T.async_task(A, f, arg1, ... , argn) or T.priority_async_task(A,
 	A.task_running(); 
 
 Returns true if T.async_task(A, f, arg1, ... , argn) or T.priority_async_task(A, f, arg1, ... , argn) was called and the task hasn't been completed yet.
+
+	A.reset(); 
+
+Resets A to its initial state if it is not bound to any incomplete task (will wait for the task to complete if needed).
