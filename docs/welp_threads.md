@@ -136,4 +136,4 @@ Returns true if T.async_task(A, f, arg1, ... , argn) or T.priority_async_task(A,
 
 	A.reset(); 
 
-Resets A to its initial state if it is not bound to any incomplete task (will wait for the task to complete if needed).
+Resets A to its initial state if it is not bound to any incomplete task (will wait for the task to complete if needed). A.task_denied() and A.task_running() will return false afterwards and the stored value of type Ty of welp::async_task_result< Ty> will be Ty() (default construction).
