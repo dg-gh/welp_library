@@ -29,3 +29,7 @@ Sets all the booleans of B as false.
 	B.set(true); 
 
 Sets all the booleans of B as true.
+
+	B.cpy(A); 
+
+Copies the first bits of A into B.
