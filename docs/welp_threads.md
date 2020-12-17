@@ -23,7 +23,7 @@ Creates n threads and a queue with a capacity for m tasks.
 
 Deletes all the threads and the queue.
 
-### Queuing tasks of the type (arg1, ... , argn) -> void
+### Queuing tasks of the type (arg1, ... , argn) -> void or (arg1, ... , argn) -> Ty (discards the return)
 
 	T.async_task(f, arg1, ... , argn); 
 
@@ -41,7 +41,7 @@ Attemps to queue the function f(arg1, ... , argn) -> void as the next task in th
 
 Will queue the function f(arg1, ... , argn) -> void as the next task in the buffer to execute as soon as the buffer gets one free spot.
 
-### Queuing tasks of the type f(arg1, ... , argn) -> void with welp::async_task_end A
+### Queuing tasks of the type f(arg1, ... , argn) -> void or (arg1, ... , argn) -> Ty (discards the return) with welp::async_task_end A
 
 	welp::async_task_end A;
 	T.async_task(A, f, arg1, ... , argn);
@@ -75,7 +75,7 @@ Similar to priority_async_task except that the program can't go past A.finish_ta
 
 Similar to force_priority_async_task except that the program can't go past A.finish_task() until the task is finished.
 
-### Queuing tasks of the type f(arg1, ... , argn) -> Ty with welp::async_task_result< Ty> A
+### Queuing tasks of the type f(arg1, ... , argn) -> Ty with welp::async_task_result< Ty> A to store the return
 
 	welp::async_task_result< Ty> A;
 	T.async_task(A, f, arg1, ... , argn);
