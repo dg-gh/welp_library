@@ -2,11 +2,11 @@
 
 welp_bit_flags.hpp provides one class :
 
-- welp::bit_flags<N> is a class that can store n booleans packed as 8 booleas per byte.
+- welp::bit_flags<number_of_bits> is a class that can store n booleans packed as 8 booleas per byte.
 
 # Member functions of welp::bit_flags<number_of_bits> B
 
-Template parameter N is the number of booleans stored in welp::bit_flags<N>.
+Template parameter number_of_bits is the number of booleans stored in welp::bit_flags<number_of_bits>.
 
 ### Setting and getting booleans
 
