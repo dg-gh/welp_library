@@ -118,8 +118,8 @@ The program can't go past T.finish_all_tasks() until every the task is finished.
 
 	T.number_of_threads(); 
 
-Returns the number of threads.
+Returns the number of threads maintained by T.
 
 	T.task_buffer_size(); 
 
-Returns the maximal number of tasks that can be stored in the queue.
+Returns the maximal number of tasks that can be stored in the queue of T.
