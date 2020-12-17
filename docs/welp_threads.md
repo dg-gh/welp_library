@@ -108,3 +108,18 @@ Similar to priority_async_task except that the program can't go past A.get() unt
 	// can't continue there until the task is finished
 
 Similar to force_priority_async_task except that the program can't go past A.get() until the task is finished.
+
+### Other methods of welp::threads< Allocator>
+
+	T.finish_all_tasks();
+	// can't continue there until all the the task are finished
+
+The program can't go past T.finish_all_tasks() until every the task is finished.
+
+	T.number_of_threads(); 
+
+Returns the number of threads.
+
+	T.task_buffer_size(); 
+
+Returns the maximal number of tasks that can be stored in the queue.
