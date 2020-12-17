@@ -112,7 +112,7 @@ Similar to force_priority_async_task except that the program can't go past A.get
 ### Other methods of welp::threads< Allocator>
 
 	T.finish_all_tasks();
-	// can't continue there until all the the task are finished
+	// can't continue there until every task is finished
 
 The program can't go past T.finish_all_tasks() until every the task is finished.
 
