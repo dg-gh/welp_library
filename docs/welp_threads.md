@@ -2,42 +2,36 @@
 
 welp_threads.hpp provides the main class :
 
-- welp::threads< Allocator> is a thread pool that works with a fixed size circular buffer working like a queue for tasks.
+- welp::threads< Allocator> is a thread pool that works with a fixed size circular buffer working like a queue for incoming tasks.
 
-# Member functions of welp::bit_flags<number_of_bits> B
+# Member functions of welp::threads< Allocator> T
 
-Template parameter number_of_bits is the number of booleans stored in welp::bit_flags<number_of_bits>.
+Template parameter Allocator can be of the form of std::allocator< char>, or any allocator that allocates arrays of chars.
 
-### Setting and getting booleans
+### Creating and destroying threads
 
-	B.load(n); 
+	T.new_threads(n, m); 
 
-Loads the nth boolean of B.
+Creates n threads and a queue with a capacity for m tasks.
 
-	B.store(n, false); 
+	T.delete_threads(); 
 
-Stores boolean false at the nth position of B.
+Deletes all the threads and the queue.
 
-	B.store(n, true); 
+### Queuing tasks of the type (arg1, ... , argn) -> void
 
-Stores boolean true at the nth position of B.
+	T.async_task(f, arg1, ... , argn); 
 
-	B.set(false); 
+Attemps to queue the function f(arg1, ... , argn) -> void. Return true if the task is accepted, returns false if the buffer is full.
 
-Sets all the booleans of B as false.
+	T.force_async_task(f, arg1, ... , argn) 
 
-	B.set(true); 
+Will queue the function f(arg1, ... , argn) -> void as soon as the buffer gets one spot free.
 
-Sets all the booleans of B as true.
+	T.priority_task(f, arg1, ... , argn); 
 
-	B.cpy(A); 
+Attemps to queue the function f(arg1, ... , argn) -> void as the next task in the buffer to execute. Return true if the task is accepted, returns false if the buffer is full.
 
-Copies the first bits of A into B.
+	T.force_priority_async_task(f, arg1, ... , argn) 
 
-	B.flip(); 
-
-Flips the bits of B.
-
-	B.say(); 
-
-Prints the bits of B.
+Will queue the function f(arg1, ... , argn) -> void as the next task in the buffer to execute as soon as the buffer gets one spot free.
