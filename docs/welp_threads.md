@@ -128,7 +128,7 @@ Returns the maximal number of tasks that can be stored in the queue of T.
 
 	A.task_denied(); 
 
-Returns true if T.async_task(A, f, arg1, ... , argn) or T.priority_async_task(A, f, arg1, ... , argn) was called when the task buffer was full and the task got denied.
+Returns true if T.async_task(A, f, arg1, ... , argn) or T.priority_async_task(A, f, arg1, ... , argn) was called for the last time when the task buffer was full and the task got denied.
 
 	A.task_running(); 
 
