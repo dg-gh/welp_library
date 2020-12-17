@@ -1,8 +1,13 @@
 # welp_threads.hpp
 
-welp_threads.hpp provides the main class :
+welp_threads.hpp provides this main class :
 
 - welp::threads< Allocator> is a thread pool that works with a fixed size circular buffer working like a queue for incoming tasks.
+
+It also provides these two classes :
+
+- welp::async_task_end for not allowing the main thread to progress until a task gets completed
+- welp::async_task_result< Ty> for not allowing the main thread to progress until a task with a return type Ty gets completed
 
 # Member functions of welp::threads< Allocator> T
 
