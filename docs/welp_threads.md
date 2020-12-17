@@ -69,3 +69,37 @@ Similar to priority_async_task except that the program can't go past A.finish_ta
 	// can't continue there until the task is finished
 
 Similar to force_priority_async_task except that the program can't go past A.finish_task() until the task is finished.
+
+### Queuing tasks of the type f(arg1, ... , argn) -> Ty with welp::async_task_result<Ty> A
+
+	welp::async_task_end A;
+	T.async_task(A, f, arg1, ... , argn);
+	// can continue there even if the task is not fished
+	A.finish_task();
+	// can't continue there until the task is finished
+
+Similar to async_task except that the program can't go past A.finish_task() until the task is finished.
+
+	welp::async_task_end A;
+	T.force_async_task(A, f, arg1, ... , argn);
+	// can continue there even if the task is not fished
+	A.finish_task();
+	// can't continue there until the task is finished
+
+Similar to force_async_task except that the program can't go past A.finish_task() until the task is finished.
+
+	welp::async_task_end A;
+	T.priority_async_task(A, f, arg1, ... , argn);
+	// can continue there even if the task is not fished
+	A.finish_task();
+	// can't continue there until the task is finished
+
+Similar to priority_async_task except that the program can't go past A.finish_task() until the task is finished.
+
+	welp::async_task_end A;
+	T.force_priority_async_task(A, f, arg1, ... , argn);
+	// can continue there even if the task is not fished
+	A.finish_task();
+	// can't continue there until the task is finished
+
+Similar to force_priority_async_task except that the program can't go past A.finish_task() until the task is finished.
