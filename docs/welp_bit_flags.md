@@ -33,3 +33,11 @@ Sets all the booleans of B as true.
 	B.cpy(A); 
 
 Copies the first bits of A into B.
+
+	B.flip(); 
+
+Flips the bits of B.
+
+	B.say(); 
+
+Prints the bits of B.
