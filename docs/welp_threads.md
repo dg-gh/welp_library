@@ -26,7 +26,7 @@ Attemps to queue the function f(arg1, ... , argn) -> void. Return true if the ta
 
 	T.force_async_task(f, arg1, ... , argn) 
 
-Will queue the function f(arg1, ... , argn) -> void as soon as the buffer gets one spot free.
+Will queue the function f(arg1, ... , argn) -> void as soon as the buffer gets one free spot.
 
 	T.priority_task(f, arg1, ... , argn); 
 
@@ -34,4 +34,4 @@ Attemps to queue the function f(arg1, ... , argn) -> void as the next task in th
 
 	T.force_priority_async_task(f, arg1, ... , argn) 
 
-Will queue the function f(arg1, ... , argn) -> void as the next task in the buffer to execute as soon as the buffer gets one spot free.
+Will queue the function f(arg1, ... , argn) -> void as the next task in the buffer to execute as soon as the buffer gets one free spot.
