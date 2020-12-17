@@ -2,7 +2,7 @@
 
 welp_cyclic_resource.hpp provides one class :
 
-- welp::cyclic_resource is a class containing a pool of memory to give to allocators. It will allocate monotonically and cycle back of the beginning at the pool when the capacity is exhausted. It uses a first in first out storage strategy where the least recently used data gets overwritten. Allocations have to come from only one thread at a time. This type of memory resource can be used to sneakily overload the new operator for children who frequently forget to call delete.
+- welp::cyclic_resource<mem_align> is a class containing a pool of memory to give to allocators. It will allocate monotonically and cycle back of the beginning at the pool when the capacity is exhausted. It uses a first in first out storage strategy where the least recently used data gets overwritten. Allocations have to come from only one thread at a time. This type of memory resource can be used to sneakily overload the new operator for children who frequently forget to call delete.
 
 # Member functions of welp::cyclic_resource<mem_align> R
 
