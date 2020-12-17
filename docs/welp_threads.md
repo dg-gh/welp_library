@@ -123,3 +123,13 @@ Returns the number of threads maintained by T.
 	T.task_buffer_size(); 
 
 Returns the maximal number of tasks that can be stored in the queue of T.
+
+# Other member functions of welp::async_task_end A or welp::async_task_result< Ty> A
+
+	A.task_denied(); 
+
+Returns true if T.async_task(A, f, arg1, ... , argn) or T.priority_async_task(A, f, arg1, ... , argn) was called when the task buffer was full and the task got denied.
+
+	A.task_running(); 
+
+Returns true if T.async_task(A, f, arg1, ... , argn) or T.priority_async_task(A, f, arg1, ... , argn) was called and the task hasn't been completed yet.
