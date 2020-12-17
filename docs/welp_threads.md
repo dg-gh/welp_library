@@ -7,7 +7,7 @@ welp_threads.hpp provides this main class :
 It also provides these two classes :
 
 - welp::async_task_end for not allowing the main thread to progress until a task gets completed
-- welp::async_task_result< Ty> for not allowing the main thread to progress until a task with a return type Ty gets completed
+- welp::async_task_result< Ty> for not allowing the main thread to progress until a task with a return type Ty gets completed and for storing the return value of type Ty of the task executed on the other thread.
 
 # Member functions of welp::threads< Allocator> T
 
