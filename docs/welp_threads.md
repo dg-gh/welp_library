@@ -40,7 +40,7 @@ Will queue the function f(arg1, ... , argn) -> void as the next task in the buff
 
 	welp::async_task_end A;
 	T.async_task(A, f, arg1, ... , argn);
-	// can continue there even if the task is not fished
+	// can continue there even if the task is not finished
 	A.finish_task();
 	// can't continue there until the task is finished
 
@@ -48,7 +48,7 @@ Similar to async_task except that the program can't go past A.finish_task() unti
 
 	welp::async_task_end A;
 	T.force_async_task(A, f, arg1, ... , argn);
-	// can continue there even if the task is not fished
+	// can continue there even if the task is not finished
 	A.finish_task();
 	// can't continue there until the task is finished
 
@@ -56,7 +56,7 @@ Similar to force_async_task except that the program can't go past A.finish_task(
 
 	welp::async_task_end A;
 	T.priority_async_task(A, f, arg1, ... , argn);
-	// can continue there even if the task is not fished
+	// can continue there even if the task is not finished
 	A.finish_task();
 	// can't continue there until the task is finished
 
@@ -64,7 +64,7 @@ Similar to priority_async_task except that the program can't go past A.finish_ta
 
 	welp::async_task_end A;
 	T.force_priority_async_task(A, f, arg1, ... , argn);
-	// can continue there even if the task is not fished
+	// can continue there even if the task is not finished
 	A.finish_task();
 	// can't continue there until the task is finished
 
@@ -74,7 +74,7 @@ Similar to force_priority_async_task except that the program can't go past A.fin
 
 	welp::async_task_result< Ty> A;
 	T.async_task(A, f, arg1, ... , argn);
-	// can continue there even if the task is not fished
+	// can continue there even if the task is not finished
 	A.get(); // yields a reference to the return value of f
 	// can't continue there until the task is finished
 
@@ -82,7 +82,7 @@ Similar to async_task except that the program can't go past A.get() until the ta
 
 	welp::async_task_result< Ty> A;
 	T.force_async_task(A, f, arg1, ... , argn);
-	// can continue there even if the task is not fished
+	// can continue there even if the task is not finished
 	A.get(); // yields a reference to the return value of f
 	// can't continue there until the task is finished
 
@@ -90,7 +90,7 @@ Similar to force_async_task except that the program can't go past A.get() until 
 
 	welp::async_task_result< Ty> A;
 	T.priority_async_task(A, f, arg1, ... , argn);
-	// can continue there even if the task is not fished
+	// can continue there even if the task is not finished
 	A.get(); // yields a reference to the return value of f
 	// can't continue there until the task is finished
 
@@ -98,7 +98,7 @@ Similar to priority_async_task except that the program can't go past A.get() unt
 
 	welp::async_task_result< Ty> A;
 	T.force_priority_async_task(A, f, arg1, ... , argn);
-	// can continue there even if the task is not fished
+	// can continue there even if the task is not finished
 	A.get(); // yields a reference to the return value of f
 	// can't continue there until the task is finished
 
