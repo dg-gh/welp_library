@@ -142,8 +142,8 @@ namespace welp
 		inline void reset_pool(std::size_t pool_number) noexcept;
 		inline void reset_pool_range(std::size_t first_pool, std::size_t end_pool) noexcept;
 
-		bool new_pools(std::size_t input_number_of_pools, std::size_t* input_block_size,
-			std::size_t* input_block_instances, std::size_t pool_align);
+		bool new_pools(std::size_t input_number_of_pools, const std::size_t* const input_block_size,
+			const std::size_t* const input_block_instances, std::size_t pool_align);
 
 #ifdef WELP_MULTIPOOL_INCLUDE_INITLIST
 		bool new_pools(std::size_t input_number_of_pools, std::initializer_list<std::size_t> input_block_size,
@@ -258,8 +258,8 @@ namespace welp
 		inline void reset_pool(std::size_t pool_number) noexcept;
 		inline void reset_pool_range(std::size_t first_pool, std::size_t end_pool) noexcept;
 
-		bool new_pools(std::size_t input_number_of_pools, std::size_t* input_block_size,
-			std::size_t* input_block_instances, std::size_t pool_align);
+		bool new_pools(std::size_t input_number_of_pools, const std::size_t* const input_block_size,
+			const std::size_t* const input_block_instances, std::size_t pool_align);
 
 #ifdef WELP_MULTIPOOL_INCLUDE_INITLIST
 		bool new_pools(std::size_t input_number_of_pools, std::initializer_list<std::size_t> input_block_size,
@@ -362,8 +362,8 @@ namespace welp
 		inline void reset_pool(std::size_t pool_number) noexcept;
 		inline void reset_pool_range(std::size_t first_pool, std::size_t end_pool) noexcept;
 
-		bool new_pools(std::size_t input_number_of_pools, std::size_t* input_block_size,
-			std::size_t* input_block_instances, std::size_t pool_align);
+		bool new_pools(std::size_t input_number_of_pools, const std::size_t* const input_block_size,
+			const std::size_t* const input_block_instances, std::size_t pool_align);
 
 #ifdef WELP_MULTIPOOL_INCLUDE_INITLIST
 		bool new_pools(std::size_t input_number_of_pools, std::initializer_list<std::size_t> input_block_size,
@@ -1051,8 +1051,8 @@ inline void welp::multipool_resource<max_number_of_pools, sub_allocator>::reset_
 
 // NEW POOLS
 template <std::size_t max_number_of_pools, class sub_allocator>
-bool welp::multipool_resource<max_number_of_pools, sub_allocator>::new_pools(std::size_t input_number_of_pools, std::size_t* input_block_size,
-	std::size_t* input_block_instances, std::size_t pool_align)
+bool welp::multipool_resource<max_number_of_pools, sub_allocator>::new_pools(std::size_t input_number_of_pools, const std::size_t* const input_block_size,
+	const std::size_t* const input_block_instances, std::size_t pool_align)
 {
 	delete_pools();
 	if (input_number_of_pools == 0)
@@ -1995,8 +1995,8 @@ inline void welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::r
 
 // NEW POOLS
 template <std::size_t max_number_of_pools, class sub_allocator>
-bool welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::new_pools(std::size_t input_number_of_pools, std::size_t* input_block_size,
-	std::size_t* input_block_instances, std::size_t pool_align)
+bool welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::new_pools(std::size_t input_number_of_pools, const std::size_t* const input_block_size,
+	const std::size_t* const input_block_instances, std::size_t pool_align)
 {
 	delete_pools();
 	if (input_number_of_pools == 0)
@@ -2606,8 +2606,8 @@ inline void welp::quadpool_resource::reset_pool_range(std::size_t first_pool, st
 
 
 // NEW POOLS
-bool welp::quadpool_resource::new_pools(std::size_t input_number_of_pools, std::size_t* input_block_size,
-	std::size_t* input_block_instances, std::size_t pool_align)
+bool welp::quadpool_resource::new_pools(std::size_t input_number_of_pools, const std::size_t* const input_block_size,
+	const std::size_t* const input_block_instances, std::size_t pool_align)
 {
 	delete_pools();
 	if (input_number_of_pools == 0)
