@@ -1055,6 +1055,10 @@ bool welp::multipool_resource<max_number_of_pools, sub_allocator>::new_pools(std
 	std::size_t* input_block_instances, std::size_t pool_align)
 {
 	delete_pools();
+	if (input_number_of_pools == 0)
+	{
+		return false;
+	}
 
 	if (input_number_of_pools > max_number_of_pools) { input_number_of_pools = max_number_of_pools; }
 	if (pool_align == 0) { pool_align = 1; }
@@ -1110,6 +1114,10 @@ bool welp::multipool_resource<max_number_of_pools, sub_allocator>::new_pools(std
 	std::initializer_list<std::size_t> input_block_instances, std::size_t pool_align)
 {
 	delete_pools();
+	if (input_number_of_pools == 0)
+	{
+		return false;
+	}
 
 	if (input_number_of_pools > max_number_of_pools) { input_number_of_pools = max_number_of_pools; }
 	if (pool_align == 0) { pool_align = 1; }
@@ -1991,6 +1999,10 @@ bool welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::new_pool
 	std::size_t* input_block_instances, std::size_t pool_align)
 {
 	delete_pools();
+	if (input_number_of_pools == 0)
+	{
+		return false;
+	}
 
 	if (input_number_of_pools > max_number_of_pools) { input_number_of_pools = max_number_of_pools; }
 	if (pool_align == 0) { pool_align = 1; }
@@ -2032,6 +2044,10 @@ bool welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::new_pool
 	std::initializer_list<std::size_t> input_block_instances, std::size_t pool_align)
 {
 	delete_pools();
+	if (input_number_of_pools == 0)
+	{
+		return false;
+	}
 
 	if (input_number_of_pools > max_number_of_pools) { input_number_of_pools = max_number_of_pools; }
 	if (pool_align == 0) { pool_align = 1; }
@@ -2594,6 +2610,10 @@ bool welp::quadpool_resource::new_pools(std::size_t input_number_of_pools, std::
 	std::size_t* input_block_instances, std::size_t pool_align)
 {
 	delete_pools();
+	if (input_number_of_pools == 0)
+	{
+		return false;
+	}
 
 	if (input_number_of_pools > 4) { input_number_of_pools = 4; }
 	if (pool_align == 0) { pool_align = 1; }
@@ -2633,6 +2653,10 @@ bool welp::quadpool_resource::new_pools(std::size_t input_number_of_pools, std::
 	std::initializer_list<std::size_t> input_block_instances, std::size_t pool_align)
 {
 	delete_pools();
+	if (input_number_of_pools == 0)
+	{
+		return false;
+	}
 
 	if (input_number_of_pools > 4) { input_number_of_pools = 4; }
 	if (pool_align == 0) { pool_align = 1; }
