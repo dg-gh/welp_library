@@ -128,7 +128,7 @@ namespace welp
 		inline std::size_t blocks_remaining_in_pool(std::size_t pool_number) noexcept;
 		inline std::size_t block_size_in_pool(std::size_t pool_number) const noexcept { return block_size[pool_number]; }
 
-		inline bool is_allocated() const noexcept { return number_of_pools != 0; }
+		inline bool owns_resources() const noexcept { return number_of_pools != 0; }
 		inline std::size_t number_of_pools_allocated() const noexcept { return number_of_pools; }
 		constexpr inline std::size_t maximum_number_of_pools() const noexcept { return max_number_of_pools; }
 
@@ -244,7 +244,7 @@ namespace welp
 		inline std::size_t blocks_remaining_in_pool(std::size_t pool_number) noexcept;
 		inline std::size_t block_size_in_pool(std::size_t pool_number) const noexcept { return block_size[pool_number]; }
 
-		inline bool is_allocated() const noexcept { return number_of_pools != 0; }
+		inline bool owns_resources() const noexcept { return number_of_pools != 0; }
 		inline std::size_t number_of_pools_allocated() const noexcept { return number_of_pools; }
 		constexpr inline std::size_t maximum_number_of_pools() const noexcept { return max_number_of_pools; }
 
@@ -348,7 +348,7 @@ namespace welp
 		inline std::size_t blocks_remaining_in_pool(std::size_t pool_number) noexcept;
 		inline std::size_t block_size_in_pool(std::size_t pool_number) const noexcept { return block_size[pool_number]; }
 
-		inline bool is_allocated() const noexcept { return number_of_pools != 0; }
+		inline bool owns_resources() const noexcept { return number_of_pools != 0; }
 		inline std::size_t number_of_pools_allocated() const noexcept { return number_of_pools; }
 		constexpr inline std::size_t maximum_number_of_pools() const noexcept { return 4; }
 
