@@ -71,7 +71,7 @@ namespace welp
 		inline bool new_pool(std::size_t bytes);
 		inline void delete_pool();
 
-		inline bool is_allocated() const noexcept { return  data_ptr_unaligned != nullptr; }
+		inline bool owns_resources() const noexcept { return  data_ptr_unaligned != nullptr; }
 
 #ifdef WELP_CYCLIC_DEBUG_MODE
 		void record_start() noexcept;
