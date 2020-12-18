@@ -51,6 +51,7 @@ namespace welp
 		inline std::size_t observer_node_count() const noexcept;
 		std::size_t observer_node_count(const label_Ty& target_label) const;
 		template <class Predicate> std::size_t observer_node_count(Predicate Pr) const;
+		template <class Ty> label_Ty observer_node_label(Ty* const target_ptr) const noexcept;
 
 
 		link_node() = default;
@@ -97,6 +98,7 @@ namespace welp
 		inline std::size_t observer_node_count() const noexcept;
 		std::size_t observer_node_count(const label_Ty& target_label) const;
 		template <class Predicate> std::size_t observer_node_count(Predicate Pr) const;
+		template <class Ty> label_Ty observer_node_label(Ty* const target_ptr) const noexcept;
 
 
 		link_node_sync() = default;
@@ -278,6 +280,19 @@ std::size_t welp::link_node<msg_Ty, label_Ty, _Allocator>::observer_node_count(P
 	return counter;
 }
 
+template <class msg_Ty, class label_Ty, class _Allocator> template <class Ty>
+inline label_Ty welp::link_node<msg_Ty, label_Ty, _Allocator>::observer_node_label(Ty* const ptr) const noexcept
+{
+	if (node_map.count(static_cast<char* const>(static_cast<void* const>(ptr))) != 0)
+	{
+		return node_map.at(static_cast<char* const>(static_cast<void* const>(ptr)));
+	}
+	else
+	{
+		return label_Ty();
+	}
+}
+
 
 #ifdef WELP_LINK_NODE_INCLUDE_MUTEX
 template <class msg_Ty, class label_Ty, class _Allocator>
@@ -434,6 +449,20 @@ std::size_t welp::link_node_sync<msg_Ty, label_Ty, _Allocator>::observer_node_co
 		}
 	}
 	return counter;
+}
+
+template <class msg_Ty, class label_Ty, class _Allocator> template <class Ty>
+inline label_Ty welp::link_node_sync<msg_Ty, label_Ty, _Allocator>::observer_node_label(Ty* const ptr) const noexcept
+{
+	std::lock_guard<std::mutex> lock(link_node_mutex);
+	if (node_map.count(static_cast<char* const>(static_cast<void* const>(ptr))) != 0)
+	{
+		return node_map.at(static_cast<char* const>(static_cast<void* const>(ptr)));
+	}
+	else
+	{
+		return label_Ty();
+	}
 }
 #endif // WELP_LIN_NODE_INCLUDE_MUTEX
 
