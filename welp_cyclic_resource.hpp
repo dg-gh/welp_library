@@ -263,6 +263,10 @@ template <std::size_t mem_align, class sub_allocator>
 inline bool welp::cyclic_resource<mem_align, sub_allocator>::new_pool(std::size_t bytes)
 {
 	delete_pool();
+	if (bytes == 0)
+	{
+		return false;
+	}
 
 	constexpr std::size_t mem_align_m1 = mem_align - 1;
 	sub_allocator _sub_allocator;
