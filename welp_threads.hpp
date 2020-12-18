@@ -120,6 +120,7 @@ namespace welp
 		void finish_all_tasks() noexcept;
 		inline std::size_t unfinished_task_count() const noexcept;
 
+		inline bool owns_resources() const noexcept;
 		inline std::size_t number_of_threads() const noexcept;
 		inline std::size_t task_buffer_size() const noexcept;
 
@@ -561,6 +562,12 @@ inline std::size_t welp::threads<_Allocator>::unfinished_task_count() const noex
 
 
 template <class _Allocator>
+inline bool welp::threads<_Allocator>::owns_resources() const noexcept
+{
+	return _number_of_threads != 0;
+}
+
+template <class _Allocator>
 inline std::size_t welp::threads<_Allocator>::number_of_threads() const noexcept
 {
 	return _number_of_threads;
@@ -585,6 +592,11 @@ bool welp::threads<_Allocator>::new_threads(std::size_t input_number_of_threads,
 {
 	delete_threads();
 	stop_threads = false;
+	
+	if ((input_number_of_threads == 0) || (input_task_buffer_size == 0))
+	{
+		return false;
+	}
 
 	try
 	{
