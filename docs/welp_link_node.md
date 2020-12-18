@@ -2,7 +2,8 @@
 
 welp_link_node.hpp provides two classes :
 
-- welp::link_node<Ty, Allocator>.
+- welp::link_node<Ty, Allocator> is a class that may receive notifications from other link nodes with Ty as the first template parameter and can maintain its own list of subscribers to send notifications to.
+- welp::observer_node<Ty> is a class that may receive notifications from other link nodes with Ty as the first template parameter.
 
 ### Code example
 
