@@ -1,6 +1,8 @@
 # welp_link_node.hpp
 
-Incoming ...
+welp_link_node.hpp provides two classes :
+
+- welp::link_node<Ty, Allocator>.
 
 ### Code example
 
