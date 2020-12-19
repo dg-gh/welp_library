@@ -3,12 +3,16 @@
 welp_link_node.hpp provides three classes :
 
 - welp::link_node<msg_Ty, label_Ty, Allocator> is a class that may receive notifications from other link nodes with msg_Ty as the first template parameter and can maintain its own list of subscribers to send notifications to.
-- welp::observer_node<msg_Ty> is a class that may receive notifications from other link nodes with msg_Ty as the first template parameter. It does not maintain subsribers and cannot send notifications.
+- welp::observer_node<msg_Ty> is a class that may receive notifications from other link nodes with msg_Ty as the first template parameter. The only difference with link_node is that it does not maintain subsribers and cannot send notifications.
 - welp::link_node_sync<msg_Ty, label_Ty, Allocator> is a class that is identical to welp::link_node<msg_Ty, label_Ty, Allocator> except that it has a mutex to secure sensitive methods.
 
 # Member functions of welp::link_node<msg_Ty, label_Ty, Allocator> L
 
 Every link node maintains a list of subscribers that can be link nodes or observer nodes, or derived classes of any of these two. Template parameter msg_Ty is the type of message sent when a link node sends a message to an other node (a link node or an observer node). Template parameter label_Ty is a label assigned to every subscriber of a link node. Every link node maintains its list of subcriber in a map where the pointer to a subscriber is the key and the label is the value associated to the key.
+
+### Getting notification
+
+As L can both get and receive notification from other nodes, it maintains its own list of subscribers and has a virtual method void on_notification_from_node(msg) that gets called when an other node sends a notification to L with msg as the message.
 
 ### Notifying subscribers
 
