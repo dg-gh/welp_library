@@ -12,6 +12,18 @@ Every link node maintains a list of subscribers that can be link nodes or observ
 
 Template parameter Allocator is an allocator of the form of std::allocator<std::pair<char* const, label_Ty>>.
 
+	L.notify_all_observer_nodes()
+
+Sends a notification to every subscriber with msg_ty() (result of the default construction) as the message.
+
+	L.notify_all_observer_nodes(msg)
+
+Sends a notification to every subscriber with msg as the message.
+
+	L.notify_all_observer_nodes(msg, target_label)
+
+Sends a notification to every subscriber labelled target_label with msg as the message.
+
 ### Code example
 
 	#include <iostream>
