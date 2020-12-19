@@ -44,6 +44,10 @@ Adds subscriber other_L to L with label target_label.
 	
 Removes other_L from the set of subscribers of L.
 
+	L.remove_all_observer_nodes();
+	
+Removes all subscribers of L.
+
 ### Code example
 
 	#include <iostream>
