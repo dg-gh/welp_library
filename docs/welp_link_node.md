@@ -66,6 +66,18 @@ Removes all subscribers of L with labels that satisfy predicate Pr.
 
 Returns true if other_L is a subscriber of L.
 
+	L.observer_node_count();
+
+Returns the number of subscribers of L;
+
+	L.observer_node_count(target_label);
+
+Returns the number of subscribers of L with label equals to target_label;
+
+	L.observer_node_count(Pr);
+
+Returns the number of subscribers of L with labels that satisfy predicate Pr;
+
 ### Code example
 
 	#include <iostream>
