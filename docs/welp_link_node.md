@@ -10,6 +10,8 @@ welp_link_node.hpp provides three classes :
 
 Every link node maintains a list of subscribers that can be link nodes or observer nodes, or derived classes of any of these two. Template parameter msg_Ty is the type of message sent when a link node sends a message to an other node (a link node or an observer node). Template parameter label_Ty is a label assigned to every subscriber of a link node. Every link node maintains its list of subcriber in a map where the pointer to a subscriber is the key and the label is the value associated to the key.
 
+### Notifying subscribers
+
 Template parameter Allocator is an allocator of the form of std::allocator<std::pair<char* const, label_Ty>>.
 
 	L.notify_all_observer_nodes()
@@ -23,6 +25,20 @@ Sends a notification to every subscriber with msg as the message.
 	L.notify_all_observer_nodes(msg, target_label)
 
 Sends a notification to every subscriber labelled target_label with msg as the message.
+
+
+
+### Adding subscribers
+
+Subcribers can be any class that inherits publicly from link nodes or observer nodes with the same message type.
+
+	L.add_observer_node(&other_L);
+	
+Adds subscriber other_L to L with label label_Ty.
+	
+	L.add_observer_node(&other_L, target_label);
+	
+Adds subscriber other_L to L with label target_label.
 
 ### Code example
 
