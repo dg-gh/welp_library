@@ -8,7 +8,9 @@ welp_link_node.hpp provides three classes :
 
 # Member functions of welp::link_node<msg_Ty, label_Ty, Allocator> R
 
-Every link node maintains a list of subscribers that can be link nodes or observer nodes, or derived classes of any of these two. Template parameter msg_Ty is the type of message sent when a link node sends a message to an other node (a link node or an observer node). Template parameter label_Ty is a label assigned to every subscriber of a link node. Every link node maintains its list of subcriber in a map where the pointer to a subscriber is the key and the label is the value associated to the key. Allocator is an allocator of the form of std::allocator<std::pair<char* const, label_Ty>>.
+Every link node maintains a list of subscribers that can be link nodes or observer nodes, or derived classes of any of these two. Template parameter msg_Ty is the type of message sent when a link node sends a message to an other node (a link node or an observer node). Template parameter label_Ty is a label assigned to every subscriber of a link node. Every link node maintains its list of subcriber in a map where the pointer to a subscriber is the key and the label is the value associated to the key.
+
+Template parameter Allocator is an allocator of the form of std::allocator<std::pair<char* const, label_Ty>>.
 
 ### Code example
 
