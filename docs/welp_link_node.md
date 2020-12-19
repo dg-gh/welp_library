@@ -10,7 +10,7 @@ welp_link_node.hpp provides three classes :
 
 Every link node maintains a list of subscribers that can be link nodes or observer nodes, or derived classes of any of these two. Template parameter msg_Ty is the type of message sent when a link node sends a message to an other node (a link node or an observer node). Template parameter label_Ty is a label assigned to every subscriber of a link node. Every link node maintains its list of subcriber in a map where the pointer to a subscriber is the key and the label is the value associated to the key.
 
-### Getting notification
+### Getting notifications
 
 As L can both get and receive notification from other nodes, it maintains its own list of subscribers and has a virtual method void on_notification_from_node(msg) that gets called when an other node sends a notification to L with msg as the message. The method on_notification_from_node(msg) does not do anything unless it gets overriden in a derived class.
 
