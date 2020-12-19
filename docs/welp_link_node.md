@@ -24,7 +24,11 @@ Sends a notification to every subscriber with msg as the message.
 
 	L.notify_all_observer_nodes(msg, target_label)
 
-Sends a notification to every subscriber labelled target_label with msg as the message.
+Sends a notification to every subscriber with label equal to target_label and with msg as the message.
+
+	L.notify_all_observer_nodes(msg, Pr)
+
+Sends a notification to every subscriber with labels that satisfy predicate Pr and with msg as the message.
 
 ### Adding subscribers
 
@@ -36,7 +40,7 @@ Adds subscriber other_L to L with label label_Ty.
 	
 	L.add_observer_node(&other_L, target_label);
 	
-Adds subscriber other_L to L with label target_label.
+Adds subscriber other_L to L with labels equal to target_label.
 
 ### Removing subscribers
 
@@ -47,6 +51,14 @@ Removes other_L from the set of subscribers of L.
 	L.remove_all_observer_nodes();
 	
 Removes all subscribers of L.
+
+	L.remove_all_observer_nodes(target_label);
+	
+Removes all subscribers of L with label equal to targel_label.
+
+	L.remove_all_observer_nodes(Pr);
+	
+Removes all subscribers of L with labels that satisfy predicate Pr.
 
 ### Code example
 
