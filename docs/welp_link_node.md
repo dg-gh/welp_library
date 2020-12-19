@@ -60,6 +60,12 @@ Removes all subscribers of L with label equal to targel_label.
 	
 Removes all subscribers of L with labels that satisfy predicate Pr.
 
+### Checking subscribers
+
+	L.contains_observer_node(&other_L);
+
+Returns true if other_L is a subscriber of L.
+
 ### Code example
 
 	#include <iostream>
