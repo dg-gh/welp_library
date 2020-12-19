@@ -26,8 +26,6 @@ Sends a notification to every subscriber with msg as the message.
 
 Sends a notification to every subscriber labelled target_label with msg as the message.
 
-
-
 ### Adding subscribers
 
 Subcribers can be any class that inherits publicly from link nodes or observer nodes with the same message type.
@@ -39,6 +37,12 @@ Adds subscriber other_L to L with label label_Ty.
 	L.add_observer_node(&other_L, target_label);
 	
 Adds subscriber other_L to L with label target_label.
+
+### Removing subscribers
+
+	L.remove_observer_node(&other_L);
+	
+Removes other_L from the set of subscribers of L.
 
 ### Code example
 
