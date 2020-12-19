@@ -12,7 +12,7 @@ Every link node maintains a list of subscribers that can be link nodes or observ
 
 ### Getting notification
 
-As L can both get and receive notification from other nodes, it maintains its own list of subscribers and has a virtual method void on_notification_from_node(msg) that gets called when an other node sends a notification to L with msg as the message.
+As L can both get and receive notification from other nodes, it maintains its own list of subscribers and has a virtual method void on_notification_from_node(msg) that gets called when an other node sends a notification to L with msg as the message. The method on_notification_from_node(msg) does not do anything unless it gets overriden in a derived class.
 
 ### Notifying subscribers
 
