@@ -875,7 +875,7 @@ void welp::threads<_Allocator>::record_say_sub()
 		<< "   > tasks denied : " << record_denied_task_count
 		<< "\n          > tasks completed : " << record_completed_task_count.load()
 		<< "   > currently unfinished tasks : " << unfinished_tasks.load()
-		<< "\n          > maximum occupancy in task buffer recorded : " << record_max_occupancy.load() << "\n" << std::endl;
+		<< "\n          > maximum occupancy recorded in task buffer : " << record_max_occupancy.load() << "\n" << std::endl;
 }
 
 template <class _Allocator>
@@ -924,7 +924,7 @@ void welp::threads<_Allocator>::record_write_sub(std::ofstream& rec_write)
 		<< "   > tasks denied : " << record_denied_task_count
 		<< "\n     > tasks completed : " << record_completed_task_count.load()
 		<< "   > currently unfinished tasks : " << unfinished_tasks.load()
-		<< "\n     > maximum occupancy in task buffer recorded : " << record_max_occupancy.load() << "\n" << std::endl;
+		<< "\n     > maximum occupancy recorded in task buffer : " << record_max_occupancy.load() << "\n" << std::endl;
 }
 
 template <class _Allocator>
