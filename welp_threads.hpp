@@ -15,6 +15,13 @@
 #include <atomic>
 #include <functional>
 
+#ifdef WELP_THREADS_DEBUG_MODE
+#include <iostream>
+#ifdef WELP_THREADS_INCLUDE_FSTREAM
+#include <fstream>
+#endif //  WELP_THREADS_INCLUDE_FSTREAM
+#endif // WELP_THREADS_DEBUG_MODE
+
 
 ////// DESCRIPTIONS //////
 
@@ -127,6 +134,34 @@ namespace welp
 		bool new_threads(std::size_t input_number_of_threads, std::size_t input_task_buffer_size);
 		void delete_threads() noexcept;
 
+#ifdef WELP_THREADS_DEBUG_MODE
+		void record_start() noexcept { std::lock_guard<std::mutex> resource_lock(task_mutex); record_on = true; };
+		void record_stop() noexcept { std::lock_guard<std::mutex> resource_lock(task_mutex); record_on = false; };
+		void record_reset() noexcept;
+
+		void record_say();
+		template <typename msg_Ty> void record_say
+		(const msg_Ty& msg);
+		template <typename msg_Ty1, typename msg_Ty2> void record_say
+		(const msg_Ty1& msg1, const msg_Ty2& msg2);
+		template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3> void record_say
+		(const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3);
+		template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3, typename msg_Ty4> void record_say
+		(const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3, const msg_Ty4& msg4);
+
+#ifdef WELP_THREADS_INCLUDE_FSTREAM
+		void record_write(const char* const filename);
+		template <typename msg_Ty> void record_write
+		(const char* const filename, const msg_Ty& msg);
+		template <typename msg_Ty1, typename msg_Ty2> void record_write
+		(const char* const filename, const msg_Ty1& msg1, const msg_Ty2& msg2);
+		template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3> void record_write
+		(const char* const filename, const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3);
+		template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3, typename msg_Ty4> void record_write
+		(const char* const filename, const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3, const msg_Ty4& msg4);
+#endif // WELP_THREADS_INCLUDE_FSTREAM
+#endif // WELP_THREADS_DEBUG_MODE
+
 		threads() = default;
 		virtual ~threads() { delete_threads(); }
 
@@ -155,6 +190,29 @@ namespace welp
 		welp::threads<_Allocator>& operator=(const welp::threads<_Allocator>&) = delete;
 		threads(welp::threads<_Allocator>&&) = delete;
 		welp::threads<_Allocator>& operator=(welp::threads<_Allocator>&&) = delete;
+
+
+		template <class function_Ty, class ... _Args> bool force_async_task_sub(const function_Ty& task, _Args&& ... args);
+		template <class function_Ty, class ... _Args> bool force_priority_async_task_sub(const function_Ty& task, _Args&& ... args);
+
+		template <class function_Ty, class ... _Args> bool force_async_task_sub(welp::async_task_end& package, const function_Ty& task, _Args&& ... args);
+		template <class function_Ty, class ... _Args> bool force_priority_async_task_sub(welp::async_task_end& package, const function_Ty& task, _Args&& ... args);
+
+		template <class return_Ty, class function_Ty, class ... _Args>
+		bool force_async_task_sub(welp::async_task_result<return_Ty>& package, const function_Ty& task, _Args&& ... args);
+		template <class return_Ty, class function_Ty, class ... _Args>
+		bool force_priority_async_task_sub(welp::async_task_result<return_Ty>& package, const function_Ty& task, _Args&& ... args);
+
+#ifdef WELP_THREADS_DEBUG_MODE
+		std::atomic<std::size_t> record_max_occupancy{ 0 };
+		std::atomic<std::size_t> record_completed_task_count{ 0 };
+		std::size_t record_accepted_task_count = 0;
+		std::size_t record_denied_task_count = 0;
+		bool record_on = false;
+
+		void record_say_sub();
+		void record_write_sub(std::ofstream& rec_write);
+#endif // WELP_THREADS_DEBUG_MODE
 	};
 }
 
@@ -227,8 +285,8 @@ template <class Ty> welp::async_task_result<Ty>::~async_task_result()
 }
 
 
-template <class _Allocator>
-template <class function_Ty, class ... _Args> bool welp::threads<_Allocator>::async_task(const function_Ty& task, _Args&& ... args)
+template <class _Allocator> template <class function_Ty, class ... _Args>
+bool welp::threads<_Allocator>::async_task(const function_Ty& task, _Args&& ... args)
 {
 	while (waiting_for_finish.load()) {}
 	std::unique_lock<std::mutex> lock(task_mutex);
@@ -245,6 +303,9 @@ template <class function_Ty, class ... _Args> bool welp::threads<_Allocator>::as
 		}
 		catch (...)
 		{
+#ifdef WELP_THREADS_DEBUG_MODE
+			if (record_on) { record_denied_task_count++; }
+#endif // WELP_THREADS_DEBUG_MODE
 			return false;
 		}
 
@@ -252,26 +313,36 @@ template <class function_Ty, class ... _Args> bool welp::threads<_Allocator>::as
 		if (last_task_ptr == task_buffer_end_ptr) { last_task_ptr = task_buffer_data_ptr; }
 		unfinished_tasks.fetch_add(1);
 		task_condition_var.notify_one();
-
+#ifdef WELP_THREADS_DEBUG_MODE
+		if (record_on)
+		{
+			record_accepted_task_count++;
+			std::size_t temp = unfinished_tasks.load();
+			if (temp > record_max_occupancy.load()) { record_max_occupancy.store(temp); }
+		}
+#endif // WELP_THREADS_DEBUG_MODE
 		return true;
 	}
 	else
 	{
+#ifdef WELP_THREADS_DEBUG_MODE
+		if (record_on) { record_denied_task_count++; }
+#endif // WELP_THREADS_DEBUG_MODE
 		return false;
 	}
 }
 
-template <class _Allocator>
-template <class function_Ty, class ... _Args> void welp::threads<_Allocator>::force_async_task(const function_Ty& task, _Args&& ... args)
+template <class _Allocator> template <class function_Ty, class ... _Args>
+void welp::threads<_Allocator>::force_async_task(const function_Ty& task, _Args&& ... args)
 {
 	if (threads_running)
 	{
-		while (!async_task(task, std::forward<_Args>(args)...)) {}
+		while (!force_async_task_sub(task, std::forward<_Args>(args)...)) {}
 	}
 }
 
-template <class _Allocator>
-template <class function_Ty, class ... _Args> bool welp::threads<_Allocator>::priority_async_task(const function_Ty& task, _Args&& ... args)
+template <class _Allocator> template <class function_Ty, class ... _Args>
+bool welp::threads<_Allocator>::priority_async_task(const function_Ty& task, _Args&& ... args)
 {
 	while (waiting_for_finish.load()) {}
 	std::unique_lock<std::mutex> lock(task_mutex);
@@ -300,26 +371,39 @@ template <class function_Ty, class ... _Args> bool welp::threads<_Allocator>::pr
 		}
 		catch (...)
 		{
+#ifdef WELP_THREADS_DEBUG_MODE
+			if (record_on) { record_denied_task_count++; }
+#endif // WELP_THREADS_DEBUG_MODE
 			return false;
 		}
 
 		unfinished_tasks.fetch_add(1);
 		task_condition_var.notify_one();
-
+#ifdef WELP_THREADS_DEBUG_MODE
+		if (record_on)
+		{
+			record_accepted_task_count++;
+			std::size_t temp = unfinished_tasks.load();
+			if (temp > record_max_occupancy.load()) { record_max_occupancy.store(temp); }
+		}
+#endif // WELP_THREADS_DEBUG_MODE
 		return true;
 	}
 	else
 	{
+#ifdef WELP_THREADS_DEBUG_MODE
+		if (record_on) { record_denied_task_count++; }
+#endif // WELP_THREADS_DEBUG_MODE
 		return false;
 	}
 }
 
-template <class _Allocator>
-template <class function_Ty, class ... _Args> void welp::threads<_Allocator>::force_priority_async_task(const function_Ty& task, _Args&& ... args)
+template <class _Allocator> template <class function_Ty, class ... _Args>
+void welp::threads<_Allocator>::force_priority_async_task(const function_Ty& task, _Args&& ... args)
 {
 	if (threads_running)
 	{
-		while (!priority_async_task(task, std::forward<_Args>(args)...)) {}
+		while (!force_priority_async_task_sub(task, std::forward<_Args>(args)...)) {}
 	}
 }
 
@@ -345,6 +429,9 @@ bool welp::threads<_Allocator>::async_task(welp::async_task_end& package, const 
 		catch (...)
 		{
 			package._task_denied.store(true);
+#ifdef WELP_THREADS_DEBUG_MODE
+			if (record_on) { record_denied_task_count++; }
+#endif // WELP_THREADS_DEBUG_MODE
 			return false;
 		}
 
@@ -355,12 +442,22 @@ bool welp::threads<_Allocator>::async_task(welp::async_task_end& package, const 
 		if (last_task_ptr == task_buffer_end_ptr) { last_task_ptr = task_buffer_data_ptr; }
 		unfinished_tasks.fetch_add(1);
 		task_condition_var.notify_one();
-
+#ifdef WELP_THREADS_DEBUG_MODE
+		if (record_on)
+		{
+			record_accepted_task_count++;
+			std::size_t temp = unfinished_tasks.load();
+			if (temp > record_max_occupancy.load()) { record_max_occupancy.store(temp); }
+		}
+#endif // WELP_THREADS_DEBUG_MODE
 		return true;
 	}
 	else
 	{
 		package._task_denied.store(true);
+#ifdef WELP_THREADS_DEBUG_MODE
+		if (record_on) { record_denied_task_count++; }
+#endif // WELP_THREADS_DEBUG_MODE
 		return false;
 	}
 }
@@ -370,7 +467,7 @@ void welp::threads<_Allocator>::force_async_task(welp::async_task_end& package, 
 {
 	if (threads_running)
 	{
-		while (!async_task(package, task, std::forward<_Args>(args)...)) {}
+		while (!force_async_task_sub(package, task, std::forward<_Args>(args)...)) {}
 	}
 }
 
@@ -408,6 +505,9 @@ bool welp::threads<_Allocator>::priority_async_task(welp::async_task_end& packag
 		catch (...)
 		{
 			package._task_denied.store(true);
+#ifdef WELP_THREADS_DEBUG_MODE
+			if (record_on) { record_denied_task_count++; }
+#endif // WELP_THREADS_DEBUG_MODE
 			return false;
 		}
 
@@ -415,12 +515,22 @@ bool welp::threads<_Allocator>::priority_async_task(welp::async_task_end& packag
 		package._task_denied.store(false);
 		unfinished_tasks.fetch_add(1);
 		task_condition_var.notify_one();
-
+#ifdef WELP_THREADS_DEBUG_MODE
+		if (record_on)
+		{
+			record_accepted_task_count++;
+			std::size_t temp = unfinished_tasks.load();
+			if (temp > record_max_occupancy.load()) { record_max_occupancy.store(temp); }
+		}
+#endif // WELP_THREADS_DEBUG_MODE
 		return true;
 	}
 	else
 	{
 		package._task_denied.store(true);
+#ifdef WELP_THREADS_DEBUG_MODE
+		if (record_on) { record_denied_task_count++; }
+#endif // WELP_THREADS_DEBUG_MODE
 		return false;
 	}
 }
@@ -430,7 +540,7 @@ void welp::threads<_Allocator>::force_priority_async_task(welp::async_task_end& 
 {
 	if (threads_running)
 	{
-		while (!priority_async_task(package, task, std::forward<_Args>(args)...)) {}
+		while (!force_priority_async_task_sub(package, task, std::forward<_Args>(args)...)) {}
 	}
 }
 
@@ -456,6 +566,9 @@ bool welp::threads<_Allocator>::async_task(welp::async_task_result<return_Ty>& p
 		catch (...)
 		{
 			package._task_denied.store(true);
+#ifdef WELP_THREADS_DEBUG_MODE
+			if (record_on) { record_denied_task_count++; }
+#endif // WELP_THREADS_DEBUG_MODE
 			return false;
 		}
 
@@ -466,12 +579,22 @@ bool welp::threads<_Allocator>::async_task(welp::async_task_result<return_Ty>& p
 		if (last_task_ptr == task_buffer_end_ptr) { last_task_ptr = task_buffer_data_ptr; }
 		unfinished_tasks.fetch_add(1);
 		task_condition_var.notify_one();
-
+#ifdef WELP_THREADS_DEBUG_MODE
+		if (record_on)
+		{
+			record_accepted_task_count++;
+			std::size_t temp = unfinished_tasks.load();
+			if (temp > record_max_occupancy.load()) { record_max_occupancy.store(temp); }
+		}
+#endif // WELP_THREADS_DEBUG_MODE
 		return true;
 	}
 	else
 	{
 		package._task_denied.store(true);
+#ifdef WELP_THREADS_DEBUG_MODE
+		if (record_on) { record_denied_task_count++; }
+#endif // WELP_THREADS_DEBUG_MODE
 		return false;
 	}
 }
@@ -481,7 +604,7 @@ void welp::threads<_Allocator>::force_async_task(welp::async_task_result<return_
 {
 	if (threads_running)
 	{
-		while (!async_task(package, task, std::forward<_Args>(args)...)) {}
+		while (!force_async_task_sub(package, task, std::forward<_Args>(args)...)) {}
 	}
 }
 
@@ -519,6 +642,9 @@ bool welp::threads<_Allocator>::priority_async_task(welp::async_task_result<retu
 		catch (...)
 		{
 			package._task_denied.store(true);
+#ifdef WELP_THREADS_DEBUG_MODE
+			if (record_on) { record_denied_task_count++; }
+#endif // WELP_THREADS_DEBUG_MODE
 			return false;
 		}
 
@@ -526,12 +652,22 @@ bool welp::threads<_Allocator>::priority_async_task(welp::async_task_result<retu
 		package._task_denied.store(false);
 		unfinished_tasks.fetch_add(1);
 		task_condition_var.notify_one();
-
+#ifdef WELP_THREADS_DEBUG_MODE
+		if (record_on)
+		{
+			record_accepted_task_count++;
+			std::size_t temp = unfinished_tasks.load();
+			if (temp > record_max_occupancy.load()) { record_max_occupancy.store(temp); }
+		}
+#endif // WELP_THREADS_DEBUG_MODE
 		return true;
 	}
 	else
 	{
 		package._task_denied.store(true);
+#ifdef WELP_THREADS_DEBUG_MODE
+		if (record_on) { record_denied_task_count++; }
+#endif // WELP_THREADS_DEBUG_MODE
 		return false;
 	}
 }
@@ -541,7 +677,7 @@ void welp::threads<_Allocator>::force_priority_async_task(welp::async_task_resul
 {
 	if (threads_running)
 	{
-		while (!priority_async_task(package, task, std::forward<_Args>(args)...)) {}
+		while (!force_priority_async_task_sub(package, task, std::forward<_Args>(args)...)) {}
 	}
 }
 
@@ -592,7 +728,7 @@ bool welp::threads<_Allocator>::new_threads(std::size_t input_number_of_threads,
 {
 	delete_threads();
 	stop_threads = false;
-	
+
 	if ((input_number_of_threads == 0) || (input_task_buffer_size == 0))
 	{
 		return false;
@@ -645,6 +781,9 @@ bool welp::threads<_Allocator>::new_threads(std::size_t input_number_of_threads,
 					}
 					current_task_ptr->operator()();
 					unfinished_tasks.fetch_sub(1);
+#ifdef WELP_THREADS_DEBUG_MODE
+					record_completed_task_count.fetch_add(1);
+#endif // WELP_THREADS_DEBUG_MODE
 				}
 
 				}
@@ -712,6 +851,441 @@ void welp::threads<_Allocator>::delete_threads() noexcept
 	last_task_ptr = nullptr;
 
 	threads_running = false;
+}
+
+
+#ifdef WELP_THREADS_DEBUG_MODE
+template <class _Allocator>
+void welp::threads<_Allocator>::record_reset() noexcept
+{
+	record_max_occupancy.store(0);
+	record_completed_task_count.store(0);
+	record_accepted_task_count = 0;
+	record_denied_task_count = 0;
+	record_on = false;
+}
+
+
+template <class _Allocator>
+void welp::threads<_Allocator>::record_say_sub()
+{
+	std::cout << "\nThreads   > number of threads : " << _number_of_threads
+		<< "   > task buffer size : " << static_cast<std::size_t>(task_buffer_end_ptr - task_buffer_data_ptr) - 1
+		<< "\n          > tasks accepted : " << record_accepted_task_count
+		<< "   > tasks denied : " << record_denied_task_count
+		<< "\n          > tasks completed : " << record_completed_task_count.load()
+		<< "   > currently unfinished tasks : " << unfinished_tasks.load()
+		<< "\n          > maximum occupancy in task buffer recorded : " << record_max_occupancy.load() << "\n" << std::endl;
+}
+
+template <class _Allocator>
+void welp::threads<_Allocator>::record_say()
+{
+	std::lock_guard<std::mutex> lock(task_mutex);
+	record_say_sub();
+}
+
+template <class _Allocator> template <typename msg_Ty>
+void welp::threads<_Allocator>::record_say(const msg_Ty& msg)
+{
+	std::lock_guard<std::mutex> lock(task_mutex);
+	std::cout << "[ " << msg << " ]\n"; record_say_sub();
+}
+
+template <class _Allocator> template <typename msg_Ty1, typename msg_Ty2>
+void welp::threads<_Allocator>::record_say(const msg_Ty1& msg1, const msg_Ty2& msg2)
+{
+	std::lock_guard<std::mutex> lock(task_mutex);
+	std::cout << "[ " << msg1 << " " << msg2 << " ]\n"; record_say_sub();
+}
+
+template <class _Allocator> template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3>
+void welp::threads<_Allocator>::record_say(const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3)
+{
+	std::lock_guard<std::mutex> lock(task_mutex);
+	std::cout << "[ " << msg1 << " " << msg2 << " " << msg3 << " ]\n"; record_say_sub();
+}
+
+template <class _Allocator> template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3, typename msg_Ty4>
+void welp::threads<_Allocator>::record_say(const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3, const msg_Ty4& msg4)
+{
+	std::lock_guard<std::mutex> lock(task_mutex);
+	std::cout << "[ " << msg1 << " " << msg2 << " " << msg3 << " " << msg4 << " ]\n"; record_say_sub();
+}
+
+
+#ifdef WELP_THREADS_INCLUDE_FSTREAM
+template <class _Allocator>
+void welp::threads<_Allocator>::record_write_sub(std::ofstream& rec_write)
+{
+	rec_write << "\nThreads   > number of threads : " << _number_of_threads
+		<< "   > task buffer size : " << static_cast<std::size_t>(task_buffer_end_ptr - task_buffer_data_ptr) - 1
+		<< "\n     > tasks accepted : " << record_accepted_task_count
+		<< "   > tasks denied : " << record_denied_task_count
+		<< "\n     > tasks completed : " << record_completed_task_count.load()
+		<< "   > currently unfinished tasks : " << unfinished_tasks.load()
+		<< "\n     > maximum occupancy in task buffer recorded : " << record_max_occupancy.load() << "\n" << std::endl;
+}
+
+template <class _Allocator>
+void welp::threads<_Allocator>::record_write(const char* const filename)
+{
+	std::lock_guard<std::mutex> lock(task_mutex);
+	std::ofstream rec_write;
+	rec_write.open(filename, std::ios::app);
+	record_write_sub(rec_write);
+	rec_write.close();
+}
+
+template <class _Allocator> template <typename msg_Ty>
+void welp::threads<_Allocator>::record_write(const char* const filename, const msg_Ty& msg)
+{
+	std::lock_guard<std::mutex> lock(task_mutex);
+	std::ofstream rec_write;
+	rec_write.open(filename, std::ios::app);
+	rec_write << "[ " << msg << " ]\n";
+	record_write_sub(rec_write);
+	rec_write.close();
+}
+
+template <class _Allocator> template <typename msg_Ty1, typename msg_Ty2>
+void welp::threads<_Allocator>::record_write(const char* const filename, const msg_Ty1& msg1, const msg_Ty2& msg2)
+{
+	std::lock_guard<std::mutex> lock(task_mutex);
+	std::ofstream rec_write;
+	rec_write.open(filename, std::ios::app);
+	rec_write << "[ " << msg1 << " " << msg2 << " ]\n";
+	record_write_sub(rec_write);
+	rec_write.close();
+}
+
+template <class _Allocator> template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3>
+void welp::threads<_Allocator>::record_write(const char* const filename, const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3)
+{
+	std::lock_guard<std::mutex> lock(task_mutex);
+	std::ofstream rec_write;
+	rec_write.open(filename, std::ios::app);
+	rec_write << "[ " << msg1 << " " << msg2 << " " << msg3 << " ]\n";
+	record_write_sub(rec_write);
+	rec_write.close();
+}
+
+template <class _Allocator> template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3, typename msg_Ty4>
+void welp::threads<_Allocator>::record_write(const char* const filename, const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3, const msg_Ty4& msg4)
+{
+	std::lock_guard<std::mutex> lock(task_mutex);
+	std::ofstream rec_write;
+	rec_write.open(filename, std::ios::app);
+	rec_write << "[ " << msg1 << " " << msg2 << " " << msg3 << " " << msg4 << " ]\n";
+	record_write_sub(rec_write);
+	rec_write.close();
+}
+#endif // WELP_THREADS_INCLUDE_FSTREAM
+#endif // WELP_THREADS_DEBUG_MODE
+
+
+template <class _Allocator> template <class function_Ty, class ... _Args>
+bool welp::threads<_Allocator>::force_async_task_sub(const function_Ty& task, _Args&& ... args)
+{
+	while (waiting_for_finish.load()) {}
+	std::unique_lock<std::mutex> lock(task_mutex);
+
+	if (threads_running && (last_task_ptr + 1 != next_task_ptr) &&
+		((next_task_ptr != task_buffer_data_ptr) || (last_task_ptr + 1 != task_buffer_end_ptr)))
+	{
+		try
+		{
+			*last_task_ptr = [&]()
+			{
+				task(std::forward<_Args>(args)...);
+			};
+		}
+		catch (...)
+		{
+			return false;
+		}
+
+		last_task_ptr++;
+		if (last_task_ptr == task_buffer_end_ptr) { last_task_ptr = task_buffer_data_ptr; }
+		unfinished_tasks.fetch_add(1);
+		task_condition_var.notify_one();
+#ifdef WELP_THREADS_DEBUG_MODE
+		if (record_on)
+		{
+			record_accepted_task_count++;
+			std::size_t temp = unfinished_tasks.load();
+			if (temp > record_max_occupancy.load()) { record_max_occupancy.store(temp); }
+		}
+#endif // WELP_THREADS_DEBUG_MODE
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+template <class _Allocator> template <class function_Ty, class ... _Args>
+bool welp::threads<_Allocator>::force_priority_async_task_sub(const function_Ty& task, _Args&& ... args)
+{
+	while (waiting_for_finish.load()) {}
+	std::unique_lock<std::mutex> lock(task_mutex);
+
+	if (threads_running && (last_task_ptr + 1 != next_task_ptr) &&
+		((next_task_ptr != task_buffer_data_ptr) || (last_task_ptr + 1 != task_buffer_end_ptr)))
+	{
+		try
+		{
+			if (next_task_ptr != task_buffer_data_ptr)
+			{
+				*(next_task_ptr - 1) = [&]()
+				{
+					task(std::forward<_Args>(args)...);
+				};
+				next_task_ptr--;
+			}
+			else
+			{
+				*(task_buffer_end_ptr - 1) = [&]()
+				{
+					task(std::forward<_Args>(args)...);
+				};
+				next_task_ptr = task_buffer_end_ptr - 1;
+			}
+		}
+		catch (...)
+		{
+			return false;
+		}
+
+		unfinished_tasks.fetch_add(1);
+		task_condition_var.notify_one();
+#ifdef WELP_THREADS_DEBUG_MODE
+		if (record_on)
+		{
+			record_accepted_task_count++;
+			std::size_t temp = unfinished_tasks.load();
+			if (temp > record_max_occupancy.load()) { record_max_occupancy.store(temp); }
+		}
+#endif // WELP_THREADS_DEBUG_MODE
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+template <class _Allocator> template <class function_Ty, class ... _Args>
+bool welp::threads<_Allocator>::force_async_task_sub(welp::async_task_end& package, const function_Ty& task, _Args&& ... args)
+{
+	while (waiting_for_finish.load()) {}
+	std::unique_lock<std::mutex> lock(task_mutex);
+
+	if (threads_running && (last_task_ptr + 1 != next_task_ptr) &&
+		((next_task_ptr != task_buffer_data_ptr) || (last_task_ptr + 1 != task_buffer_end_ptr)) &&
+		!package._task_running.load())
+	{
+		try
+		{
+			*last_task_ptr = [&]()
+			{
+				task(std::forward<_Args>(args)...);
+				package._task_running.store(false);
+			};
+		}
+		catch (...)
+		{
+			package._task_denied.store(true);
+			return false;
+		}
+
+		package._task_running.store(true);
+		package._task_denied.store(false);
+
+		last_task_ptr++;
+		if (last_task_ptr == task_buffer_end_ptr) { last_task_ptr = task_buffer_data_ptr; }
+		unfinished_tasks.fetch_add(1);
+		task_condition_var.notify_one();
+#ifdef WELP_THREADS_DEBUG_MODE
+		if (record_on)
+		{
+			record_accepted_task_count++;
+			std::size_t temp = unfinished_tasks.load();
+			if (temp > record_max_occupancy.load()) { record_max_occupancy.store(temp); }
+		}
+#endif // WELP_THREADS_DEBUG_MODE
+		return true;
+	}
+	else
+	{
+		package._task_denied.store(true);
+		return false;
+	}
+}
+
+template <class _Allocator> template <class function_Ty, class ... _Args>
+bool welp::threads<_Allocator>::force_priority_async_task_sub(welp::async_task_end& package, const function_Ty& task, _Args&& ... args)
+{
+	while (waiting_for_finish.load()) {}
+	std::unique_lock<std::mutex> lock(task_mutex);
+
+	if (threads_running && (last_task_ptr + 1 != next_task_ptr) &&
+		((next_task_ptr != task_buffer_data_ptr) || (last_task_ptr + 1 != task_buffer_end_ptr)) &&
+		!package._task_running.load())
+	{
+		try
+		{
+			if (next_task_ptr != task_buffer_data_ptr)
+			{
+				*(next_task_ptr - 1) = [&]()
+				{
+					task(std::forward<_Args>(args)...);
+					package._task_running.store(false);
+				};
+				next_task_ptr--;
+			}
+			else
+			{
+				*(task_buffer_end_ptr - 1) = [&]()
+				{
+					task(std::forward<_Args>(args)...);
+					package._task_running.store(false);
+				};
+				next_task_ptr = task_buffer_end_ptr - 1;
+			}
+		}
+		catch (...)
+		{
+			package._task_denied.store(true);
+			return false;
+		}
+
+		package._task_running.store(true);
+		package._task_denied.store(false);
+		unfinished_tasks.fetch_add(1);
+		task_condition_var.notify_one();
+#ifdef WELP_THREADS_DEBUG_MODE
+		if (record_on)
+		{
+			record_accepted_task_count++;
+			std::size_t temp = unfinished_tasks.load();
+			if (temp > record_max_occupancy.load()) { record_max_occupancy.store(temp); }
+		}
+#endif // WELP_THREADS_DEBUG_MODE
+		return true;
+	}
+	else
+	{
+		package._task_denied.store(true);
+		return false;
+	}
+}
+
+template <class _Allocator> template <class return_Ty, class function_Ty, class ... _Args>
+bool welp::threads<_Allocator>::force_async_task_sub(welp::async_task_result<return_Ty>& package, const function_Ty& task, _Args&& ... args)
+{
+	while (waiting_for_finish.load()) {}
+	std::unique_lock<std::mutex> lock(task_mutex);
+
+	if (threads_running && (last_task_ptr + 1 != next_task_ptr) &&
+		((next_task_ptr != task_buffer_data_ptr) || (last_task_ptr + 1 != task_buffer_end_ptr)) &&
+		!package._task_running.load())
+	{
+		try
+		{
+			*last_task_ptr = [&]()
+			{
+				package.stored_value = task(std::forward<_Args>(args)...);
+				package._task_running.store(false);
+			};
+		}
+		catch (...)
+		{
+			package._task_denied.store(true);
+			return false;
+		}
+
+		package._task_running.store(true);
+		package._task_denied.store(false);
+
+		last_task_ptr++;
+		if (last_task_ptr == task_buffer_end_ptr) { last_task_ptr = task_buffer_data_ptr; }
+		unfinished_tasks.fetch_add(1);
+		task_condition_var.notify_one();
+#ifdef WELP_THREADS_DEBUG_MODE
+		if (record_on)
+		{
+			record_accepted_task_count++;
+			std::size_t temp = unfinished_tasks.load();
+			if (temp > record_max_occupancy.load()) { record_max_occupancy.store(temp); }
+		}
+#endif // WELP_THREADS_DEBUG_MODE
+		return true;
+	}
+	else
+	{
+		package._task_denied.store(true);
+		return false;
+	}
+}
+
+template <class _Allocator> template <class return_Ty, class function_Ty, class ... _Args>
+bool welp::threads<_Allocator>::force_priority_async_task_sub(welp::async_task_result<return_Ty>& package, const function_Ty& task, _Args&& ... args)
+{
+	while (waiting_for_finish.load()) {}
+	std::unique_lock<std::mutex> lock(task_mutex);
+
+	if (threads_running && (last_task_ptr + 1 != next_task_ptr) &&
+		((next_task_ptr != task_buffer_data_ptr) || (last_task_ptr + 1 != task_buffer_end_ptr)) &&
+		!package._task_running.load())
+	{
+		try
+		{
+			if (next_task_ptr != task_buffer_data_ptr)
+			{
+				*(next_task_ptr - 1) = [&]()
+				{
+					package.stored_value = task(std::forward<_Args>(args)...);
+					package._task_running.store(false);
+				};
+				next_task_ptr--;
+			}
+			else
+			{
+				*(task_buffer_end_ptr - 1) = [&]()
+				{
+					package.stored_value = task(std::forward<_Args>(args)...);
+					package._task_running.store(false);
+				};
+				next_task_ptr = task_buffer_end_ptr - 1;
+			}
+		}
+		catch (...)
+		{
+			package._task_denied.store(true);
+			return false;
+		}
+
+		package._task_running.store(true);
+		package._task_denied.store(false);
+		unfinished_tasks.fetch_add(1);
+		task_condition_var.notify_one();
+#ifdef WELP_THREADS_DEBUG_MODE
+		if (record_on)
+		{
+			record_accepted_task_count++;
+			std::size_t temp = unfinished_tasks.load();
+			if (temp > record_max_occupancy.load()) { record_max_occupancy.store(temp); }
+		}
+#endif // WELP_THREADS_DEBUG_MODE
+		return true;
+	}
+	else
+	{
+		package._task_denied.store(true);
+		return false;
+	}
 }
 
 
