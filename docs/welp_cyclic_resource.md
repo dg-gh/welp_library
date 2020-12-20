@@ -69,7 +69,7 @@ Same and displays message msg. Overloads can display up to 4 messages.
 ### Code example with the std::allocator template
 
 	#define WELP_CYCLIC_DEBUG_MODE
-	#include "welp_cyclic_resource.h"
+	#include "welp_cyclic_resource.hpp"
 	#include <vector>
 	
 	welp::cyclic_resource<16> R; // R memory blocks will be aligned on 16 bytes
@@ -120,7 +120,7 @@ Same and displays message msg. Overloads can display up to 4 messages.
 ### Code example with std::pmr::memory_resource (requires C++17)
 
 	#define WELP_CYCLIC_DEBUG_MODE
-	#include "welp_cyclic_resource.h"
+	#include "welp_cyclic_resource.hpp"
 	#include <vector>
 	#include <memory_resource>
 	
