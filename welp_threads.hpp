@@ -266,7 +266,7 @@ template <class function_Ty, class ... _Args> void welp::threads<_Allocator>::fo
 {
 	if (threads_running)
 	{
-		while (!async_task(task, std::forward<_Args>(args)...)) {};
+		while (!async_task(task, std::forward<_Args>(args)...)) {}
 	}
 }
 
@@ -319,7 +319,7 @@ template <class function_Ty, class ... _Args> void welp::threads<_Allocator>::fo
 {
 	if (threads_running)
 	{
-		while (!priority_async_task(task, std::forward<_Args>(args)...)) {};
+		while (!priority_async_task(task, std::forward<_Args>(args)...)) {}
 	}
 }
 
@@ -370,7 +370,7 @@ void welp::threads<_Allocator>::force_async_task(welp::async_task_end& package, 
 {
 	if (threads_running)
 	{
-		while (!async_task(package, task, std::forward<_Args>(args)...)) {};
+		while (!async_task(package, task, std::forward<_Args>(args)...)) {}
 	}
 }
 
@@ -430,7 +430,7 @@ void welp::threads<_Allocator>::force_priority_async_task(welp::async_task_end& 
 {
 	if (threads_running)
 	{
-		while (!priority_async_task(package, task, std::forward<_Args>(args)...)) {};
+		while (!priority_async_task(package, task, std::forward<_Args>(args)...)) {}
 	}
 }
 
@@ -481,7 +481,7 @@ void welp::threads<_Allocator>::force_async_task(welp::async_task_result<return_
 {
 	if (threads_running)
 	{
-		while (!async_task(package, task, std::forward<_Args>(args)...)) {};
+		while (!async_task(package, task, std::forward<_Args>(args)...)) {}
 	}
 }
 
@@ -541,7 +541,7 @@ void welp::threads<_Allocator>::force_priority_async_task(welp::async_task_resul
 {
 	if (threads_running)
 	{
-		while (!priority_async_task(package, task, std::forward<_Args>(args)...)) {};
+		while (!priority_async_task(package, task, std::forward<_Args>(args)...)) {}
 	}
 }
 
