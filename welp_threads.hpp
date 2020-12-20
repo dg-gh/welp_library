@@ -870,7 +870,7 @@ template <class _Allocator>
 void welp::threads<_Allocator>::record_say_sub()
 {
 	std::cout << "\nThreads   > number of threads : " << _number_of_threads
-		<< "   > task buffer size : " << static_cast<std::size_t>(task_buffer_end_ptr - task_buffer_data_ptr) - 1
+		<< "   > task buffer size : " << ((task_buffer_data_ptr != nullptr) ? static_cast<std::size_t>(task_buffer_end_ptr - task_buffer_data_ptr) - 1 : 0)
 		<< "\n          > tasks accepted : " << record_accepted_task_count
 		<< "   > tasks denied : " << record_denied_task_count
 		<< "\n          > tasks completed : " << record_completed_task_count.load()
@@ -919,7 +919,7 @@ template <class _Allocator>
 void welp::threads<_Allocator>::record_write_sub(std::ofstream& rec_write)
 {
 	rec_write << "\nThreads   > number of threads : " << _number_of_threads
-		<< "   > task buffer size : " << static_cast<std::size_t>(task_buffer_end_ptr - task_buffer_data_ptr) - 1
+		<< "   > task buffer size : " << ((task_buffer_data_ptr != nullptr) ? static_cast<std::size_t>(task_buffer_end_ptr - task_buffer_data_ptr) - 1 : 0)
 		<< "\n     > tasks accepted : " << record_accepted_task_count
 		<< "   > tasks denied : " << record_denied_task_count
 		<< "\n     > tasks completed : " << record_completed_task_count.load()
