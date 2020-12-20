@@ -161,7 +161,8 @@ namespace welp
 		void record_reset() noexcept;
 
 		void record_say();
-		template <typename msg_Ty> void record_say(const msg_Ty& msg);
+		template <typename msg_Ty> void record_say
+		(const msg_Ty& msg);
 		template <typename msg_Ty1, typename msg_Ty2> void record_say
 		(const msg_Ty1& msg1, const msg_Ty2& msg2);
 		template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3> void record_say
@@ -171,7 +172,8 @@ namespace welp
 
 #ifdef WELP_MULTIPOOL_INCLUDE_FSTREAM
 		void record_write(const char* const filename);
-		template <typename msg_Ty> void record_write(const char* const filename, const msg_Ty& msg);
+		template <typename msg_Ty> void record_write
+		(const char* const filename, const msg_Ty& msg);
 		template <typename msg_Ty1, typename msg_Ty2> void record_write
 		(const char* const filename, const msg_Ty1& msg1, const msg_Ty2& msg2);
 		template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3> void record_write
@@ -291,7 +293,8 @@ namespace welp
 		void record_reset() noexcept;
 
 		void record_say();
-		template <typename msg_Ty> void record_say(const msg_Ty& msg);
+		template <typename msg_Ty> void record_say
+		(const msg_Ty& msg);
 		template <typename msg_Ty1, typename msg_Ty2> void record_say
 		(const msg_Ty1& msg1, const msg_Ty2& msg2);
 		template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3> void record_say
@@ -301,7 +304,8 @@ namespace welp
 
 #ifdef WELP_MULTIPOOL_INCLUDE_FSTREAM
 		void record_write(const char* const filename);
-		template <typename msg_Ty> void record_write(const char* const filename, const msg_Ty& msg);
+		template <typename msg_Ty> void record_write
+		(const char* const filename, const msg_Ty& msg);
 		template <typename msg_Ty1, typename msg_Ty2> void record_write
 		(const char* const filename, const msg_Ty1& msg1, const msg_Ty2& msg2);
 		template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3> void record_write
