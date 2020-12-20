@@ -155,7 +155,7 @@ Same and displays message msg. Overloads can display up to 4 messages.
 ### Code example with the std::allocator template
 
 	#define WELP_MULTIPOOL_DEBUG_MODE
-	#include "welp_multipool_resource.h"
+	#include "welp_multipool_resource.hpp"
 	#include <vector>
 
 	welp::multipool_resource<4> R; // R can have up to 4 pools
@@ -220,7 +220,7 @@ Same and displays message msg. Overloads can display up to 4 messages.
 ### Code example with std::pmr::memory_resource (requires C++17)
 
 	#define WELP_MULTIPOOL_DEBUG_MODE
-	#include "welp_multipool_resource.h"
+	#include "welp_multipool_resource.hpp"
 	#include <vector>
 	#include <memory_resource>
 	
