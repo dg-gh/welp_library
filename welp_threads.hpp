@@ -794,6 +794,8 @@ bool welp::threads<_Allocator>::new_threads(std::size_t input_number_of_threads,
 	{
 		return false;
 	}
+	
+	input_task_buffer_size = (input_number_of_threads > input_task_buffer_size) ? input_number_of_threads : input_task_buffer_size;
 
 	try
 	{
