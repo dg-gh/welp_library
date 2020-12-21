@@ -348,7 +348,7 @@ void welp::threads<_Allocator>::force_async_task(const function_Ty& task, _Args&
 		while (!force_async_task_sub(task, std::forward<_Args>(args)...)) {}
 	}
 #ifdef WELP_THREADS_DEBUG_MODE
-	else{ record_delayed_task_count.fetch_add(1); }
+	else { record_denied_task_count.fetch_add(1); }
 #endif // WELP_THREADS_DEBUG_MODE
 }
 
@@ -424,7 +424,7 @@ void welp::threads<_Allocator>::force_priority_async_task(const function_Ty& tas
 		while (!force_priority_async_task_sub(task, std::forward<_Args>(args)...)) {}
 	}
 #ifdef WELP_THREADS_DEBUG_MODE
-	else { record_delayed_task_count.fetch_add(1); }
+	else { record_denied_task_count.fetch_add(1); }
 #endif // WELP_THREADS_DEBUG_MODE
 }
 
@@ -498,7 +498,7 @@ void welp::threads<_Allocator>::force_async_task(welp::async_task_end& package, 
 		while (!force_async_task_sub(package, task, std::forward<_Args>(args)...)) {}
 	}
 #ifdef WELP_THREADS_DEBUG_MODE
-	else { record_delayed_task_count.fetch_add(1); }
+	else { record_denied_task_count.fetch_add(1); }
 #endif // WELP_THREADS_DEBUG_MODE
 }
 
@@ -581,7 +581,7 @@ void welp::threads<_Allocator>::force_priority_async_task(welp::async_task_end& 
 		while (!force_priority_async_task_sub(package, task, std::forward<_Args>(args)...)) {}
 	}
 #ifdef WELP_THREADS_DEBUG_MODE
-	else { record_delayed_task_count.fetch_add(1); }
+	else { record_denied_task_count.fetch_add(1); }
 #endif // WELP_THREADS_DEBUG_MODE
 }
 
@@ -655,7 +655,7 @@ void welp::threads<_Allocator>::force_async_task(welp::async_task_result<return_
 		while (!force_async_task_sub(package, task, std::forward<_Args>(args)...)) {}
 	}
 #ifdef WELP_THREADS_DEBUG_MODE
-	else { record_delayed_task_count.fetch_add(1); }
+	else { record_denied_task_count.fetch_add(1); }
 #endif // WELP_THREADS_DEBUG_MODE
 }
 
@@ -738,7 +738,7 @@ void welp::threads<_Allocator>::force_priority_async_task(welp::async_task_resul
 		while (!force_priority_async_task_sub(package, task, std::forward<_Args>(args)...)) {}
 	}
 #ifdef WELP_THREADS_DEBUG_MODE
-	else { record_delayed_task_count.fetch_add(1); }
+	else { record_denied_task_count.fetch_add(1); }
 #endif // WELP_THREADS_DEBUG_MODE
 }
 
@@ -935,7 +935,7 @@ void welp::threads<_Allocator>::record_say_sub()
 		<< "   > task buffer size : " << ((task_buffer_data_ptr != nullptr) ? static_cast<std::size_t>(task_buffer_end_ptr - task_buffer_data_ptr) - 1 : 0)
 		<< "\n          > tasks accepted : " << record_accepted_task_count
 		<< "   > tasks denied : " << record_denied_task_count
-		<< "   > tasks delayed : " << record_delayed_task_count.load()
+		<< "   > tasks accepted with delay : " << record_delayed_task_count.load()
 		<< "\n          > tasks completed : " << record_completed_task_count.load()
 		<< "   > currently unfinished tasks : " << unfinished_tasks.load()
 		<< "\n          > maximum occupancy recorded in task buffer : " << record_max_occupancy.load() << "\n" << std::endl;
@@ -985,7 +985,7 @@ void welp::threads<_Allocator>::record_write_sub(std::ofstream& rec_write)
 		<< "   > task buffer size : " << ((task_buffer_data_ptr != nullptr) ? static_cast<std::size_t>(task_buffer_end_ptr - task_buffer_data_ptr) - 1 : 0)
 		<< "\n     > tasks accepted : " << record_accepted_task_count
 		<< "   > tasks denied : " << record_denied_task_count
-		<< "   > tasks delayed : " << record_delayed_task_count.load()
+		<< "   > tasks accepted with delay : " << record_delayed_task_count.load()
 		<< "\n     > tasks completed : " << record_completed_task_count.load()
 		<< "   > currently unfinished tasks : " << unfinished_tasks.load()
 		<< "\n     > maximum occupancy recorded in task buffer : " << record_max_occupancy.load() << "\n" << std::endl;
