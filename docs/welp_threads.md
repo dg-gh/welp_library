@@ -23,9 +23,9 @@ Creates n threads and a queue with a capacity for m tasks.
 
 Deletes all the threads and the queue.
 
-	R.owns_resources(); 
+	T.owns_resources(); 
 
-Returns true if R currently owns threads and memory on the heap.
+Returns true if T currently owns threads and memory on the heap.
 
 ### Queuing tasks of the type f(arg1, ... , argn) -> void or f(arg1, ... , argn) -> Ty (discards the return)
 
