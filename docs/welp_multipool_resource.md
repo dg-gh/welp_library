@@ -22,6 +22,10 @@ In case of a failed allocation, the member function returns boolean false. In th
 
 Same with size_t* pointers p, q instead of initializer lists.
 
+	R.owns_resources(); 
+
+Returns true if R currently owns memory on the heap.
+
 ### Destroying pools
 
 	R.delete_pools(); 
