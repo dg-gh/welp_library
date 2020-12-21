@@ -137,3 +137,35 @@ Returns true if T.async_task(A, f, arg1, ... , argn) or T.priority_async_task(A,
 	A.reset(); 
 
 Resets A to its initial state if it is not bound to any incomplete task (will wait for the task to complete if needed). A.task_denied() and A.task_running() will return false afterwards and the stored value of type Ty of welp::async_task_result< Ty> will be Ty() (default construction).
+
+### Recording stats
+
+All the functions recording stats are enabled if the macro WELP_THREADS_DEBUG_MODE is defined.
+
+	T.record_start();
+
+Starts recording stats.
+
+	T.record_stop();
+
+Stops recording cumulative stats. Doesn't destroy existing stats, can be switched on again with T.record_start() and will add new events cumulatively to the stats recorded before.
+
+	T.record_reset();
+
+Resets stats to zero. Stops recording stats.
+
+	T.record_say();
+
+Displays the recorded stats.
+
+	T.record_say(msg);
+
+Same and displays message msg. Overloads can display up to 4 messages.
+
+	T.record_write(filename);
+
+Writes the recorded stats into filename. Works if the macro WELP_THREADS_INCLUDE_FSTREAM is defined.
+
+	T.record_say(filename, msg);
+
+Same and displays message msg. Overloads can display up to 4 messages. Works if the macro WELP_THREADS_INCLUDE_FSTREAM is defined.
