@@ -66,6 +66,14 @@ Displays the recorded stats. Will display for each pool : Allocations, deallocat
 
 Same and displays message msg. Overloads can display up to 4 messages.
 
+	R.record_write(filename);
+
+Writes the recorded stats into filename. Works if the macro WELP_MULTIPOOL_INCLUDE_FSTREAM is defined.
+
+	R.record_say(filename, msg);
+
+Same and displays message msg. Overloads can display up to 4 messages. Works if the macro WELP_MULTIPOOL_INCLUDE_FSTREAM is defined.
+
 ### Code example with the std::allocator template
 
 	#define WELP_CYCLIC_DEBUG_MODE
