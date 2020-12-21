@@ -1,4 +1,4 @@
-// welp_cyclic_resource.hpp - last update : 12 / 12 / 2020
+// welp_cyclic_resource.hpp - last update : 21 / 12 / 2020
 // License <http://unlicense.org/> (statement below at the end of the file)
 
 
@@ -12,6 +12,9 @@
 
 #ifdef WELP_CYCLIC_DEBUG_MODE
 #include <iostream>
+#ifdef WELP_CYCLIC_INCLUDE_FSTREAM
+#include <fstream>
+#endif // WELP_CYCLIC_INCLUDE_FSTREAM
 #endif // WELP_CYCLIC_DEBUG_MODE
 
 #ifndef WELP_CYCLIC_RECORD_INT
@@ -77,25 +80,46 @@ namespace welp
 		void record_start() noexcept;
 		void record_stop() noexcept;
 		void record_reset() noexcept;
+
 		void record_say() const;
-		template <typename msg_Ty> void record_say(const msg_Ty& msg) const;
+		template <typename msg_Ty> void record_say
+		(const msg_Ty& msg) const;
 		template <typename msg_Ty1, typename msg_Ty2> void record_say
 		(const msg_Ty1& msg1, const msg_Ty2& msg2) const;
 		template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3> void record_say
 		(const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3) const;
 		template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3, typename msg_Ty4> void record_say
 		(const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3, const msg_Ty4& msg4) const;
+
+#ifdef WELP_CYCLIC_INCLUDE_FSTREAM
+		void record_write(const char* const filename) const;
+		template <typename msg_Ty> void record_write
+		(const char* const filename, const msg_Ty& msg) const;
+		template <typename msg_Ty1, typename msg_Ty2> void record_write
+		(const char* const filename, const msg_Ty1& msg1, const msg_Ty2& msg2) const;
+		template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3> void record_write
+		(const char* const filename, const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3) const;
+		template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3, typename msg_Ty4> void record_write
+		(const char* const filename, const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3, const msg_Ty4& msg4) const;
+#endif // WELP_CYCLIC_INCLUDE_FSTREAM
 #endif // WELP_CYCLIC_DEBUG_MODE
 
 		cyclic_resource() = default;
-		virtual ~cyclic_resource() noexcept { delete_pool(); }
+		virtual ~cyclic_resource() { delete_pool(); }
 
 	private:
 
-		cyclic_resource(const welp::cyclic_resource<mem_align, sub_allocator>& rhs) = delete;
-		cyclic_resource<mem_align, sub_allocator>& operator=(const welp::cyclic_resource<mem_align, sub_allocator>& rhs) = delete;
-		cyclic_resource(welp::cyclic_resource<mem_align, sub_allocator>&& rhs) = delete;
-		welp::cyclic_resource<mem_align, sub_allocator>& operator=(welp::cyclic_resource<mem_align, sub_allocator>&& rhs) = delete;
+#ifdef WELP_CYCLIC_DEBUG_MODE
+		void record_say_sub() const;
+#ifdef WELP_CYCLIC_INCLUDE_FSTREAM
+		void record_write_sub(std::ostream& rec_write) const;
+#endif // WELP_CYCLIC_INCLUDE_FSTREAM
+#endif // WELP_CYCLIC_DEBUG_MODE
+
+		cyclic_resource(const welp::cyclic_resource<mem_align, sub_allocator>&) = delete;
+		cyclic_resource<mem_align, sub_allocator>& operator=(const welp::cyclic_resource<mem_align, sub_allocator>&) = delete;
+		cyclic_resource(welp::cyclic_resource<mem_align, sub_allocator>&&) = delete;
+		welp::cyclic_resource<mem_align, sub_allocator>& operator=(welp::cyclic_resource<mem_align, sub_allocator>&&) = delete;
 	};
 }
 
@@ -318,8 +342,10 @@ void welp::cyclic_resource<mem_align, sub_allocator>::record_reset() noexcept
 	alloc_byte_count = 0;
 	cycle_count = 0;
 }
+
+
 template <std::size_t mem_align, class sub_allocator>
-void welp::cyclic_resource<mem_align, sub_allocator>::record_say() const
+void welp::cyclic_resource<mem_align, sub_allocator>::record_say_sub() const
 {
 	std::cout << "\nCyclic pool ";
 	std::cout.fill(' '); std::cout.width(2);
@@ -333,29 +359,105 @@ void welp::cyclic_resource<mem_align, sub_allocator>::record_say() const
 	std::cout << "> bytes allocated : " << alloc_byte_count
 		<< "  > cycles : " << cycle_count << std::endl;
 }
+
+template <std::size_t mem_align, class sub_allocator>
+void welp::cyclic_resource<mem_align, sub_allocator>::record_say() const
+{
+	record_say_sub();
+}
+
 template <std::size_t mem_align, class sub_allocator>
 template <typename msg_Ty> void welp::cyclic_resource<mem_align, sub_allocator>::record_say(const msg_Ty& msg) const
 {
-	std::cout << "[ " << msg << " ]\n"; record_say();
+	std::cout << "[ " << msg << " ]\n"; record_say_sub();
 }
+
 template <std::size_t mem_align, class sub_allocator>
 template <typename msg_Ty1, typename msg_Ty2> void welp::cyclic_resource<mem_align, sub_allocator>::record_say
 (const msg_Ty1& msg1, const msg_Ty2& msg2) const
 {
-	std::cout << "[ " << msg1 << " " << msg2 << " ]\n"; record_say();
+	std::cout << "[ " << msg1 << " " << msg2 << " ]\n"; record_say_sub();
 }
+
 template <std::size_t mem_align, class sub_allocator>
 template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3> void welp::cyclic_resource<mem_align, sub_allocator>::record_say
 (const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3) const
 {
-	std::cout << "[ " << msg1 << " " << msg2 << " " << msg3 << " ]\n"; record_say();
+	std::cout << "[ " << msg1 << " " << msg2 << " " << msg3 << " ]\n"; record_say_sub();
 }
+
 template <std::size_t mem_align, class sub_allocator>
 template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3, typename msg_Ty4> void welp::cyclic_resource<mem_align, sub_allocator>::record_say
 (const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3, const msg_Ty4& msg4) const
 {
-	std::cout << "[ " << msg1 << " " << msg2 << " " << msg3 << " " << msg4 << " ]\n"; record_say();
+	std::cout << "[ " << msg1 << " " << msg2 << " " << msg3 << " " << msg4 << " ]\n"; record_say_sub();
 }
+
+
+#ifdef WELP_CYCLIC_INCLUDE_FSTREAM
+template <std::size_t mem_align, class sub_allocator>
+void welp::cyclic_resource<mem_align, sub_allocator>::record_write_sub(std::ostream& rec_write) const
+{
+	rec_write << "\nCyclic pool  > pool capacity : "
+		<< static_cast<std::size_t>(end_ptr - data_ptr)
+		<< "  > allocations : " << alloc_count
+		<< "  > deallocations : " << dealloc_count << "\n"
+		<< "             > bytes allocated : " << alloc_byte_count
+		<< "  > cycles : " << cycle_count << "\n" << std::endl;
+}
+
+template <std::size_t mem_align, class sub_allocator>
+void welp::cyclic_resource<mem_align, sub_allocator>::record_write(const char* const filename) const
+{
+	std::ofstream rec_write;
+	rec_write.open(filename, std::ios::app);
+	record_write_sub(rec_write);
+	rec_write.close();
+}
+
+template <std::size_t mem_align, class sub_allocator>
+template <typename msg_Ty> void welp::cyclic_resource<mem_align, sub_allocator>::record_write(const char* const filename, const msg_Ty& msg) const
+{
+	std::ofstream rec_write;
+	rec_write.open(filename, std::ios::app);
+	rec_write << "[ " << msg << " ]\n";
+	record_write_sub(rec_write);
+	rec_write.close();
+}
+
+template <std::size_t mem_align, class sub_allocator>
+template <typename msg_Ty1, typename msg_Ty2> void welp::cyclic_resource<mem_align, sub_allocator>::record_write
+(const char* const filename, const msg_Ty1& msg1, const msg_Ty2& msg2) const
+{
+	std::ofstream rec_write;
+	rec_write.open(filename, std::ios::app);
+	rec_write << "[ " << msg1 << " " << msg2 << " ]\n";
+	record_write_sub(rec_write);
+	rec_write.close();
+}
+
+template <std::size_t mem_align, class sub_allocator>
+template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3> void welp::cyclic_resource<mem_align, sub_allocator>::record_write
+(const char* const filename, const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3) const
+{
+	std::ofstream rec_write;
+	rec_write.open(filename, std::ios::app);
+	rec_write << "[ " << msg1 << " " << msg2 << " " << msg3 << " ]\n";
+	record_write_sub(rec_write);
+	rec_write.close();
+}
+
+template <std::size_t mem_align, class sub_allocator>
+template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3, typename msg_Ty4> void welp::cyclic_resource<mem_align, sub_allocator>::record_write
+(const char* const filename, const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3, const msg_Ty4& msg4) const
+{
+	std::ofstream rec_write;
+	rec_write.open(filename, std::ios::app);
+	rec_write << "[ " << msg1 << " " << msg2 << " " << msg3 << " " << msg4 << " ]\n";
+	record_write_sub(rec_write);
+	rec_write.close();
+}
+#endif // WELP_CYCLIC_INCLUDE_FSTREAM
 #endif // WELP_CYCLIC_DEBUG_MODE
 
 
