@@ -208,6 +208,7 @@ namespace welp
 		std::atomic<std::size_t> record_completed_task_count{ 0 };
 		std::size_t record_accepted_task_count = 0;
 		std::size_t record_denied_task_count = 0;
+		std::atomic<std::size_t> record_delayed_task_count{ 0 };
 		bool record_on = false;
 
 		void record_say_sub();
@@ -337,6 +338,13 @@ void welp::threads<_Allocator>::force_async_task(const function_Ty& task, _Args&
 {
 	if (threads_running)
 	{
+#ifdef WELP_THREADS_DEBUG_MODE
+		if (!force_async_task_sub(task, std::forward<_Args>(args)...))
+		{
+			record_delayed_task_count.fetch_add(1);
+		}
+		else { return; }
+#endif // WELP_THREADS_DEBUG_MODE
 		while (!force_async_task_sub(task, std::forward<_Args>(args)...)) {}
 	}
 }
@@ -403,6 +411,13 @@ void welp::threads<_Allocator>::force_priority_async_task(const function_Ty& tas
 {
 	if (threads_running)
 	{
+#ifdef WELP_THREADS_DEBUG_MODE
+		if (!force_priority_async_task_sub(task, std::forward<_Args>(args)...))
+		{
+			record_delayed_task_count.fetch_add(1);
+		}
+		else { return; }
+#endif // WELP_THREADS_DEBUG_MODE
 		while (!force_priority_async_task_sub(task, std::forward<_Args>(args)...)) {}
 	}
 }
