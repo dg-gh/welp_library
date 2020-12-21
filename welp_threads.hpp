@@ -347,6 +347,9 @@ void welp::threads<_Allocator>::force_async_task(const function_Ty& task, _Args&
 #endif // WELP_THREADS_DEBUG_MODE
 		while (!force_async_task_sub(task, std::forward<_Args>(args)...)) {}
 	}
+#ifdef WELP_THREADS_DEBUG_MODE
+	else{ record_delayed_task_count.fetch_add(1); }
+#endif // WELP_THREADS_DEBUG_MODE
 }
 
 template <class _Allocator> template <class function_Ty, class ... _Args>
@@ -420,6 +423,9 @@ void welp::threads<_Allocator>::force_priority_async_task(const function_Ty& tas
 #endif // WELP_THREADS_DEBUG_MODE
 		while (!force_priority_async_task_sub(task, std::forward<_Args>(args)...)) {}
 	}
+#ifdef WELP_THREADS_DEBUG_MODE
+	else { record_delayed_task_count.fetch_add(1); }
+#endif // WELP_THREADS_DEBUG_MODE
 }
 
 
@@ -482,8 +488,18 @@ void welp::threads<_Allocator>::force_async_task(welp::async_task_end& package, 
 {
 	if (threads_running)
 	{
+#ifdef WELP_THREADS_DEBUG_MODE
+		if (!force_async_task_sub(package, task, std::forward<_Args>(args)...))
+		{
+			record_delayed_task_count.fetch_add(1);
+		}
+		else { return; }
+#endif // WELP_THREADS_DEBUG_MODE
 		while (!force_async_task_sub(package, task, std::forward<_Args>(args)...)) {}
 	}
+#ifdef WELP_THREADS_DEBUG_MODE
+	else { record_delayed_task_count.fetch_add(1); }
+#endif // WELP_THREADS_DEBUG_MODE
 }
 
 template <class _Allocator> template <class function_Ty, class ... _Args>
@@ -555,8 +571,18 @@ void welp::threads<_Allocator>::force_priority_async_task(welp::async_task_end& 
 {
 	if (threads_running)
 	{
+#ifdef WELP_THREADS_DEBUG_MODE
+		if (!force_priority_async_task_sub(package, task, std::forward<_Args>(args)...))
+		{
+			record_delayed_task_count.fetch_add(1);
+		}
+		else { return; }
+#endif // WELP_THREADS_DEBUG_MODE
 		while (!force_priority_async_task_sub(package, task, std::forward<_Args>(args)...)) {}
 	}
+#ifdef WELP_THREADS_DEBUG_MODE
+	else { record_delayed_task_count.fetch_add(1); }
+#endif // WELP_THREADS_DEBUG_MODE
 }
 
 
@@ -619,8 +645,18 @@ void welp::threads<_Allocator>::force_async_task(welp::async_task_result<return_
 {
 	if (threads_running)
 	{
+#ifdef WELP_THREADS_DEBUG_MODE
+		if (!force_async_task_sub(package, task, std::forward<_Args>(args)...))
+		{
+			record_delayed_task_count.fetch_add(1);
+		}
+		else { return; }
+#endif // WELP_THREADS_DEBUG_MODE
 		while (!force_async_task_sub(package, task, std::forward<_Args>(args)...)) {}
 	}
+#ifdef WELP_THREADS_DEBUG_MODE
+	else { record_delayed_task_count.fetch_add(1); }
+#endif // WELP_THREADS_DEBUG_MODE
 }
 
 template <class _Allocator> template <class return_Ty, class function_Ty, class ... _Args>
@@ -692,8 +728,18 @@ void welp::threads<_Allocator>::force_priority_async_task(welp::async_task_resul
 {
 	if (threads_running)
 	{
+#ifdef WELP_THREADS_DEBUG_MODE
+		if (!force_priority_async_task_sub(package, task, std::forward<_Args>(args)...))
+		{
+			record_delayed_task_count.fetch_add(1);
+		}
+		else { return; }
+#endif // WELP_THREADS_DEBUG_MODE
 		while (!force_priority_async_task_sub(package, task, std::forward<_Args>(args)...)) {}
 	}
+#ifdef WELP_THREADS_DEBUG_MODE
+	else { record_delayed_task_count.fetch_add(1); }
+#endif // WELP_THREADS_DEBUG_MODE
 }
 
 
@@ -877,6 +923,7 @@ void welp::threads<_Allocator>::record_reset() noexcept
 	record_completed_task_count.store(0);
 	record_accepted_task_count = 0;
 	record_denied_task_count = 0;
+	record_delayed_task_count.store(0);
 	record_on = false;
 }
 
