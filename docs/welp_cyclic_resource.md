@@ -18,6 +18,10 @@ Creates a pool of N bytes.
 
 Deletes the pool.
 
+	R.owns_resources(); 
+
+Returns true if R currently owns memory on the heap.
+
 ### Allocating typed and non-typed arrays
 
 	R.allocate_type<Ty>(N); 
