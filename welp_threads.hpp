@@ -1,4 +1,4 @@
-// welp_threads.hpp - last update : 15 / 12 / 2020
+// welp_threads.hpp - last update : 21 / 12 / 2020
 // License <http://unlicense.org/> (statement below at the end of the file)
 
 
@@ -21,6 +21,10 @@
 #include <fstream>
 #endif //  WELP_THREADS_INCLUDE_FSTREAM
 #endif // WELP_THREADS_DEBUG_MODE
+
+#ifndef WELP_THREADS_RECORD_INT
+#define WELP_THREADS_RECORD_INT unsigned int
+#endif // WELP_THREADS_RECORD_INT
 
 
 ////// DESCRIPTIONS //////
@@ -204,11 +208,11 @@ namespace welp
 		bool force_priority_async_task_sub(welp::async_task_result<return_Ty>& package, const function_Ty& task, _Args&& ... args);
 
 #ifdef WELP_THREADS_DEBUG_MODE
-		std::atomic<std::size_t> record_max_occupancy{ 0 };
-		std::atomic<std::size_t> record_completed_task_count{ 0 };
-		std::size_t record_accepted_task_count = 0;
-		std::size_t record_denied_task_count = 0;
-		std::atomic<std::size_t> record_delayed_task_count{ 0 };
+		std::atomic<WELP_THREADS_RECORD_INT> record_max_occupancy{ 0 };
+		std::atomic<WELP_THREADS_RECORD_INT> record_completed_task_count{ 0 };
+		WELP_THREADS_RECORD_INT record_accepted_task_count = 0;
+		std::atomic<WELP_THREADS_RECORD_INT> record_denied_task_count{ 0 };
+		std::atomic<WELP_THREADS_RECORD_INT> record_delayed_task_count{ 0 };
 		bool record_on = false;
 
 		void record_say_sub();
@@ -305,7 +309,7 @@ bool welp::threads<_Allocator>::async_task(const function_Ty& task, _Args&& ... 
 		catch (...)
 		{
 #ifdef WELP_THREADS_DEBUG_MODE
-			if (record_on) { record_denied_task_count++; }
+			if (record_on) { record_denied_task_count.fetch_add(1); }
 #endif // WELP_THREADS_DEBUG_MODE
 			return false;
 		}
@@ -327,7 +331,7 @@ bool welp::threads<_Allocator>::async_task(const function_Ty& task, _Args&& ... 
 	else
 	{
 #ifdef WELP_THREADS_DEBUG_MODE
-		if (record_on) { record_denied_task_count++; }
+		if (record_on) { record_denied_task_count.fetch_add(1); }
 #endif // WELP_THREADS_DEBUG_MODE
 		return false;
 	}
@@ -383,7 +387,7 @@ bool welp::threads<_Allocator>::priority_async_task(const function_Ty& task, _Ar
 		catch (...)
 		{
 #ifdef WELP_THREADS_DEBUG_MODE
-			if (record_on) { record_denied_task_count++; }
+			if (record_on) { record_denied_task_count.fetch_add(1); }
 #endif // WELP_THREADS_DEBUG_MODE
 			return false;
 		}
@@ -403,7 +407,7 @@ bool welp::threads<_Allocator>::priority_async_task(const function_Ty& task, _Ar
 	else
 	{
 #ifdef WELP_THREADS_DEBUG_MODE
-		if (record_on) { record_denied_task_count++; }
+		if (record_on) { record_denied_task_count.fetch_add(1); }
 #endif // WELP_THREADS_DEBUG_MODE
 		return false;
 	}
@@ -451,7 +455,7 @@ bool welp::threads<_Allocator>::async_task(welp::async_task_end& package, const 
 		{
 			package._task_denied.store(true);
 #ifdef WELP_THREADS_DEBUG_MODE
-			if (record_on) { record_denied_task_count++; }
+			if (record_on) { record_denied_task_count.fetch_add(1); }
 #endif // WELP_THREADS_DEBUG_MODE
 			return false;
 		}
@@ -477,7 +481,7 @@ bool welp::threads<_Allocator>::async_task(welp::async_task_end& package, const 
 	{
 		package._task_denied.store(true);
 #ifdef WELP_THREADS_DEBUG_MODE
-		if (record_on) { record_denied_task_count++; }
+		if (record_on) { record_denied_task_count.fetch_add(1); }
 #endif // WELP_THREADS_DEBUG_MODE
 		return false;
 	}
@@ -537,7 +541,7 @@ bool welp::threads<_Allocator>::priority_async_task(welp::async_task_end& packag
 		{
 			package._task_denied.store(true);
 #ifdef WELP_THREADS_DEBUG_MODE
-			if (record_on) { record_denied_task_count++; }
+			if (record_on) { record_denied_task_count.fetch_add(1); }
 #endif // WELP_THREADS_DEBUG_MODE
 			return false;
 		}
@@ -560,7 +564,7 @@ bool welp::threads<_Allocator>::priority_async_task(welp::async_task_end& packag
 	{
 		package._task_denied.store(true);
 #ifdef WELP_THREADS_DEBUG_MODE
-		if (record_on) { record_denied_task_count++; }
+		if (record_on) { record_denied_task_count.fetch_add(1); }
 #endif // WELP_THREADS_DEBUG_MODE
 		return false;
 	}
@@ -608,7 +612,7 @@ bool welp::threads<_Allocator>::async_task(welp::async_task_result<return_Ty>& p
 		{
 			package._task_denied.store(true);
 #ifdef WELP_THREADS_DEBUG_MODE
-			if (record_on) { record_denied_task_count++; }
+			if (record_on) { record_denied_task_count.fetch_add(1); }
 #endif // WELP_THREADS_DEBUG_MODE
 			return false;
 		}
@@ -634,7 +638,7 @@ bool welp::threads<_Allocator>::async_task(welp::async_task_result<return_Ty>& p
 	{
 		package._task_denied.store(true);
 #ifdef WELP_THREADS_DEBUG_MODE
-		if (record_on) { record_denied_task_count++; }
+		if (record_on) { record_denied_task_count.fetch_add(1); }
 #endif // WELP_THREADS_DEBUG_MODE
 		return false;
 	}
@@ -694,7 +698,7 @@ bool welp::threads<_Allocator>::priority_async_task(welp::async_task_result<retu
 		{
 			package._task_denied.store(true);
 #ifdef WELP_THREADS_DEBUG_MODE
-			if (record_on) { record_denied_task_count++; }
+			if (record_on) { record_denied_task_count.fetch_add(1); }
 #endif // WELP_THREADS_DEBUG_MODE
 			return false;
 		}
@@ -717,7 +721,7 @@ bool welp::threads<_Allocator>::priority_async_task(welp::async_task_result<retu
 	{
 		package._task_denied.store(true);
 #ifdef WELP_THREADS_DEBUG_MODE
-		if (record_on) { record_denied_task_count++; }
+		if (record_on) { record_denied_task_count.fetch_add(1); }
 #endif // WELP_THREADS_DEBUG_MODE
 		return false;
 	}
@@ -794,7 +798,7 @@ bool welp::threads<_Allocator>::new_threads(std::size_t input_number_of_threads,
 	{
 		return false;
 	}
-	
+
 	input_task_buffer_size = (input_number_of_threads > input_task_buffer_size) ? input_number_of_threads : input_task_buffer_size;
 
 	try
