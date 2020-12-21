@@ -109,35 +109,6 @@ Similar to priority_async_task except that the program can't go past A.get() unt
 
 Similar to force_priority_async_task except that the program can't go past A.get() until the task is finished.
 
-### Other methods of welp::threads< Allocator>
-
-	T.finish_all_tasks();
-	// can't continue there until every task is finished
-
-The program can't go past T.finish_all_tasks() until every the task is finished.
-
-	T.number_of_threads(); 
-
-Returns the number of threads maintained by T.
-
-	T.task_buffer_size(); 
-
-Returns the maximal number of tasks that can be stored in the queue of T.
-
-# Other member functions of welp::async_task_end A or welp::async_task_result< Ty> A
-
-	A.task_denied(); 
-
-Returns true if T.async_task(A, f, arg1, ... , argn) or T.priority_async_task(A, f, arg1, ... , argn) was called for the last time when the task buffer was full and the task got denied.
-
-	A.task_running(); 
-
-Returns true if T.async_task(A, f, arg1, ... , argn) or T.priority_async_task(A, f, arg1, ... , argn) was called and the task hasn't been completed yet.
-
-	A.reset(); 
-
-Resets A to its initial state if it is not bound to any incomplete task (will wait for the task to complete if needed). A.task_denied() and A.task_running() will return false afterwards and the stored value of type Ty of welp::async_task_result< Ty> will be Ty() (default construction).
-
 ### Recording stats
 
 All the functions recording stats are enabled if the macro WELP_THREADS_DEBUG_MODE is defined.
@@ -169,3 +140,32 @@ Writes the recorded stats into filename. Works if the macro WELP_THREADS_INCLUDE
 	T.record_say(filename, msg);
 
 Same and displays message msg. Overloads can display up to 4 messages. Works if the macro WELP_THREADS_INCLUDE_FSTREAM is defined.
+
+### Other methods of welp::threads< Allocator>
+
+	T.finish_all_tasks();
+	// can't continue there until every task is finished
+
+The program can't go past T.finish_all_tasks() until every the task is finished.
+
+	T.number_of_threads(); 
+
+Returns the number of threads maintained by T.
+
+	T.task_buffer_size(); 
+
+Returns the maximal number of tasks that can be stored in the queue of T.
+
+# Other member functions of welp::async_task_end A or welp::async_task_result< Ty> A
+
+	A.task_denied(); 
+
+Returns true if T.async_task(A, f, arg1, ... , argn) or T.priority_async_task(A, f, arg1, ... , argn) was called for the last time when the task buffer was full and the task got denied.
+
+	A.task_running(); 
+
+Returns true if T.async_task(A, f, arg1, ... , argn) or T.priority_async_task(A, f, arg1, ... , argn) was called and the task hasn't been completed yet.
+
+	A.reset(); 
+
+Resets A to its initial state if it is not bound to any incomplete task (will wait for the task to complete if needed). A.task_denied() and A.task_running() will return false afterwards and the stored value of type Ty of welp::async_task_result< Ty> will be Ty() (default construction).
