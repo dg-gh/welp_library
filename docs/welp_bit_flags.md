@@ -32,12 +32,34 @@ Sets all the booleans of B as true.
 
 	B.cpy(A); 
 
-Copies the first bits of A into B.
+Copies the first bits of A (A can be any class or object) into B.
 
-	B.flip(); 
+### Bitwise operations
 
-Flips the bits of B.
+	B1 &= B2; 
+	B1 |= B2; 
+	B1 ^= B2; 
+	B1.flip();
+
+Bitwise operations and, or, xor, not of B1 with B2 (modifies B1).
+
+	B1 & B2; 
+	B1 | B2; 
+	B1 ^ B2;
+	~B;
+
+### Reinterpret as bits
+
+	A.as_bit_flags();
+
+Reinterprets any object A as bit flags reference of 8 * sizeof(A) bits.
+
+	A.as_bit_flags<n>();
+
+Reinterprets any object A as bit flags refence of n bits.
+
+### Printing the bits
 
 	B.say(); 
 
-Prints the bits of B.
+Prints the bits of B. Requires the macro WELP_BIT_FLAGS_INCLUDE_IOSTREAM to be defined.
