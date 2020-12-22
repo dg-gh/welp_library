@@ -48,6 +48,8 @@ Bitwise operations and, or, xor, not of B1 with B2 (modifies B1).
 	B1 ^ B2;
 	~B;
 
+Bitwise operations and, or, xor, not of B1 with B2 (return new objects).
+
 ### Reinterpret as bits
 
 	A.as_bit_flags();
