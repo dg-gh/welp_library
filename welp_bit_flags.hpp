@@ -84,6 +84,7 @@ namespace welp
 	template <std::size_t bits> inline welp::bit_flags<bits> operator&(const welp::bit_flags<bits>& A, const welp::bit_flags<bits>& B) noexcept;
 	template <std::size_t bits> inline welp::bit_flags<bits> operator|(const welp::bit_flags<bits>& A, const welp::bit_flags<bits>& B) noexcept;
 	template <std::size_t bits> inline welp::bit_flags<bits> operator^(const welp::bit_flags<bits>& A, const welp::bit_flags<bits>& B) noexcept;
+	template <std::size_t bits> inline welp::bit_flags<bits> operator~(const welp::bit_flags<bits>& A) noexcept;
 
 	template <class Ty> inline const welp::bit_flags<8 * sizeof(Ty)>& as_bit_flags(const Ty& rhs) noexcept;
 	template <class Ty> inline welp::bit_flags<8 * sizeof(Ty)>& as_bit_flags(Ty& rhs) noexcept;
