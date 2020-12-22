@@ -271,41 +271,15 @@ inline std::uint8_t welp::bit_flags<bits>::shift_true(std::size_t offset) const 
 {
 	switch (offset)
 	{
-
-	case 0:
-		return static_cast<std::uint8_t>(1);
-		break;
-
-	case 1:
-		return static_cast<std::uint8_t>(2);
-		break;
-
-	case 2:
-		return static_cast<std::uint8_t>(4);
-		break;
-
-	case 3:
-		return static_cast<std::uint8_t>(8);
-		break;
-
-	case 4:
-		return static_cast<std::uint8_t>(16);
-		break;
-
-	case 5:
-		return static_cast<std::uint8_t>(32);
-		break;
-
-	case 6:
-		return static_cast<std::uint8_t>(64);
-		break;
-
-	case 7:
-		return static_cast<std::uint8_t>(128);
-		break;
-
-	default:
-		return static_cast<std::uint8_t>(0);
+	case 0: return static_cast<std::uint8_t>(1); break;
+	case 1: return static_cast<std::uint8_t>(2); break;
+	case 2: return static_cast<std::uint8_t>(4); break;
+	case 3: return static_cast<std::uint8_t>(8); break;
+	case 4: return static_cast<std::uint8_t>(16); break;
+	case 5: return static_cast<std::uint8_t>(32); break;
+	case 6: return static_cast<std::uint8_t>(64); break;
+	case 7: return static_cast<std::uint8_t>(128); break;
+	default: return static_cast<std::uint8_t>(0); break;
 	}
 }
 
@@ -313,42 +287,16 @@ template <std::size_t bits>
 inline std::uint8_t welp::bit_flags<bits>::shift_false(std::size_t offset) const noexcept
 {
 	switch (offset)
-	{
-
-	case 0:
-		return static_cast<std::uint8_t>(254);
-		break;
-
-	case 1:
-		return static_cast<std::uint8_t>(253);
-		break;
-
-	case 2:
-		return static_cast<std::uint8_t>(251);
-		break;
-
-	case 3:
-		return static_cast<std::uint8_t>(247);
-		break;
-
-	case 4:
-		return static_cast<std::uint8_t>(239);
-		break;
-
-	case 5:
-		return static_cast<std::uint8_t>(223);
-		break;
-
-	case 6:
-		return static_cast<std::uint8_t>(191);
-		break;
-
-	case 7:
-		return static_cast<std::uint8_t>(127);
-		break;
-
-	default:
-		return static_cast<std::uint8_t>(255);
+	{		
+	case 0: return static_cast<std::uint8_t>(254); break;
+	case 1: return static_cast<std::uint8_t>(253); break;
+	case 2: return static_cast<std::uint8_t>(251); break;
+	case 3: return static_cast<std::uint8_t>(247); break;
+	case 4: return static_cast<std::uint8_t>(239); break;
+	case 5: return static_cast<std::uint8_t>(223); break;
+	case 6: return static_cast<std::uint8_t>(191); break;
+	case 7: return static_cast<std::uint8_t>(127); break;
+	default: return static_cast<std::uint8_t>(255); break;			
 	}
 }
 
@@ -357,41 +305,15 @@ inline std::uint8_t welp::bit_flags<bits>::bitmask_true(std::size_t digits) cons
 {
 	switch (digits)
 	{
-
-	case 0:
-		return static_cast<std::uint8_t>(0);
-		break;
-
-	case 1:
-		return static_cast<std::uint8_t>(1);
-		break;
-
-	case 2:
-		return static_cast<std::uint8_t>(3);
-		break;
-
-	case 3:
-		return static_cast<std::uint8_t>(7);
-		break;
-
-	case 4:
-		return static_cast<std::uint8_t>(15);
-		break;
-
-	case 5:
-		return static_cast<std::uint8_t>(31);
-		break;
-
-	case 6:
-		return static_cast<std::uint8_t>(63);
-		break;
-
-	case 7:
-		return static_cast<std::uint8_t>(127);
-		break;
-
-	default:
-		return static_cast<std::uint8_t>(255);
+	case 0: return static_cast<std::uint8_t>(0); break;
+	case 1: return static_cast<std::uint8_t>(1); break;
+	case 2: return static_cast<std::uint8_t>(3); break;
+	case 3: return static_cast<std::uint8_t>(7); break;
+	case 4: return static_cast<std::uint8_t>(15); break;
+	case 5: return static_cast<std::uint8_t>(31); break;
+	case 6: return static_cast<std::uint8_t>(63); break;
+	case 7: return static_cast<std::uint8_t>(127); break;
+	default: return static_cast<std::uint8_t>(255); break;
 	}
 }
 
@@ -400,41 +322,15 @@ inline std::uint8_t welp::bit_flags<bits>::bitmask_false(std::size_t digits) con
 {
 	switch (digits)
 	{
-
-	case 0:
-		return static_cast<std::uint8_t>(255);
-		break;
-
-	case 1:
-		return static_cast<std::uint8_t>(254);
-		break;
-
-	case 2:
-		return static_cast<std::uint8_t>(252);
-		break;
-
-	case 3:
-		return static_cast<std::uint8_t>(248);
-		break;
-
-	case 4:
-		return static_cast<std::uint8_t>(240);
-		break;
-
-	case 5:
-		return static_cast<std::uint8_t>(224);
-		break;
-
-	case 6:
-		return static_cast<std::uint8_t>(192);
-		break;
-
-	case 7:
-		return static_cast<std::uint8_t>(128);
-		break;
-
-	default:
-		return static_cast<std::uint8_t>(0);
+	case 0: return static_cast<std::uint8_t>(255); break;
+	case 1: return static_cast<std::uint8_t>(254); break;
+	case 2: return static_cast<std::uint8_t>(252); break;
+	case 3: return static_cast<std::uint8_t>(248); break;
+	case 4: return static_cast<std::uint8_t>(240); break;
+	case 5: return static_cast<std::uint8_t>(224); break;
+	case 6: return static_cast<std::uint8_t>(192); break;
+	case 7: return static_cast<std::uint8_t>(128); break;
+	default: return static_cast<std::uint8_t>(0); break;
 	}
 }
 
