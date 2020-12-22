@@ -52,11 +52,11 @@ Bitwise operations and, or, xor, not of B1 with B2 (modifies B1).
 
 	A.as_bit_flags();
 
-Reinterprets any object A as bit flags reference of 8 * sizeof(A) bits.
+Reinterprets any object A as a bit flag reference of 8 * sizeof(A) bits.
 
 	A.as_bit_flags<n>();
 
-Reinterprets any object A as bit flags refence of n bits.
+Reinterprets any object A as a bit flag refence of n bits.
 
 ### Printing the bits
 
