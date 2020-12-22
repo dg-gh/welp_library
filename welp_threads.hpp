@@ -846,8 +846,8 @@ bool welp::threads<_Allocator>::new_threads(std::size_t input_number_of_threads,
 							return;
 						}
 					}
-					current_task_ptr->operator()();
 					unfinished_tasks.fetch_sub(1);
+					current_task_ptr->operator()();
 #ifdef WELP_THREADS_DEBUG_MODE
 					record_completed_task_count.fetch_add(1);
 #endif // WELP_THREADS_DEBUG_MODE
