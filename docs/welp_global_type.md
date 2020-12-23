@@ -1,6 +1,6 @@
 # welp_global_type.hpp
 
-welp_global_type.hpp provides a template class that wraps around a base class to make it unique, while preserving its interface. As an example, welp::global_type<base_type> has all the methods of base_type and has the same bits.
+welp_global_type.hpp provides a template class that wraps around a base class to make it unique and global, while preserving its interface. As an example, welp::global_type<base_type> has all the methods of base_type and has the same bits.
 
 Incoming ...
 
