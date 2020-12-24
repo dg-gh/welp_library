@@ -19,7 +19,7 @@
 #include <iostream>
 #ifdef WELP_THREADS_INCLUDE_FSTREAM
 #include <fstream>
-#endif //  WELP_THREADS_INCLUDE_FSTREAM
+#endif // WELP_THREADS_INCLUDE_FSTREAM
 #endif // WELP_THREADS_DEBUG_MODE
 
 #ifndef WELP_THREADS_RECORD_INT
