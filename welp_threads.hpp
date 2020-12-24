@@ -8,6 +8,13 @@
 
 ////// INCLUDES //////
 
+#ifdef WELP_THREADS_INCLUDE_ALL // include all in one line with #define WELP_THREADS_INCLUDE_ALL
+#ifndef WELP_THREADS_INCLUDE_FSTREAM
+#define WELP_THREADS_INCLUDE_FSTREAM
+#endif
+#endif // WELP_THREADS_INCLUDE_ALL
+
+
 #include <cstdlib>
 #include <thread>
 #include <mutex>
