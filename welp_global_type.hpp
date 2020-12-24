@@ -1,4 +1,4 @@
-// welp_global_type.hpp - last update : 15 / 12 / 2020
+// welp_global_type.hpp - last update : 24 / 12 / 2020
 // License <http://unlicense.org/> (statement below at the end of the file)
 
 
