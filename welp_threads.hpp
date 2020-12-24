@@ -1,4 +1,4 @@
-// welp_threads.hpp - last update : 22 / 12 / 2020
+// welp_threads.hpp - last update : 24 / 12 / 2020
 // License <http://unlicense.org/> (statement below at the end of the file)
 
 
@@ -854,7 +854,7 @@ bool welp::threads<_Allocator>::new_threads(std::size_t input_number_of_threads,
 					current_task_ptr->operator()();
 					unfinished_tasks.fetch_sub(1);
 #ifdef WELP_THREADS_DEBUG_MODE
-					record_completed_task_count.fetch_add(1);
+					if (record_on) { record_completed_task_count.fetch_add(1); }
 #endif // WELP_THREADS_DEBUG_MODE
 				}
 
