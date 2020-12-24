@@ -1,4 +1,4 @@
-// welp_multipool_resource.hpp - last update : 20 / 12 / 2020
+// welp_multipool_resource.hpp - last update : 24 / 12 / 2020
 // License <http://unlicense.org/> (statement below at the end of the file)
 
 
