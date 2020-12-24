@@ -12,6 +12,14 @@
 #include <cstdint>
 #include <cstring>
 
+
+#ifdef WELP_BIT_FLAGS_INCLUDE_ALL // include all in one line with #define WELP_BIT_FLAGS_INCLUDE_ALL
+#ifndef WELP_BIT_FLAGS_INCLUDE_IOSTREAM
+#define WELP_BIT_FLAGS_INCLUDE_IOSTREAM
+#endif
+#endif // WELP_BIT_FLAGS_INCLUDE_ALL
+
+
 #ifdef WELP_BIT_FLAGS_DEBUG_MODE
 #include <cassert>
 #endif // WELP_BIT_FLAGS_DEBUG_MODE
