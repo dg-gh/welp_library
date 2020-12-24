@@ -1,4 +1,4 @@
-// welp_chrono.hpp - last update : 12 / 12 / 2020
+// welp_chrono.hpp - last update : 24 / 12 / 2020
 // License <http://unlicense.org/> (statement below at the end of the file)
 
 
@@ -9,6 +9,14 @@
 ////// INCLUDES //////
 
 #include <chrono>
+
+
+#ifdef WELP_CHRONO_INCLUDE_ALL // include all in one line with #define WELP_CHRONO_INCLUDE_ALL
+#ifndef WELP_CHRONO_INCLUDE_IOSTREAM
+#define WELP_CHRONO_INCLUDE_IOSTREAM
+#endif
+#endif // WELP_CHRONO_INCLUDE_ALL
+
 
 #ifdef WELP_CHRONO_INCLUDE_IOSTREAM
 #include <iostream>
