@@ -1,4 +1,4 @@
-// welp_cyclic_resource.hpp - last update : 21 / 12 / 2020
+// welp_cyclic_resource.hpp - last update : 24 / 12 / 2020
 // License <http://unlicense.org/> (statement below at the end of the file)
 
 
@@ -9,6 +9,14 @@
 ////// INCLUDES //////
 
 #include <cstdlib>
+
+
+#ifdef WELP_CYCLIC_INCLUDE_ALL // include all in one line with #define WELP_CYCLIC_INCLUDE_ALL
+#ifndef WELP_CYCLIC_INCLUDE_FSTREAM
+#define WELP_CYCLIC_INCLUDE_FSTREAM
+#endif
+#endif // WELP_CYCLIC_INCLUDE_ALL
+
 
 #ifdef WELP_CYCLIC_DEBUG_MODE
 #include <iostream>
