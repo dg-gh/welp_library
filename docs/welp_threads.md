@@ -147,6 +147,14 @@ Same and displays message msg. Overloads can display up to 4 messages. Works if 
 
 ### Other methods of welp::threads< Allocator>
 
+	T.waiting_tasks();
+
+Returns the number of tasks waiting to be executed.
+
+	T.unfinished_tasks();
+
+Returns the number of tasks waiting to be executed or currently executing.
+
 	T.finish_all_tasks();
 	// can't continue there until every task is finished
 
