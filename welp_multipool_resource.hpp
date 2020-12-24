@@ -12,14 +12,6 @@
 #include <cstring>
 
 
-#ifdef WELP_MULTIPOOL_DEBUG_MODE
-#include <iostream>
-#ifdef WELP_MULTIPOOL_INCLUDE_FSTREAM
-#include <fstream>
-#endif //  WELP_MULTIPOOL_INCLUDE_FSTREAM
-#endif // WELP_MULTIPOOL_DEBUG_MODE
-
-
 #ifdef WELP_MULTIPOOL_INCLUDE_ALL // include all in one line with #define WELP_MULTIPOOL_INCLUDE_ALL
 
 #ifndef WELP_MULTIPOOL_INCLUDE_INITLIST
@@ -31,9 +23,19 @@
 #ifndef WELP_MULTIPOOL_INCLUDE_MUTEX
 #define WELP_MULTIPOOL_INCLUDE_MUTEX
 #endif
+#ifndef WELP_MULTIPOOL_INCLUDE_FSTREAM
+#define WELP_MULTIPOOL_INCLUDE_FSTREAM
+#endif
 
 #endif // WELP_MULTIPOOL_INCLUDE_ALL
 
+
+#ifdef WELP_MULTIPOOL_DEBUG_MODE
+#include <iostream>
+#ifdef WELP_MULTIPOOL_INCLUDE_FSTREAM
+#include <fstream>
+#endif //  WELP_MULTIPOOL_INCLUDE_FSTREAM
+#endif // WELP_MULTIPOOL_DEBUG_MODE
 
 #ifdef WELP_MULTIPOOL_INCLUDE_INITLIST
 #include <initializer_list>
