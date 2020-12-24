@@ -8,6 +8,13 @@
 
 ////// INCLUDES //////
 
+#ifdef WELP_LINK_NODE_INCLUDE_ALL // include all in one line with #define WELP_LINK_NODE_INCLUDE_ALL
+#ifndef WELP_LINK_NODE_INCLUDE_MUTEX
+#define WELP_LINK_NODE_INCLUDE_MUTEX
+#endif
+#endif // WELP_LINK_NODE_INCLUDE_ALL
+
+
 #include <cstdlib>
 #include <map>
 
