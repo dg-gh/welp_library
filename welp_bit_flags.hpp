@@ -1,4 +1,4 @@
-// welp_bit_flags.h - last update : 16 / 12 / 2020
+// welp_bit_flags.h - last update : 24 / 12 / 2020
 // License <http://unlicense.org/> (statement below at the end of the file)
 
 
