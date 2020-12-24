@@ -333,7 +333,8 @@ bool welp::threads<_Allocator>::async_task(const function_Ty& task, _Args&& ... 
 		if (record_on)
 		{
 			record_accepted_task_count++;
-			if (waiting_tasks.load() > record_max_occupancy.load()) { record_max_occupancy.store(waiting_tasks); }
+			std::size_t temp = waiting_tasks.load();
+			if (temp > record_max_occupancy.load()) { record_max_occupancy.store(temp); }
 		}
 #endif // WELP_THREADS_DEBUG_MODE
 		return true;
@@ -409,7 +410,8 @@ bool welp::threads<_Allocator>::priority_async_task(const function_Ty& task, _Ar
 		if (record_on)
 		{
 			record_accepted_task_count++;
-			if (waiting_tasks.load() > record_max_occupancy.load()) { record_max_occupancy.store(waiting_tasks); }
+			std::size_t temp = waiting_tasks.load();
+			if (temp > record_max_occupancy.load()) { record_max_occupancy.store(temp); }
 		}
 #endif // WELP_THREADS_DEBUG_MODE
 		return true;
@@ -482,7 +484,8 @@ bool welp::threads<_Allocator>::async_task(welp::async_task_end& package, const 
 		if (record_on)
 		{
 			record_accepted_task_count++;
-			if (waiting_tasks.load() > record_max_occupancy.load()) { record_max_occupancy.store(waiting_tasks); }
+			std::size_t temp = waiting_tasks.load();
+			if (temp > record_max_occupancy.load()) { record_max_occupancy.store(temp); }
 		}
 #endif // WELP_THREADS_DEBUG_MODE
 		return true;
@@ -565,7 +568,8 @@ bool welp::threads<_Allocator>::priority_async_task(welp::async_task_end& packag
 		if (record_on)
 		{
 			record_accepted_task_count++;
-			if (waiting_tasks.load() > record_max_occupancy.load()) { record_max_occupancy.store(waiting_tasks); }
+			std::size_t temp = waiting_tasks.load();
+			if (temp > record_max_occupancy.load()) { record_max_occupancy.store(temp); }
 		}
 #endif // WELP_THREADS_DEBUG_MODE
 		return true;
@@ -639,7 +643,8 @@ bool welp::threads<_Allocator>::async_task(welp::async_task_result<return_Ty>& p
 		if (record_on)
 		{
 			record_accepted_task_count++;
-			if (waiting_tasks.load() > record_max_occupancy.load()) { record_max_occupancy.store(waiting_tasks); }
+			std::size_t temp = waiting_tasks.load();
+			if (temp > record_max_occupancy.load()) { record_max_occupancy.store(temp); }
 		}
 #endif // WELP_THREADS_DEBUG_MODE
 		return true;
@@ -722,7 +727,8 @@ bool welp::threads<_Allocator>::priority_async_task(welp::async_task_result<retu
 		if (record_on)
 		{
 			record_accepted_task_count++;
-			if (waiting_tasks.load() > record_max_occupancy.load()) { record_max_occupancy.store(waiting_tasks); }
+			std::size_t temp = waiting_tasks.load();
+			if (temp > record_max_occupancy.load()) { record_max_occupancy.store(temp); }
 		}
 #endif // WELP_THREADS_DEBUG_MODE
 		return true;
@@ -1102,7 +1108,8 @@ bool welp::threads<_Allocator>::force_async_task_sub(const function_Ty& task, _A
 		if (record_on)
 		{
 			record_accepted_task_count++;
-			if (waiting_tasks.load() > record_max_occupancy.load()) { record_max_occupancy.store(waiting_tasks); }
+			std::size_t temp = waiting_tasks.load();
+			if (temp > record_max_occupancy.load()) { record_max_occupancy.store(temp); }
 		}
 #endif // WELP_THREADS_DEBUG_MODE
 		return true;
@@ -1153,7 +1160,8 @@ bool welp::threads<_Allocator>::force_priority_async_task_sub(const function_Ty&
 		if (record_on)
 		{
 			record_accepted_task_count++;
-			if (waiting_tasks.load() > record_max_occupancy.load()) { record_max_occupancy.store(waiting_tasks); }
+			std::size_t temp = waiting_tasks.load();
+			if (temp > record_max_occupancy.load()) { record_max_occupancy.store(temp); }
 		}
 #endif // WELP_THREADS_DEBUG_MODE
 		return true;
@@ -1200,7 +1208,8 @@ bool welp::threads<_Allocator>::force_async_task_sub(welp::async_task_end& packa
 		if (record_on)
 		{
 			record_accepted_task_count++;
-			if (waiting_tasks.load() > record_max_occupancy.load()) { record_max_occupancy.store(waiting_tasks); }
+			std::size_t temp = waiting_tasks.load();
+			if (temp > record_max_occupancy.load()) { record_max_occupancy.store(temp); }
 		}
 #endif // WELP_THREADS_DEBUG_MODE
 		return true;
@@ -1258,7 +1267,8 @@ bool welp::threads<_Allocator>::force_priority_async_task_sub(welp::async_task_e
 		if (record_on)
 		{
 			record_accepted_task_count++;
-			if (waiting_tasks.load() > record_max_occupancy.load()) { record_max_occupancy.store(waiting_tasks); }
+			std::size_t temp = waiting_tasks.load();
+			if (temp > record_max_occupancy.load()) { record_max_occupancy.store(temp); }
 		}
 #endif // WELP_THREADS_DEBUG_MODE
 		return true;
@@ -1306,7 +1316,8 @@ bool welp::threads<_Allocator>::force_async_task_sub(welp::async_task_result<ret
 		if (record_on)
 		{
 			record_accepted_task_count++;
-			if (waiting_tasks.load() > record_max_occupancy.load()) { record_max_occupancy.store(waiting_tasks); }
+			std::size_t temp = waiting_tasks.load();
+			if (temp > record_max_occupancy.load()) { record_max_occupancy.store(temp); }
 		}
 #endif // WELP_THREADS_DEBUG_MODE
 		return true;
@@ -1364,7 +1375,8 @@ bool welp::threads<_Allocator>::force_priority_async_task_sub(welp::async_task_r
 		if (record_on)
 		{
 			record_accepted_task_count++;
-			if (waiting_tasks.load() > record_max_occupancy.load()) { record_max_occupancy.store(waiting_tasks); }
+			std::size_t temp = waiting_tasks.load();
+			if (temp > record_max_occupancy.load()) { record_max_occupancy.store(temp); }
 		}
 #endif // WELP_THREADS_DEBUG_MODE
 		return true;
