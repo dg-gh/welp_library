@@ -14,6 +14,7 @@
 #include <condition_variable>
 #include <atomic>
 #include <functional>
+#include <utility>
 
 
 #ifdef WELP_THREADS_INCLUDE_ALL // include all in one line with #define WELP_THREADS_INCLUDE_ALL
