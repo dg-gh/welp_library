@@ -1,4 +1,4 @@
-// welp_bit_flags.h - last update : 24 / 12 / 2020
+// welp_bit_flags.h - last update : 25 / 12 / 2020
 // License <http://unlicense.org/> (statement below at the end of the file)
 
 
@@ -441,6 +441,118 @@ template <std::size_t bits> std::ostream& operator<<(std::ostream& out, const we
 	A.say(); return out;
 }
 #endif // WELP_BIT_FLAGS_INCLUDE_IOSTREAM
+
+namespace welp
+{
+	template <> class bit_flags<0>
+	{
+
+	public:
+
+		inline bool load(std::size_t offset) const noexcept
+		{
+			return (*(static_cast<const std::uint8_t*>(field) + (offset >> 3)) & shift_true(offset & 7)) != static_cast<std::uint8_t>(0);
+		}
+		inline welp::bit_flags<0>& store(std::size_t offset, bool flag) noexcept
+		{
+			if (flag)
+			{
+				*(static_cast<std::uint8_t*>(field) + (offset >> 3)) |= shift_true(offset & 7);
+				return *this;
+			}
+			else
+			{
+				*(static_cast<std::uint8_t*>(field) + (offset >> 3)) &= shift_false(offset & 7);
+				return *this;
+			}
+		}
+
+#ifdef WELP_BIT_FLAGS_INCLUDE_IOSTREAM
+		const welp::bit_flags<0>& say(std::size_t bits) const
+		{
+			std::cout << ">>>  bit 0 : " << load(0) << "\n";
+			for (std::size_t k = 1; k < bits; k++)
+			{
+				std::cout << "     bit " << k << " : " << load(k) << "\n";
+			}
+			std::cout << std::endl;
+			return *this;
+		}
+		welp::bit_flags<0>& say(std::size_t bits)
+		{
+			std::cout << ">>>  bit 0 : " << load(0) << "\n";
+			for (std::size_t k = 1; k < bits; k++)
+			{
+				std::cout << "     bit " << k << " : " << load(k) << "\n";
+			}
+			std::cout << std::endl;
+			return *this;
+		}
+		const welp::bit_flags<0>& say(std::size_t start_bit, std::size_t end_bit) const
+		{
+			std::cout << ">>>  bit  " << start_bit << " : " << load(start_bit) << "\n";
+			for (std::size_t k = start_bit + 1; k < end_bit; k++)
+			{
+				std::cout << "     bit " << k << " : " << load(k) << "\n";
+			}
+			std::cout << std::endl;
+			return *this;
+		}
+		welp::bit_flags<0>& say(std::size_t start_bit, std::size_t end_bit)
+		{
+			std::cout << ">>>  bit  " << start_bit << " : " << load(start_bit) << "\n";
+			for (std::size_t k = start_bit + 1; k < end_bit; k++)
+			{
+				std::cout << "     bit " << k << " : " << load(k) << "\n";
+			}
+			std::cout << std::endl;
+			return *this;
+		}
+#endif // WELP_BIT_FLAGS_INCLUDE_IOSTREAM
+
+		bit_flags() noexcept;
+		bit_flags(const welp::bit_flags<0>&) noexcept = default;
+		welp::bit_flags<0>& operator=(const welp::bit_flags<0>&) noexcept;
+		bit_flags(welp::bit_flags<0>&&) noexcept = default;
+		welp::bit_flags<0>& operator=(welp::bit_flags<0>&&) noexcept;
+		~bit_flags() = default;
+
+	private:
+
+		std::uint8_t field[1];
+
+		inline std::uint8_t shift_true(std::size_t offset) const noexcept
+		{
+			switch (offset)
+			{
+			case 0: return static_cast<std::uint8_t>(1); break;
+			case 1: return static_cast<std::uint8_t>(2); break;
+			case 2: return static_cast<std::uint8_t>(4); break;
+			case 3: return static_cast<std::uint8_t>(8); break;
+			case 4: return static_cast<std::uint8_t>(16); break;
+			case 5: return static_cast<std::uint8_t>(32); break;
+			case 6: return static_cast<std::uint8_t>(64); break;
+			case 7: return static_cast<std::uint8_t>(128); break;
+			default: return static_cast<std::uint8_t>(0); break;
+			}
+		}
+		inline std::uint8_t shift_false(std::size_t offset) const noexcept
+		{
+			switch (offset)
+			{
+			case 0: return static_cast<std::uint8_t>(254); break;
+			case 1: return static_cast<std::uint8_t>(253); break;
+			case 2: return static_cast<std::uint8_t>(251); break;
+			case 3: return static_cast<std::uint8_t>(247); break;
+			case 4: return static_cast<std::uint8_t>(239); break;
+			case 5: return static_cast<std::uint8_t>(223); break;
+			case 6: return static_cast<std::uint8_t>(191); break;
+			case 7: return static_cast<std::uint8_t>(127); break;
+			default: return static_cast<std::uint8_t>(255); break;
+			}
+		}
+	};
+}
 
 
 #endif // WELP_BIT_FLAGS_H
