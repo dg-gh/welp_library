@@ -476,7 +476,7 @@ namespace welp
 
 		// constructors and destructors
 
-		matrix();
+		matrix() noexcept = default;
 		// initializes the matrix with a given capacity
 		matrix(std::size_t new_capacity);
 		// initializes the matrix with a given numbers of rows and colums
@@ -488,10 +488,10 @@ namespace welp
 		matrix(std::size_t new_r, std::size_t new_c, std::initializer_list<Ty> L);
 #endif // WELP_MATRIX_INCLUDE_INITLIST
 
-		matrix(welp::matrix<Ty, _Allocator>& rhs) = default;
-		welp::matrix<Ty, _Allocator>& operator=(welp::matrix<Ty, _Allocator>& rhs) = default;
-		matrix(welp::matrix<Ty, _Allocator>&& rhs) = default;
-		welp::matrix<Ty, _Allocator>& operator=(welp::matrix<Ty, _Allocator>&& rhs) = default;
+		matrix(const welp::matrix<Ty, _Allocator>&) = default;
+		welp::matrix<Ty, _Allocator>& operator=(const welp::matrix<Ty, _Allocator>&) = default;
+		matrix(welp::matrix<Ty, _Allocator>&&) = default;
+		welp::matrix<Ty, _Allocator>& operator=(welp::matrix<Ty, _Allocator>&&) = default;
 
 		~matrix();
 
@@ -12846,7 +12846,6 @@ template <typename Ty, class _Allocator> void welp::_matrix_container<Ty, _Alloc
 
 // constructors and destructors
 
-template <typename Ty, class _Allocator> welp::matrix<Ty, _Allocator>::matrix() : welp::_matrix_container<Ty, _Allocator>() {}
 template <typename Ty, class _Allocator> welp::matrix<Ty, _Allocator>::matrix(std::size_t new_capacity) : welp::_matrix_container<Ty, _Allocator>(new_capacity) {}
 template <typename Ty, class _Allocator> welp::matrix<Ty, _Allocator>::matrix(std::size_t new_r, std::size_t new_c) : welp::_matrix_container<Ty, _Allocator>(new_r, new_c) {}
 template <typename Ty, class _Allocator> welp::matrix<Ty, _Allocator>::matrix(std::size_t new_r, std::size_t new_c, Ty x) : welp::_matrix_container<Ty, _Allocator>(new_r, new_c)
