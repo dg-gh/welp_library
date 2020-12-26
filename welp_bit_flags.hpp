@@ -511,10 +511,10 @@ namespace welp
 #endif // WELP_BIT_FLAGS_INCLUDE_IOSTREAM
 
 		bit_flags() = delete;
-		bit_flags(const welp::bit_flags<0>&) noexcept = default;
-		welp::bit_flags<0>& operator=(const welp::bit_flags<0>&) noexcept;
-		bit_flags(welp::bit_flags<0>&&) noexcept = default;
-		welp::bit_flags<0>& operator=(welp::bit_flags<0>&&) noexcept;
+		bit_flags(const welp::bit_flags<0>&) = delete;
+		welp::bit_flags<0>& operator=(const welp::bit_flags<0>&) = delete;
+		bit_flags(welp::bit_flags<0>&&) = delete;
+		welp::bit_flags<0>& operator=(welp::bit_flags<0>&&) = delete;
 		~bit_flags() = default;
 
 	private:
