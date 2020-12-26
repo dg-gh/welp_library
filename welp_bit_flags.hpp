@@ -36,6 +36,8 @@
 
 namespace welp
 {
+	// bits
+	
 	template <std::size_t bits> class bit_flags
 	{
 
@@ -101,10 +103,64 @@ namespace welp
 	template <class Ty> inline welp::bit_flags<8 * sizeof(Ty)>& as_bit_flags(Ty& rhs) noexcept;
 	template <std::size_t bits, class Ty> inline const welp::bit_flags<bits>& as_bit_flags(const Ty& rhs) noexcept;
 	template <std::size_t bits, class Ty> inline welp::bit_flags<bits>& as_bit_flags(Ty& rhs) noexcept;
+	
+	// bytes
+	
+	template <std::size_t bytes> class byte_flags
+	{
+
+	public:
+
+		inline char load(std::size_t byte_offset, bool upper_half_byte) const noexcept;
+		inline byte_flags<bytes>& store(std::size_t byte_offset, bool upper_half_byte, char hex) noexcept;
+
+		inline welp::byte_flags<bytes>& set(std::uint8_t number) noexcept;
+		inline welp::byte_flags<bytes>& set(char lower_half_byte, char upper_half_byte) noexcept;
+		template <class Ty> inline welp::byte_flags<bytes>& cpy(const Ty& rhs) noexcept;
+
+		inline const std::uint8_t& operator[](std::size_t offset) const noexcept;
+		inline std::uint8_t& operator[](std::size_t offset) noexcept;
+
+		inline const std::uint8_t* data() const noexcept;
+		inline std::uint8_t* data() noexcept;
+
+#ifdef WELP_BIT_FLAGS_INCLUDE_IOSTREAM
+		const welp::byte_flags<bytes>& say() const;
+		welp::byte_flags<bytes>& say();
+#endif // WELP_BIT_FLAGS_INCLUDE_IOSTREAM
+
+		byte_flags() = default;
+		byte_flags(const welp::byte_flags<bytes>&) noexcept = default;
+		welp::byte_flags<bytes>& operator=(const welp::byte_flags<bytes>&) noexcept = default;
+		byte_flags(welp::byte_flags<bytes>&&) noexcept = default;
+		welp::byte_flags<bytes>& operator=(welp::byte_flags<bytes>&&) noexcept = default;
+		~byte_flags() = default;
+
+		template <std::size_t bytes2>
+		friend inline bool operator==(const welp::byte_flags<bytes2>&, const welp::byte_flags<bytes2>&) noexcept;
+		template <std::size_t bytes2>
+		friend inline bool operator!=(const welp::byte_flags<bytes2>&, const welp::byte_flags<bytes2>&) noexcept;
+
+	private:
+
+		std::uint8_t field[bytes] = { static_cast<std::uint8_t>(0) };
+
+		inline std::uint8_t char_to_uint8_t(char hex) const noexcept;
+	};
+	
+	template <std::size_t bytes> inline bool operator==(const welp::byte_flags<bytes>& A, const welp::byte_flags<bytes>& B) noexcept;
+	template <std::size_t bytes> inline bool operator!=(const welp::byte_flags<bytes>& A, const welp::byte_flags<bytes>& B) noexcept;
+
+	template <class Ty> inline const welp::byte_flags<sizeof(Ty)>& as_byte_flags(const Ty& rhs) noexcept;
+	template <class Ty> inline welp::byte_flags<sizeof(Ty)>& as_byte_flags(Ty& rhs) noexcept;
+	template <std::size_t bytes, class Ty> inline const welp::byte_flags<bytes>& as_byte_flags(const Ty& rhs) noexcept;
+	template <std::size_t bytes, class Ty> inline welp::byte_flags<bytes>& as_byte_flags(Ty& rhs) noexcept;
 }
 
 
 ////// IMPLEMENTATIONS //////
+
+// bits
 
 template <std::size_t bits>
 inline bool welp::bit_flags<bits>::load(std::size_t bit_offset) const noexcept
@@ -549,6 +605,388 @@ namespace welp
 			case 6: return static_cast<std::uint8_t>(191); break;
 			case 7: return static_cast<std::uint8_t>(127); break;
 			default: return static_cast<std::uint8_t>(255); break;
+			}
+		}
+	};
+}
+
+// bytes
+
+template <std::size_t bytes>
+inline char welp::byte_flags<bytes>::load(std::size_t byte_offset, bool upper_half_byte) const noexcept
+{
+#ifdef WELP_BIT_FLAGS_DEBUG_MODE
+	assert(byte_offset < bytes);
+#endif // WELP_BIT_FLAGS_DEBUG_MODE
+	std::uint8_t temp = (upper_half_byte) ? (field[byte_offset] >> 4) : (field[byte_offset] & static_cast<std::uint8_t>(15));
+
+	switch (temp)
+	{
+	case 0: return '0'; break;
+	case 1: return '1'; break;
+	case 2: return '2'; break;
+	case 3: return '3'; break;
+	case 4: return '4'; break;
+	case 5: return '5'; break;
+	case 6: return '6'; break;
+	case 7: return '7'; break;
+	case 8: return '8'; break;
+	case 9: return '9'; break;
+
+	case 10: return 'A'; break;
+	case 11: return 'B'; break;
+	case 12: return 'C'; break;
+	case 13: return 'D'; break;
+	case 14: return 'E'; break;
+	case 15: return 'F'; break;
+
+	default: return '?'; break;
+	}
+}
+
+template <std::size_t bytes>
+inline welp::byte_flags<bytes>& welp::byte_flags<bytes>::store(std::size_t byte_offset, bool upper_half_byte, char hex) noexcept
+{
+#ifdef WELP_BIT_FLAGS_DEBUG_MODE
+	assert(byte_offset < bytes);
+#endif // WELP_BIT_FLAGS_DEBUG_MODE
+	std::uint8_t temp = char_to_uint8_t(hex);
+
+	if (upper_half_byte)
+	{
+		field[byte_offset] = (field[byte_offset] & static_cast<std::uint8_t>(240)) | (temp << 4);
+	}
+	else
+	{
+		field[byte_offset] = (field[byte_offset] & static_cast<std::uint8_t>(15)) | temp;
+	}
+
+	return *this;
+}
+
+template <std::size_t bytes>
+inline welp::byte_flags<bytes>& welp::byte_flags<bytes>::set(std::uint8_t number) noexcept
+{
+	for (std::size_t k = 0; k < bytes; k++)
+	{
+		field[k] = number;
+	}
+	return *this;
+}
+
+template <std::size_t bytes>
+inline welp::byte_flags<bytes>& welp::byte_flags<bytes>::set(char lower_half_byte, char upper_half_byte) noexcept
+{
+	std::uint8_t temp = char_to_uint8_t(lower_half_byte) | (char_to_uint8_t(upper_half_byte) << 4);
+
+	for (std::size_t k = 0; k < bytes; k++)
+	{
+		field[k] = temp;
+	}
+	return *this;
+}
+
+template <std::size_t bytes>
+template <class Ty> inline welp::byte_flags<bytes>& welp::byte_flags<bytes>::cpy(const Ty& rhs) noexcept
+{
+	std::memcpy(static_cast<std::uint8_t*>(field), &rhs, bytes);
+	return *this;
+}
+
+template <std::size_t bytes>
+inline const std::uint8_t& welp::byte_flags<bytes>::operator[](std::size_t offset) const noexcept
+{
+	return field[offset];
+}
+
+template <std::size_t bytes>
+inline std::uint8_t& welp::byte_flags<bytes>::operator[](std::size_t offset) noexcept
+{
+	return field[offset];
+}
+
+template <std::size_t bytes>
+inline const std::uint8_t* welp::byte_flags<bytes>::data() const noexcept
+{
+	return static_cast<const std::uint8_t*>(field);
+}
+
+template <std::size_t bytes>
+inline std::uint8_t* welp::byte_flags<bytes>::data() noexcept
+{
+	return static_cast<std::uint8_t*>(field);
+}
+
+
+#ifdef WELP_BIT_FLAGS_INCLUDE_IOSTREAM
+template <std::size_t bytes>
+const welp::byte_flags<bytes>& welp::byte_flags<bytes>::say() const
+{
+	std::cout << ">>>  byte 0 : " << load(0, false) << load(0, true)
+		<< "   (" << static_cast<unsigned int>(field[0]) << ")\n";
+	for (std::size_t k = 1; k < bytes; k++)
+	{
+		std::cout << "     byte " << k << " : " << load(k, false) << load(k, true)
+			<< "   (" << static_cast<unsigned int>(field[k]) << ")\n";
+	}
+	std::cout << std::endl;
+	return *this;
+}
+
+template <std::size_t bytes>
+welp::byte_flags<bytes>& welp::byte_flags<bytes>::say()
+{
+	std::cout << ">>>  byte 0 : " << load(0, false) << load(0, true)
+		<< "   (" << static_cast<unsigned int>(field[0]) << ")\n";
+	for (std::size_t k = 1; k < bytes; k++)
+	{
+		std::cout << "     byte " << k << " : " << load(k, false) << load(k, true)
+			<< "   (" << static_cast<unsigned int>(field[k]) << ")\n";
+	}
+	std::cout << std::endl;
+	return *this;
+}
+#endif // WELP_BIT_FLAGS_INCLUDE_IOSTREAM
+
+
+template <std::size_t bytes>
+inline std::uint8_t welp::byte_flags<bytes>::char_to_uint8_t(char hex) const noexcept
+{
+	switch (hex)
+	{
+	case '0': return static_cast<std::uint8_t>(0); break;
+	case '1': return static_cast<std::uint8_t>(1); break;
+	case '2': return static_cast<std::uint8_t>(2); break;
+	case '3': return static_cast<std::uint8_t>(3); break;
+	case '4': return static_cast<std::uint8_t>(4); break;
+	case '5': return static_cast<std::uint8_t>(5); break;
+	case '6': return static_cast<std::uint8_t>(6); break;
+	case '7': return static_cast<std::uint8_t>(7); break;
+	case '8': return static_cast<std::uint8_t>(8); break;
+	case '9': return static_cast<std::uint8_t>(9); break;
+
+	case 'A': return static_cast<std::uint8_t>(10); break;
+	case 'B': return static_cast<std::uint8_t>(11); break;
+	case 'C': return static_cast<std::uint8_t>(12); break;
+	case 'D': return static_cast<std::uint8_t>(13); break;
+	case 'E': return static_cast<std::uint8_t>(14); break;
+	case 'F': return static_cast<std::uint8_t>(15); break;
+
+	case 'a': return static_cast<std::uint8_t>(10); break;
+	case 'b': return static_cast<std::uint8_t>(11); break;
+	case 'c': return static_cast<std::uint8_t>(12); break;
+	case 'd': return static_cast<std::uint8_t>(13); break;
+	case 'e': return static_cast<std::uint8_t>(14); break;
+	case 'f': return static_cast<std::uint8_t>(15); break;
+
+	default: return static_cast<std::uint8_t>(0); break;
+	}
+}
+
+namespace welp
+{
+	template <std::size_t bytes> inline bool operator==(const welp::byte_flags<bytes>& A, const welp::byte_flags<bytes>& B) noexcept
+	{
+		for (std::size_t k = 0; k < bytes; k++)
+		{
+			if (A.field[k] != B.field[k]) { return false; }
+		}
+		return true;
+	}
+	template <std::size_t bytes> inline bool operator!=(const welp::byte_flags<bytes>& A, const welp::byte_flags<bytes>& B) noexcept
+	{
+		for (std::size_t k = 0; k < bytes; k++)
+		{
+			if (A.field[k] != B.field[k]) { return true; }
+		}
+		return false;
+	}
+
+	template <class Ty> inline const welp::byte_flags<sizeof(Ty)>& as_byte_flags(const Ty& rhs) noexcept
+	{
+		return reinterpret_cast<const welp::byte_flags<sizeof(Ty)>&>(rhs);
+	}
+	template <class Ty> inline welp::byte_flags<sizeof(Ty)>& as_byte_flags(Ty& rhs) noexcept
+	{
+		return reinterpret_cast<welp::byte_flags<sizeof(Ty)>&>(rhs);
+	}
+	template <std::size_t bytes, class Ty> inline const welp::byte_flags<bytes>& as_byte_flags(const Ty& rhs) noexcept
+	{
+		return reinterpret_cast<const welp::byte_flags<bytes>&>(rhs);
+	}
+	template <std::size_t bytes, class Ty> inline welp::byte_flags<bytes>& as_byte_flags(Ty& rhs) noexcept
+	{
+		return reinterpret_cast<welp::byte_flags<bytes>&>(rhs);
+	}
+}
+
+#ifdef WELP_BIT_FLAGS_INCLUDE_IOSTREAM
+template <std::size_t bytes> std::ostream& operator<<(std::ostream& out, const welp::byte_flags<bytes>& A)
+{
+	A.say(); return out;
+}
+#endif // WELP_BIT_FLAGS_INCLUDE_IOSTREAM
+
+namespace welp
+{
+	template <> class byte_flags<0>
+	{
+
+	public:
+
+		inline char load(std::size_t byte_offset, bool upper_half_byte) const noexcept
+		{
+			std::uint8_t temp = (upper_half_byte) ? (field[byte_offset] >> 4) : (field[byte_offset] & static_cast<std::uint8_t>(15));
+
+			switch (temp)
+			{
+			case 0: return '0'; break;
+			case 1: return '1'; break;
+			case 2: return '2'; break;
+			case 3: return '3'; break;
+			case 4: return '4'; break;
+			case 5: return '5'; break;
+			case 6: return '6'; break;
+			case 7: return '7'; break;
+			case 8: return '8'; break;
+			case 9: return '9'; break;
+
+			case 10: return 'A'; break;
+			case 11: return 'B'; break;
+			case 12: return 'C'; break;
+			case 13: return 'D'; break;
+			case 14: return 'E'; break;
+			case 15: return 'F'; break;
+
+			default: return '?'; break;
+			}
+		}
+		inline byte_flags<0>& store(std::size_t byte_offset, bool upper_half_byte, char hex) noexcept
+		{
+			std::uint8_t temp = char_to_uint8_t(hex);
+
+			if (upper_half_byte)
+			{
+				field[byte_offset] = (field[byte_offset] & static_cast<std::uint8_t>(240)) | (temp << 4);
+			}
+			else
+			{
+				field[byte_offset] = (field[byte_offset] & static_cast<std::uint8_t>(15)) | temp;
+			}
+
+			return *this;
+		}
+
+#ifdef WELP_BIT_FLAGS_INCLUDE_IOSTREAM
+		const welp::byte_flags<0>& say(std::size_t bytes) const
+		{
+			std::cout << ">>>  byte 0 : " << load(0, false) << load(0, true)
+				<< "   (" << static_cast<unsigned int>(field[0]) << ")\n";
+			for (std::size_t k = 1; k < bytes; k++)
+			{
+				std::cout << "     byte " << k << " : " << load(k, false) << load(k, true)
+					<< "   (" << static_cast<unsigned int>(field[k]) << ")\n";
+			}
+			std::cout << std::endl;
+			return *this;
+		}
+		welp::byte_flags<0>& say(std::size_t bytes)
+		{
+			std::cout << ">>>  byte 0 : " << load(0, false) << load(0, true)
+				<< "   (" << static_cast<unsigned int>(field[0]) << ")\n";
+			for (std::size_t k = 1; k < bytes; k++)
+			{
+				std::cout << "     byte " << k << " : " << load(k, false) << load(k, true)
+					<< "   (" << static_cast<unsigned int>(field[k]) << ")\n";
+			}
+			std::cout << std::endl;
+			return *this;
+		}
+		const welp::byte_flags<0>& say(std::size_t start_byte, std::size_t end_byte) const
+		{
+			std::cout << ">>>  byte " << start_byte << " : " << load(start_byte, false) << load(start_byte, true)
+				<< "   (" << static_cast<unsigned int>(field[start_byte]) << ")\n";
+			for (std::size_t k = start_byte + 1; k < end_byte; k++)
+			{
+				std::cout << "     byte " << k << " : " << load(k, false) << load(k, true)
+					<< "   (" << static_cast<unsigned int>(field[k]) << ")\n";
+			}
+			std::cout << std::endl;
+			return *this;
+		}
+		welp::byte_flags<0>& say(std::size_t start_byte, std::size_t end_byte)
+		{
+			std::cout << ">>>  byte " << start_byte << " : " << load(start_byte, false) << load(start_byte, true)
+				<< "   (" << static_cast<unsigned int>(field[start_byte]) << ")\n";
+			for (std::size_t k = start_byte + 1; k < end_byte; k++)
+			{
+				std::cout << "     byte " << k << " : " << load(k, false) << load(k, true)
+					<< "   (" << static_cast<unsigned int>(field[k]) << ")\n";
+			}
+			std::cout << std::endl;
+			return *this;
+		}
+#endif // WELP_BIT_FLAGS_INCLUDE_IOSTREAM
+
+		inline const std::uint8_t& operator[](std::size_t offset) const noexcept
+		{
+			return *(static_cast<const std::uint8_t*>(field) + offset);
+		}
+		inline std::uint8_t& operator[](std::size_t offset) noexcept
+		{
+			return *(static_cast<std::uint8_t*>(field) + offset);
+		}
+
+		inline const std::uint8_t* data() const noexcept
+		{
+			return static_cast<const std::uint8_t*>(field);
+		}
+		inline std::uint8_t* data() noexcept
+		{
+			return static_cast<std::uint8_t*>(field);
+		}
+
+		byte_flags() = delete;
+		byte_flags(const welp::byte_flags<0>&) = delete;
+		welp::byte_flags<0>& operator=(const welp::byte_flags<0>&) = delete;
+		byte_flags(welp::byte_flags<0>&&) = delete;
+		welp::byte_flags<0>& operator=(welp::byte_flags<0>&&) = delete;
+		~byte_flags() = default;
+
+	private:
+
+		std::uint8_t field[1];
+
+		inline std::uint8_t char_to_uint8_t(char hex) const noexcept
+		{
+			switch (hex)
+			{
+			case '0': return static_cast<std::uint8_t>(0); break;
+			case '1': return static_cast<std::uint8_t>(1); break;
+			case '2': return static_cast<std::uint8_t>(2); break;
+			case '3': return static_cast<std::uint8_t>(3); break;
+			case '4': return static_cast<std::uint8_t>(4); break;
+			case '5': return static_cast<std::uint8_t>(5); break;
+			case '6': return static_cast<std::uint8_t>(6); break;
+			case '7': return static_cast<std::uint8_t>(7); break;
+			case '8': return static_cast<std::uint8_t>(8); break;
+			case '9': return static_cast<std::uint8_t>(9); break;
+
+			case 'A': return static_cast<std::uint8_t>(10); break;
+			case 'B': return static_cast<std::uint8_t>(11); break;
+			case 'C': return static_cast<std::uint8_t>(12); break;
+			case 'D': return static_cast<std::uint8_t>(13); break;
+			case 'E': return static_cast<std::uint8_t>(14); break;
+			case 'F': return static_cast<std::uint8_t>(15); break;
+
+			case 'a': return static_cast<std::uint8_t>(10); break;
+			case 'b': return static_cast<std::uint8_t>(11); break;
+			case 'c': return static_cast<std::uint8_t>(12); break;
+			case 'd': return static_cast<std::uint8_t>(13); break;
+			case 'e': return static_cast<std::uint8_t>(14); break;
+			case 'f': return static_cast<std::uint8_t>(15); break;
+
+			default: return static_cast<std::uint8_t>(0); break;
 			}
 		}
 	};
