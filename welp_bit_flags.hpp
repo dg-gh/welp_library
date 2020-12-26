@@ -41,8 +41,8 @@ namespace welp
 
 	public:
 
-		inline bool load(std::size_t offset) const noexcept;
-		inline welp::bit_flags<bits>& store(std::size_t offset, bool flag) noexcept;
+		inline bool load(std::size_t bit_offset) const noexcept;
+		inline welp::bit_flags<bits>& store(std::size_t bit_offset, bool flag) noexcept;
 
 		inline welp::bit_flags<bits>& set(bool flag) noexcept;
 		template <class Ty> inline welp::bit_flags<bits>& cpy(const Ty& rhs) noexcept;
@@ -83,8 +83,8 @@ namespace welp
 
 		std::uint8_t field[(bits + ((8 - (bits & 7)) & 7)) >> 3];
 
-		inline std::uint8_t shift_true(std::size_t offset) const noexcept;
-		inline std::uint8_t shift_false(std::size_t offset) const noexcept;
+		inline std::uint8_t shift_true(std::size_t bit_offset) const noexcept;
+		inline std::uint8_t shift_false(std::size_t bit_offset) const noexcept;
 		inline std::uint8_t bitmask_true(std::size_t digits) const noexcept;
 		inline std::uint8_t bitmask_false(std::size_t digits) const noexcept;
 	};
@@ -107,28 +107,28 @@ namespace welp
 ////// IMPLEMENTATIONS //////
 
 template <std::size_t bits>
-inline bool welp::bit_flags<bits>::load(std::size_t offset) const noexcept
+inline bool welp::bit_flags<bits>::load(std::size_t bit_offset) const noexcept
 {
 #ifdef WELP_BIT_FLAGS_DEBUG_MODE
-	assert(offset < bits);
+	assert(bit_offset < bits);
 #endif // WELP_BIT_FLAGS_DEBUG_MODE
-	return (field[offset >> 3] & shift_true(offset & 7)) != static_cast<std::uint8_t>(0);
+	return (field[bit_offset >> 3] & shift_true(bit_offset & 7)) != static_cast<std::uint8_t>(0);
 }
 
 template <std::size_t bits>
-inline welp::bit_flags<bits>& welp::bit_flags<bits>::store(std::size_t offset, bool flag) noexcept
+inline welp::bit_flags<bits>& welp::bit_flags<bits>::store(std::size_t bit_offset, bool flag) noexcept
 {
 #ifdef WELP_BIT_FLAGS_DEBUG_MODE
-	assert(offset < bits);
+	assert(bit_offset < bits);
 #endif // WELP_BIT_FLAGS_DEBUG_MODE
 	if (flag)
 	{
-		field[offset >> 3] |= shift_true(offset & 7);
+		field[bit_offset >> 3] |= shift_true(bit_offset & 7);
 		return *this;
 	}
 	else
 	{
-		field[offset >> 3] &= shift_false(offset & 7);
+		field[bit_offset >> 3] &= shift_false(bit_offset & 7);
 		return *this;
 	}
 }
@@ -279,9 +279,9 @@ inline welp::bit_flags<bits>& welp::bit_flags<bits>::operator=(welp::bit_flags<b
 
 
 template <std::size_t bits>
-inline std::uint8_t welp::bit_flags<bits>::shift_true(std::size_t offset) const noexcept
+inline std::uint8_t welp::bit_flags<bits>::shift_true(std::size_t bit_offset) const noexcept
 {
-	switch (offset)
+	switch (bit_offset)
 	{
 	case 0: return static_cast<std::uint8_t>(1); break;
 	case 1: return static_cast<std::uint8_t>(2); break;
@@ -296,9 +296,9 @@ inline std::uint8_t welp::bit_flags<bits>::shift_true(std::size_t offset) const 
 }
 
 template <std::size_t bits>
-inline std::uint8_t welp::bit_flags<bits>::shift_false(std::size_t offset) const noexcept
+inline std::uint8_t welp::bit_flags<bits>::shift_false(std::size_t bit_offset) const noexcept
 {
-	switch (offset)
+	switch (bit_offset)
 	{		
 	case 0: return static_cast<std::uint8_t>(254); break;
 	case 1: return static_cast<std::uint8_t>(253); break;
@@ -449,20 +449,20 @@ namespace welp
 
 	public:
 
-		inline bool load(std::size_t offset) const noexcept
+		inline bool load(std::size_t bit_offset) const noexcept
 		{
-			return (*(static_cast<const std::uint8_t*>(field) + (offset >> 3)) & shift_true(offset & 7)) != static_cast<std::uint8_t>(0);
+			return (*(static_cast<const std::uint8_t*>(field) + (bit_offset >> 3)) & shift_true(bit_offset & 7)) != static_cast<std::uint8_t>(0);
 		}
-		inline welp::bit_flags<0>& store(std::size_t offset, bool flag) noexcept
+		inline welp::bit_flags<0>& store(std::size_t bit_offset, bool flag) noexcept
 		{
 			if (flag)
 			{
-				*(static_cast<std::uint8_t*>(field) + (offset >> 3)) |= shift_true(offset & 7);
+				*(static_cast<std::uint8_t*>(field) + (bit_offset >> 3)) |= shift_true(bit_offset & 7);
 				return *this;
 			}
 			else
 			{
-				*(static_cast<std::uint8_t*>(field) + (offset >> 3)) &= shift_false(offset & 7);
+				*(static_cast<std::uint8_t*>(field) + (bit_offset >> 3)) &= shift_false(bit_offset & 7);
 				return *this;
 			}
 		}
@@ -521,9 +521,9 @@ namespace welp
 
 		std::uint8_t field[1];
 
-		inline std::uint8_t shift_true(std::size_t offset) const noexcept
+		inline std::uint8_t shift_true(std::size_t bit_offset) const noexcept
 		{
-			switch (offset)
+			switch (bit_offset)
 			{
 			case 0: return static_cast<std::uint8_t>(1); break;
 			case 1: return static_cast<std::uint8_t>(2); break;
@@ -536,9 +536,9 @@ namespace welp
 			default: return static_cast<std::uint8_t>(0); break;
 			}
 		}
-		inline std::uint8_t shift_false(std::size_t offset) const noexcept
+		inline std::uint8_t shift_false(std::size_t bit_offset) const noexcept
 		{
-			switch (offset)
+			switch (bit_offset)
 			{
 			case 0: return static_cast<std::uint8_t>(254); break;
 			case 1: return static_cast<std::uint8_t>(253); break;
