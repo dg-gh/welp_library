@@ -2625,6 +2625,10 @@ inline void* welp::quadpool_resource::allocate_byte_in_pool(std::size_t bytes, s
 			return nullptr;
 		}
 	}
+#ifdef WELP_MULTIPOOL_DEBUG_MODE
+	if (record_on) { record_failed_allocations++; }
+#endif // WELP_MULTIPOOL_DEBUG_MODE
+	return nullptr;
 }
 
 
