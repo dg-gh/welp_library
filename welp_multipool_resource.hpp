@@ -578,6 +578,10 @@ template <class Ty> inline Ty* welp::multipool_resource<max_number_of_pools, sub
 			return nullptr;
 		}
 	}
+#ifdef WELP_MULTIPOOL_DEBUG_MODE
+	if (record_on) { record_failed_allocations++; }
+#endif // WELP_MULTIPOOL_DEBUG_MODE
+	return nullptr;
 }
 
 
@@ -1603,6 +1607,10 @@ template <class Ty> inline Ty* welp::multipool_resource_sync<max_number_of_pools
 			return nullptr;
 		}
 	}
+#ifdef WELP_MULTIPOOL_DEBUG_MODE
+	if (record_on) { record_failed_allocations++; }
+#endif // WELP_MULTIPOOL_DEBUG_MODE
+	return nullptr;
 }
 
 
