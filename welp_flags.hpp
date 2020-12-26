@@ -128,6 +128,8 @@ namespace welp
 		
 		inline const welp::bit_flags<8 * bytes>& as_bit_flags() const noexcept;
 		inline welp::bit_flags<8 * bytes>& as_bit_flags() noexcept;
+		template <std::size_t bits = 8> inline const welp::bit_flags<bits>& as_bit_flags(std::size_t byte_offset) const noexcept;
+		template <std::size_t bits = 8> inline welp::bit_flags<bits>& as_bit_flags(std::size_t byte_offset) noexcept;
 
 #ifdef WELP_FLAGS_INCLUDE_IOSTREAM
 		const welp::byte_flags<bytes>& say() const;
@@ -737,6 +739,24 @@ inline welp::bit_flags<8 * bytes>& welp::byte_flags<bytes>::as_bit_flags() noexc
 	return reinterpret_cast<welp::bit_flags<8 * bytes>&>(*this);
 }
 
+template <std::size_t bytes> template <std::size_t bits>
+inline const welp::bit_flags<bits>& welp::byte_flags<bytes>::as_bit_flags(std::size_t byte_offset) const noexcept
+{
+#ifdef WELP_FLAGS_DEBUG_MODE
+	assert(8 * byte_offset + bits <= 8 * bytes);
+#endif // WELP_FLAGS_DEBUG_MODE
+	return reinterpret_cast<const welp::bit_flags<bits>&>(field[byte_offset]);
+}
+
+template <std::size_t bytes> template <std::size_t bits>
+inline welp::bit_flags<bits>& welp::byte_flags<bytes>::as_bit_flags(std::size_t byte_offset) noexcept
+{
+#ifdef WELP_FLAGS_DEBUG_MODE
+	assert(8 * byte_offset + bits <= 8 * bytes);
+#endif // WELP_FLAGS_DEBUG_MODE
+	return reinterpret_cast<welp::bit_flags<bits>&>(field[byte_offset]);
+}
+
 
 #ifdef WELP_FLAGS_INCLUDE_IOSTREAM
 template <std::size_t bytes>
@@ -975,6 +995,17 @@ namespace welp
 		inline welp::bit_flags<0>& as_bit_flags() noexcept
 		{
 			return reinterpret_cast<welp::bit_flags<0>&>(*this);
+		}
+		
+		template <std::size_t bits>
+		inline const welp::bit_flags<bits>& as_bit_flags(std::size_t byte_offset) const noexcept
+		{
+			return reinterpret_cast<const welp::bit_flags<bits>&>(*(static_cast<const std::uint8_t*>(field) + byte_offset));
+		}
+		template <std::size_t bits>
+		inline welp::bit_flags<bits>& as_bit_flags(std::size_t byte_offset) noexcept
+		{
+			return reinterpret_cast<welp::bit_flags<bits>&>(*(static_cast<std::uint8_t*>(field) + byte_offset));
 		}
 
 		byte_flags() = delete;
