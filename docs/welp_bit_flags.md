@@ -1,6 +1,6 @@
-# welp_bit_flags.hpp
+# welp_flags.hpp
 
-welp_bit_flags.hpp provides one class :
+welp_flags.hpp provides one class :
 
 - welp::bit_flags<number_of_bits> is a class that can store n booleans packed as 8 booleas per byte.
 
