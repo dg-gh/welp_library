@@ -63,7 +63,7 @@ Reinterprets any object A as a bit flags reference of 8 * sizeof(A) bits.
 
 	welp::as_bit_flags<n>(A);
 
-Reinterprets any object A as a bit flags refence of n bits.
+Reinterprets any object A as a bit flags reference of n bits.
 
 ### Reinterpret as bytes
 
@@ -73,4 +73,4 @@ Reinterprets any object A as a byte flags reference of sizeof(A) bytes.
 
 	welp::as_byte_flags<n>(A);
 
-Reinterprets any object A as a byte flags refence of n bytes.
+Reinterprets any object A as a byte flags reference of n bytes.
