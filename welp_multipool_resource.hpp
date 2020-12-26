@@ -795,6 +795,10 @@ inline void* welp::multipool_resource<max_number_of_pools, sub_allocator>::alloc
 			return nullptr;
 		}
 	}
+#ifdef WELP_MULTIPOOL_DEBUG_MODE
+	if (record_on) { record_failed_allocations++; }
+#endif // WELP_MULTIPOOL_DEBUG_MODE
+	return nullptr;
 }
 
 
@@ -1826,6 +1830,10 @@ inline void* welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::
 			return nullptr;
 		}
 	}
+#ifdef WELP_MULTIPOOL_DEBUG_MODE
+	if (record_on) { record_failed_allocations++; }
+#endif // WELP_MULTIPOOL_DEBUG_MODE
+	return nullptr;
 }
 
 
