@@ -491,12 +491,14 @@ namespace welp
 	}
 }
 
+
 #ifdef WELP_BIT_FLAGS_INCLUDE_IOSTREAM
 template <std::size_t bits> std::ostream& operator<<(std::ostream& out, const welp::bit_flags<bits>& A)
 {
 	A.say(); return out;
 }
 #endif // WELP_BIT_FLAGS_INCLUDE_IOSTREAM
+
 
 namespace welp
 {
@@ -609,6 +611,7 @@ namespace welp
 		}
 	};
 }
+
 
 // bytes
 
@@ -820,12 +823,14 @@ namespace welp
 	}
 }
 
+
 #ifdef WELP_BIT_FLAGS_INCLUDE_IOSTREAM
 template <std::size_t bytes> std::ostream& operator<<(std::ostream& out, const welp::byte_flags<bytes>& A)
 {
 	A.say(); return out;
 }
 #endif // WELP_BIT_FLAGS_INCLUDE_IOSTREAM
+
 
 namespace welp
 {
