@@ -3194,7 +3194,7 @@ void welp::quadpool_resource::record_write(const char* const filename, const cha
 }
 
 
-void welp::quadpool_resource::record_write(const char* const filename, const const char* const msg1,
+void welp::quadpool_resource::record_write(const char* const filename, const char* const msg1,
 	const char* const msg2, const char* const msg3)
 {
 	std::ofstream rec_write;
