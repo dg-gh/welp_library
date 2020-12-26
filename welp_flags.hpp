@@ -1,9 +1,9 @@
-// welp_bit_flags.h - last update : 26 / 12 / 2020
+// welp_flags.h - last update : 26 / 12 / 2020
 // License <http://unlicense.org/> (statement below at the end of the file)
 
 
-#ifndef WELP_BIT_FLAGS_H
-#define WELP_BIT_FLAGS_H
+#ifndef WELP_FLAGS_H
+#define WELP_FLAGS_H
 
 
 ////// INCLUDES //////
@@ -13,23 +13,23 @@
 #include <cstring>
 
 
-#ifdef WELP_BIT_FLAGS_INCLUDE_ALL // include all in one line with #define WELP_BIT_FLAGS_INCLUDE_ALL
-#ifndef WELP_BIT_FLAGS_INCLUDE_IOSTREAM
-#define WELP_BIT_FLAGS_INCLUDE_IOSTREAM
+#ifdef WELP_FLAGS_INCLUDE_ALL // include all in one line with #define WELP_FLAGS_INCLUDE_ALL
+#ifndef WELP_FLAGS_INCLUDE_IOSTREAM
+#define WELP_FLAGS_INCLUDE_IOSTREAM
 #endif
-#endif // WELP_BIT_FLAGS_INCLUDE_ALL
+#endif // WELP_FLAGS_INCLUDE_ALL
 
 
-#ifdef WELP_BIT_FLAGS_DEBUG_MODE
+#ifdef WELP_FLAGS_DEBUG_MODE
 #include <cassert>
-#ifndef WELP_BIT_FLAGS_INCLUDE_IOSTREAM
-#define WELP_BIT_FLAGS_INCLUDE_IOSTREAM
+#ifndef WELP_FLAGS_INCLUDE_IOSTREAM
+#define WELP_FLAGS_INCLUDE_IOSTREAM
 #endif
-#endif // WELP_BIT_FLAGS_DEBUG_MODE
+#endif // WELP_FLAGS_DEBUG_MODE
 
-#ifdef WELP_BIT_FLAGS_INCLUDE_IOSTREAM
+#ifdef WELP_FLAGS_INCLUDE_IOSTREAM
 #include <iostream>
-#endif // WELP_BIT_FLAGS_INCLUDE_IOSTREAM
+#endif // WELP_FLAGS_INCLUDE_IOSTREAM
 
 
 ////// DESCRIPTIONS //////
@@ -37,7 +37,7 @@
 namespace welp
 {
 	// bits
-	
+
 	template <std::size_t bits> class bit_flags
 	{
 
@@ -56,10 +56,10 @@ namespace welp
 
 		constexpr std::size_t size() const noexcept { return bits; }
 
-#ifdef WELP_BIT_FLAGS_INCLUDE_IOSTREAM
+#ifdef WELP_FLAGS_INCLUDE_IOSTREAM
 		const welp::bit_flags<bits>& say() const;
 		welp::bit_flags<bits>& say();
-#endif // WELP_BIT_FLAGS_INCLUDE_IOSTREAM
+#endif // WELP_FLAGS_INCLUDE_IOSTREAM
 
 		bit_flags() noexcept;
 		bit_flags(const welp::bit_flags<bits>&) noexcept = default;
@@ -103,9 +103,9 @@ namespace welp
 	template <class Ty> inline welp::bit_flags<8 * sizeof(Ty)>& as_bit_flags(Ty& rhs) noexcept;
 	template <std::size_t bits, class Ty> inline const welp::bit_flags<bits>& as_bit_flags(const Ty& rhs) noexcept;
 	template <std::size_t bits, class Ty> inline welp::bit_flags<bits>& as_bit_flags(Ty& rhs) noexcept;
-	
+
 	// bytes
-	
+
 	template <std::size_t bytes> class byte_flags
 	{
 
@@ -124,10 +124,10 @@ namespace welp
 		inline const std::uint8_t* data() const noexcept;
 		inline std::uint8_t* data() noexcept;
 
-#ifdef WELP_BIT_FLAGS_INCLUDE_IOSTREAM
+#ifdef WELP_FLAGS_INCLUDE_IOSTREAM
 		const welp::byte_flags<bytes>& say() const;
 		welp::byte_flags<bytes>& say();
-#endif // WELP_BIT_FLAGS_INCLUDE_IOSTREAM
+#endif // WELP_FLAGS_INCLUDE_IOSTREAM
 
 		byte_flags() = default;
 		byte_flags(const welp::byte_flags<bytes>&) noexcept = default;
@@ -147,7 +147,7 @@ namespace welp
 
 		inline std::uint8_t char_to_uint8_t(char hex) const noexcept;
 	};
-	
+
 	template <std::size_t bytes> inline bool operator==(const welp::byte_flags<bytes>& A, const welp::byte_flags<bytes>& B) noexcept;
 	template <std::size_t bytes> inline bool operator!=(const welp::byte_flags<bytes>& A, const welp::byte_flags<bytes>& B) noexcept;
 
@@ -165,18 +165,18 @@ namespace welp
 template <std::size_t bits>
 inline bool welp::bit_flags<bits>::load(std::size_t bit_offset) const noexcept
 {
-#ifdef WELP_BIT_FLAGS_DEBUG_MODE
+#ifdef WELP_FLAGS_DEBUG_MODE
 	assert(bit_offset < bits);
-#endif // WELP_BIT_FLAGS_DEBUG_MODE
+#endif // WELP_FLAGS_DEBUG_MODE
 	return (field[bit_offset >> 3] & shift_true(bit_offset & 7)) != static_cast<std::uint8_t>(0);
 }
 
 template <std::size_t bits>
 inline welp::bit_flags<bits>& welp::bit_flags<bits>::store(std::size_t bit_offset, bool flag) noexcept
 {
-#ifdef WELP_BIT_FLAGS_DEBUG_MODE
+#ifdef WELP_FLAGS_DEBUG_MODE
 	assert(bit_offset < bits);
-#endif // WELP_BIT_FLAGS_DEBUG_MODE
+#endif // WELP_FLAGS_DEBUG_MODE
 	if (flag)
 	{
 		field[bit_offset >> 3] |= shift_true(bit_offset & 7);
@@ -275,7 +275,7 @@ inline welp::bit_flags<bits>& welp::bit_flags<bits>::flip() noexcept
 }
 
 
-#ifdef WELP_BIT_FLAGS_INCLUDE_IOSTREAM
+#ifdef WELP_FLAGS_INCLUDE_IOSTREAM
 template <std::size_t bits>
 const welp::bit_flags<bits>& welp::bit_flags<bits>::say() const
 {
@@ -299,7 +299,7 @@ welp::bit_flags<bits>& welp::bit_flags<bits>::say()
 	std::cout << std::endl;
 	return *this;
 }
-#endif // WELP_BIT_FLAGS_INCLUDE_IOSTREAM
+#endif // WELP_FLAGS_INCLUDE_IOSTREAM
 
 
 template <std::size_t bits>
@@ -355,7 +355,7 @@ template <std::size_t bits>
 inline std::uint8_t welp::bit_flags<bits>::shift_false(std::size_t bit_offset) const noexcept
 {
 	switch (bit_offset)
-	{		
+	{
 	case 0: return static_cast<std::uint8_t>(254); break;
 	case 1: return static_cast<std::uint8_t>(253); break;
 	case 2: return static_cast<std::uint8_t>(251); break;
@@ -364,7 +364,7 @@ inline std::uint8_t welp::bit_flags<bits>::shift_false(std::size_t bit_offset) c
 	case 5: return static_cast<std::uint8_t>(223); break;
 	case 6: return static_cast<std::uint8_t>(191); break;
 	case 7: return static_cast<std::uint8_t>(127); break;
-	default: return static_cast<std::uint8_t>(255); break;			
+	default: return static_cast<std::uint8_t>(255); break;
 	}
 }
 
@@ -492,12 +492,12 @@ namespace welp
 }
 
 
-#ifdef WELP_BIT_FLAGS_INCLUDE_IOSTREAM
+#ifdef WELP_FLAGS_INCLUDE_IOSTREAM
 template <std::size_t bits> std::ostream& operator<<(std::ostream& out, const welp::bit_flags<bits>& A)
 {
 	A.say(); return out;
 }
-#endif // WELP_BIT_FLAGS_INCLUDE_IOSTREAM
+#endif // WELP_FLAGS_INCLUDE_IOSTREAM
 
 
 namespace welp
@@ -525,7 +525,7 @@ namespace welp
 			}
 		}
 
-#ifdef WELP_BIT_FLAGS_INCLUDE_IOSTREAM
+#ifdef WELP_FLAGS_INCLUDE_IOSTREAM
 		const welp::bit_flags<0>& say(std::size_t bits) const
 		{
 			std::cout << ">>>  bit 0 : " << load(0) << "\n";
@@ -566,7 +566,7 @@ namespace welp
 			std::cout << std::endl;
 			return *this;
 		}
-#endif // WELP_BIT_FLAGS_INCLUDE_IOSTREAM
+#endif // WELP_FLAGS_INCLUDE_IOSTREAM
 
 		bit_flags() = delete;
 		bit_flags(const welp::bit_flags<0>&) = delete;
@@ -618,9 +618,9 @@ namespace welp
 template <std::size_t bytes>
 inline char welp::byte_flags<bytes>::load(std::size_t byte_offset, bool upper_half_byte) const noexcept
 {
-#ifdef WELP_BIT_FLAGS_DEBUG_MODE
+#ifdef WELP_FLAGS_DEBUG_MODE
 	assert(byte_offset < bytes);
-#endif // WELP_BIT_FLAGS_DEBUG_MODE
+#endif // WELP_FLAGS_DEBUG_MODE
 	std::uint8_t temp = (upper_half_byte) ? (field[byte_offset] >> 4) : (field[byte_offset] & static_cast<std::uint8_t>(15));
 
 	switch (temp)
@@ -650,9 +650,9 @@ inline char welp::byte_flags<bytes>::load(std::size_t byte_offset, bool upper_ha
 template <std::size_t bytes>
 inline welp::byte_flags<bytes>& welp::byte_flags<bytes>::store(std::size_t byte_offset, bool upper_half_byte, char hex) noexcept
 {
-#ifdef WELP_BIT_FLAGS_DEBUG_MODE
+#ifdef WELP_FLAGS_DEBUG_MODE
 	assert(byte_offset < bytes);
-#endif // WELP_BIT_FLAGS_DEBUG_MODE
+#endif // WELP_FLAGS_DEBUG_MODE
 	std::uint8_t temp = char_to_uint8_t(hex);
 
 	if (upper_half_byte)
@@ -721,7 +721,7 @@ inline std::uint8_t* welp::byte_flags<bytes>::data() noexcept
 }
 
 
-#ifdef WELP_BIT_FLAGS_INCLUDE_IOSTREAM
+#ifdef WELP_FLAGS_INCLUDE_IOSTREAM
 template <std::size_t bytes>
 const welp::byte_flags<bytes>& welp::byte_flags<bytes>::say() const
 {
@@ -749,7 +749,7 @@ welp::byte_flags<bytes>& welp::byte_flags<bytes>::say()
 	std::cout << std::endl;
 	return *this;
 }
-#endif // WELP_BIT_FLAGS_INCLUDE_IOSTREAM
+#endif // WELP_FLAGS_INCLUDE_IOSTREAM
 
 
 template <std::size_t bytes>
@@ -824,12 +824,12 @@ namespace welp
 }
 
 
-#ifdef WELP_BIT_FLAGS_INCLUDE_IOSTREAM
+#ifdef WELP_FLAGS_INCLUDE_IOSTREAM
 template <std::size_t bytes> std::ostream& operator<<(std::ostream& out, const welp::byte_flags<bytes>& A)
 {
 	A.say(); return out;
 }
-#endif // WELP_BIT_FLAGS_INCLUDE_IOSTREAM
+#endif // WELP_FLAGS_INCLUDE_IOSTREAM
 
 
 namespace welp
@@ -882,7 +882,7 @@ namespace welp
 			return *this;
 		}
 
-#ifdef WELP_BIT_FLAGS_INCLUDE_IOSTREAM
+#ifdef WELP_FLAGS_INCLUDE_IOSTREAM
 		const welp::byte_flags<0>& say(std::size_t bytes) const
 		{
 			std::cout << ">>>  byte 0 : " << load(0, false) << load(0, true)
@@ -931,7 +931,7 @@ namespace welp
 			std::cout << std::endl;
 			return *this;
 		}
-#endif // WELP_BIT_FLAGS_INCLUDE_IOSTREAM
+#endif // WELP_FLAGS_INCLUDE_IOSTREAM
 
 		inline const std::uint8_t& operator[](std::size_t offset) const noexcept
 		{
@@ -998,10 +998,10 @@ namespace welp
 }
 
 
-#endif // WELP_BIT_FLAGS_H
+#endif // WELP_FLAGS_H
 
 
-// welp_bit_flags.hpp
+// welp_flags.hpp
 // 
 // This is free software released into the public domain.
 // 
