@@ -1,8 +1,9 @@
 # welp_flags.hpp
 
-welp_flags.hpp provides one class :
+welp_flags.hpp provides two classes :
 
 - welp::bit_flags<number_of_bits> is a class that can store n booleans packed as 8 booleas per byte.
+- welp::byte_flags<number_of_bytes> is a class that can store n uint8_t.
 
 # Member functions of welp::bit_flags<number_of_bits> B
 
@@ -50,18 +51,26 @@ Bitwise operations and, or, xor, not of B1 with B2 (modifies B1).
 
 Bitwise operations and, or, xor, not of B1 with B2 (return new objects).
 
-### Reinterpret as bits
-
-	A.as_bit_flags();
-
-Reinterprets any object A as a bit flag reference of 8 * sizeof(A) bits.
-
-	A.as_bit_flags<n>();
-
-Reinterprets any object A as a bit flag refence of n bits.
-
-### Printing the bits
-
 	B.say(); 
 
 Prints the bits of B. Requires the macro WELP_BIT_FLAGS_INCLUDE_IOSTREAM to be defined.
+
+### Reinterpret as bits
+
+	welp::as_bit_flags(A);
+
+Reinterprets any object A as a bit flags reference of 8 * sizeof(A) bits.
+
+	welp::as_bit_flags<n>(A);
+
+Reinterprets any object A as a bit flags refence of n bits.
+
+### Reinterpret as bytes
+
+	welp::as_byte_flags(A);
+
+Reinterprets any object A as a byte flags reference of sizeof(A) bytes.
+
+	welp::as_byte_flags<n>(A);
+
+Reinterprets any object A as a byte flags refence of n bytes.
