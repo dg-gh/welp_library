@@ -123,6 +123,8 @@ namespace welp
 
 		inline const std::uint8_t* data() const noexcept;
 		inline std::uint8_t* data() noexcept;
+		
+		constexpr std::size_t size() const noexcept { return bytes; }
 
 #ifdef WELP_FLAGS_INCLUDE_IOSTREAM
 		const welp::byte_flags<bytes>& say() const;
