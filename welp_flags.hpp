@@ -125,6 +125,9 @@ namespace welp
 		inline std::uint8_t* data() noexcept;
 		
 		constexpr std::size_t size() const noexcept { return bytes; }
+		
+		inline const welp::bit_flags<8 * bytes>& as_bit_flags() const noexcept;
+		inline welp::bit_flags<8 * bytes>& as_bit_flags() noexcept;
 
 #ifdef WELP_FLAGS_INCLUDE_IOSTREAM
 		const welp::byte_flags<bytes>& say() const;
@@ -722,6 +725,18 @@ inline std::uint8_t* welp::byte_flags<bytes>::data() noexcept
 	return static_cast<std::uint8_t*>(field);
 }
 
+template <std::size_t bytes>
+inline const welp::bit_flags<8 * bytes>& welp::byte_flags<bytes>::as_bit_flags() const noexcept
+{
+	return reinterpret_cast<const welp::bit_flags<8 * bytes>&>(*this);
+}
+
+template <std::size_t bytes>
+inline welp::bit_flags<8 * bytes>& welp::byte_flags<bytes>::as_bit_flags() noexcept
+{
+	return reinterpret_cast<welp::bit_flags<8 * bytes>&>(*this);
+}
+
 
 #ifdef WELP_FLAGS_INCLUDE_IOSTREAM
 template <std::size_t bytes>
@@ -951,6 +966,15 @@ namespace welp
 		inline std::uint8_t* data() noexcept
 		{
 			return static_cast<std::uint8_t*>(field);
+		}
+		
+		inline const welp::bit_flags<0>& as_bit_flags() const noexcept
+		{
+			return reinterpret_cast<const welp::bit_flags<0>&>(*this);
+		}
+		inline welp::bit_flags<0>& as_bit_flags() noexcept
+		{
+			return reinterpret_cast<welp::bit_flags<0>&>(*this);
 		}
 
 		byte_flags() = delete;
