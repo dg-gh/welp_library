@@ -12,7 +12,8 @@
 #include <cstring>
 
 
-#ifdef WELP_MULTIPOOL_INCLUDE_ALL // include all in one line with #define WELP_MULTIPOOL_INCLUDE_ALL
+// include all in one line with #define WELP_MULTIPOOL_INCLUDE_ALL
+#if defined(WELP_MULTIPOOL_INCLUDE_ALL) || defined(WELP_ALWAYS_INCLUDE_ALL)
 
 #ifndef WELP_MULTIPOOL_INCLUDE_INITLIST
 #define WELP_MULTIPOOL_INCLUDE_INITLIST
