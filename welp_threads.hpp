@@ -25,7 +25,7 @@
 #endif // WELP_THREADS_INCLUDE_ALL
 
 
-#ifdef WELP_THREADS_DEBUG_MODE
+#if defined(WELP_THREADS_DEBUG_MODE) || defined(WELP_ALWAYS_DEBUG_MODE)
 #include <iostream>
 #ifdef WELP_THREADS_INCLUDE_FSTREAM
 #include <fstream>
