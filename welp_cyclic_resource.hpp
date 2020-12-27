@@ -11,7 +11,8 @@
 #include <cstdlib>
 
 
-#ifdef WELP_CYCLIC_INCLUDE_ALL // include all in one line with #define WELP_CYCLIC_INCLUDE_ALL
+ // include all in one line with #define WELP_CYCLIC_INCLUDE_ALL
+#if defined(WELP_CYCLIC_INCLUDE_ALL) || defined(WELP_ALWAYS_INCLUDE_ALL)
 #ifndef WELP_CYCLIC_INCLUDE_FSTREAM
 #define WELP_CYCLIC_INCLUDE_FSTREAM
 #endif
