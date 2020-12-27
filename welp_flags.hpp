@@ -76,6 +76,11 @@ namespace welp
 			bool flag4, bool flag5, bool flag6, bool flag7) noexcept;
 		inline welp::flags<bits>& set_bytes(char lower_hex, char upper_hex) noexcept;
 		inline welp::flags<bits>& set_bytes(std::uint8_t number) noexcept;
+		
+		constexpr std::uint8_t* begin() noexcept { return static_cast<std::uint8_t*>(field); }
+		constexpr const std::uint8_t* cbegin() const noexcept { return static_cast<const std::uint8_t*>(field); }
+		constexpr std::uint8_t* end() noexcept { return static_cast<std::uint8_t*>(field) + ((bits + ((8 - (bits & 7)) & 7)) >> 3); }
+		constexpr const std::uint8_t* cend() const noexcept { return static_cast<const std::uint8_t*>(field) + ((bits + ((8 - (bits & 7)) & 7)) >> 3); }
 
 		template <class Ty> inline welp::flags<bits>& cpy(const Ty& rhs) noexcept;
 
