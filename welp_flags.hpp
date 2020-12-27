@@ -577,7 +577,10 @@ welp::flags<bits>::flags() noexcept
 	constexpr std::size_t bytes = bits >> 3;
 	constexpr std::size_t remainder_bits = bits & 7;
 	std::memset(static_cast<std::uint8_t*>(field), static_cast<std::uint8_t>(0), bytes);
-	field[bytes] &= bitmask_false(remainder_bits);
+	if (remainder_bits != 0)
+	{
+		*(static_cast<std::uint8_t*>(field) + bytes) &= bitmask_false(remainder_bits);
+	}
 }
 
 template <std::size_t bits>
@@ -586,8 +589,11 @@ inline welp::flags<bits>& welp::flags<bits>::operator=(const welp::flags<bits>& 
 	constexpr std::size_t bytes = bits >> 3;
 	constexpr std::size_t remainder_bits = bits & 7;
 	std::memcpy(static_cast<std::uint8_t*>(field), static_cast<const std::uint8_t*>(rhs.field), bytes);
-	field[bytes] &= bitmask_false(remainder_bits);
-	field[bytes] |= (rhs.field[bytes] & bitmask_true(remainder_bits));
+	if (remainder_bits != 0)
+	{
+		*(static_cast<std::uint8_t*>(field) + bytes) &= bitmask_false(remainder_bits);
+		*(static_cast<std::uint8_t*>(field) + bytes) & bitmask_true(remainder_bits));
+	}
 	return *this;
 }
 
@@ -597,8 +603,11 @@ inline welp::flags<bits>& welp::flags<bits>::operator=(welp::flags<bits>&& rhs) 
 	constexpr std::size_t bytes = bits >> 3;
 	constexpr std::size_t remainder_bits = bits & 7;
 	std::memcpy(static_cast<std::uint8_t*>(field), static_cast<const std::uint8_t*>(rhs.field), bytes);
-	field[bytes] &= bitmask_false(remainder_bits);
-	field[bytes] |= (rhs.field[bytes] & bitmask_true(remainder_bits));
+	if (remainder_bits != 0)
+	{
+		*(static_cast<std::uint8_t*>(field) + bytes) &= bitmask_false(remainder_bits);
+		*(static_cast<std::uint8_t*>(field) + bytes) |= (rhs.field[bytes] & bitmask_true(remainder_bits));
+	}
 	return *this;
 }
 
