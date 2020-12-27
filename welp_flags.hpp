@@ -669,11 +669,11 @@ inline welp::byte_flags<bytes>& welp::byte_flags<bytes>::store(std::size_t byte_
 
 	if (upper_half_byte)
 	{
-		field[byte_offset] = (field[byte_offset] & static_cast<std::uint8_t>(240)) | (temp << 4);
+		field[byte_offset] = (field[byte_offset] & static_cast<std::uint8_t>(15)) | (temp << 4);
 	}
 	else
 	{
-		field[byte_offset] = (field[byte_offset] & static_cast<std::uint8_t>(15)) | temp;
+		field[byte_offset] = (field[byte_offset] & static_cast<std::uint8_t>(240)) | temp;
 	}
 
 	return *this;
