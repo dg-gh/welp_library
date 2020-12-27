@@ -12,7 +12,8 @@
 #include <memory>
 
 
-#ifdef WELP_GLOBAL_TYPE_INCLUDE_ALL // include all in one line with #define WELP_GLOBAL_TYPE_INCLUDE_ALL
+// include all in one line with #define WELP_GLOBAL_TYPE_INCLUDE_ALL
+#if defined(WELP_GLOBAL_TYPE_INCLUDE_ALL) || defined(WELP_ALWAYS_INCLUDE_ALL)
 #ifndef WELP_GLOBAL_TYPE_INCLUDE_MUTEX
 #define WELP_GLOBAL_TYPE_INCLUDE_MUTEX
 #endif
