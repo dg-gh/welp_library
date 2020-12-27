@@ -766,9 +766,12 @@ namespace welp
 		{
 			if (A.field[k] != B.field[k]) { return false; }
 		}
-
-		std::uint8_t bitmask = A.bitmask_true(remainder_bits);
-		if ((A.field[bytes] & bitmask) != (B.field[bytes] & bitmask)) { return false; }
+		if (remainder_bits != 0)
+		{
+			std::uint8_t bitmask = A.bitmask_true(remainder_bits);
+			if ((A.field[bytes] & bitmask) != (B.field[bytes] & bitmask)) { return false; }
+			else { return true; }
+		}
 		else { return true; }
 	}
 	template <std::size_t bits> inline bool operator!=(const welp::flags<bits>& A, const welp::flags<bits>& B) noexcept
@@ -779,9 +782,12 @@ namespace welp
 		{
 			if (A.field[k] != B.field[k]) { return true; }
 		}
-
-		std::uint8_t bitmask = A.bitmask_true(remainder_bits);
-		if ((A.field[bytes] & bitmask) != (B.field[bytes] & bitmask)) { return true; }
+		if (remainder_bits != 0)
+		{
+			std::uint8_t bitmask = A.bitmask_true(remainder_bits);
+			if ((A.field[bytes] & bitmask) != (B.field[bytes] & bitmask)) { return true; }
+			else { return true; }
+		}
 		else { return true; }
 	}
 
