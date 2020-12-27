@@ -57,7 +57,7 @@ namespace welp
 		inline flags<bits>& store_hex(std::size_t byte_offset, bool upper_half_byte, char hex) noexcept;
 
 		inline std::uint8_t load_byte(std::size_t byte_offset) const noexcept;
-		inline flags<bits>& store_byte(std::size_t byte_offset, std::uint8_t value) noexcept;
+		inline flags<bits>& store_byte(std::size_t byte_offset, std::uint8_t number) noexcept;
 		inline const std::uint8_t& operator[](std::size_t byte_offset) const noexcept;
 		inline std::uint8_t& operator[](std::size_t byte_offset) noexcept;
 
@@ -277,12 +277,12 @@ inline std::uint8_t welp::flags<bits>::load_byte(std::size_t byte_offset) const 
 }
 
 template <std::size_t bits>
-inline welp::flags<bits>& welp::flags<bits>::store_byte(std::size_t byte_offset, std::uint8_t value) noexcept
+inline welp::flags<bits>& welp::flags<bits>::store_byte(std::size_t byte_offset, std::uint8_t number) noexcept
 {
 #ifdef WELP_FLAGS_DEBUG_MODE
 	assert(8 * byte_offset < bits);
 #endif // WELP_FLAGS_DEBUG_MODE
-	field[byte_offset] = value;
+	field[byte_offset] = number;
 	return *this;
 }
 
@@ -393,16 +393,16 @@ template <std::size_t bits>
 inline welp::flags<bits>& welp::flags<bits>::set_bytes(char lower_hex, char upper_hex) noexcept
 {
 	constexpr std::size_t bytes = bits >> 3;
-	std::uint8_t value = char_to_uint8_t(lower_hex) | (char_to_uint8_t(upper_hex) << 4);
-	std::memset(static_cast<std::uint8_t*>(field), value, bytes);
+	std::uint8_t number = char_to_uint8_t(lower_hex) | (char_to_uint8_t(upper_hex) << 4);
+	std::memset(static_cast<std::uint8_t*>(field), number, bytes);
 	return *this;
 }
 
 template <std::size_t bits>
-inline welp::flags<bits>& welp::flags<bits>::set_bytes(std::uint8_t value) noexcept
+inline welp::flags<bits>& welp::flags<bits>::set_bytes(std::uint8_t number) noexcept
 {
 	constexpr std::size_t bytes = bits >> 3;
-	std::memset(static_cast<std::uint8_t*>(field), value, bytes);
+	std::memset(static_cast<std::uint8_t*>(field), number, bytes);
 	return *this;
 }
 
@@ -930,9 +930,9 @@ namespace welp
 		{
 			return *(static_cast<const std::uint8_t*>(field) + byte_offset);
 		}
-		inline welp::flags<0>& store_byte(std::size_t byte_offset, std::uint8_t value) noexcept
+		inline welp::flags<0>& store_byte(std::size_t byte_offset, std::uint8_t number) noexcept
 		{
-			*(static_cast<std::uint8_t*>(field) + byte_offset) = value;
+			*(static_cast<std::uint8_t*>(field) + byte_offset) = number;
 			return *this;
 		}
 		inline const std::uint8_t& operator[](std::size_t byte_offset) const noexcept
