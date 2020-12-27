@@ -19,7 +19,7 @@
 #endif // WELP_CYCLIC_INCLUDE_ALL
 
 
-#ifdef WELP_CYCLIC_DEBUG_MODE
+#if defined(WELP_CYCLIC_DEBUG_MODE) || defined(WELP_ALWAYS_DEBUG_MODE)
 #include <iostream>
 #ifdef WELP_CYCLIC_INCLUDE_FSTREAM
 #include <fstream>
