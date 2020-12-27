@@ -1087,7 +1087,8 @@ namespace welp
 			for (std::size_t k = start_hex + 1; k < end_hex; k++)
 			{
 				std::cout << "     hex " << k << "  >  " << load_hex(k)
-					<< " :: " << load_bit(4 * k) << load_bit(4 * k + 1) << load_bit(4 * k + 2) << load_bit(4 * k + 3) << "\n";
+					<< " :: " << load_bit(4 * k) << load_bit(4 * k + 1)
+					<< load_bit(4 * k + 2) << load_bit(4 * k + 3) << "\n";
 			}
 		}
 		void say_bytes_sub(std::size_t start_byte, std::size_t end_byte) const
@@ -1100,8 +1101,8 @@ namespace welp
 			{
 				std::cout << "     byte " << k << "  >  " << static_cast<unsigned int>(load_byte(k))
 					<< " :: " << load_hex(k, false) << load_hex(k, true)
-					<< " :: " << load_bit(k, 0) << load_bit(k, 1) << load_bit(k, 2) << load_bit(k, 3) << load_bit(k, 4)
-					<< load_bit(k, 5) << load_bit(k, 6) << load_bit(k, 7) << "\n";
+					<< " :: " << load_bit(k, 0) << load_bit(k, 1) << load_bit(k, 2) << load_bit(k, 3)
+					<< load_bit(k, 4) << load_bit(k, 5) << load_bit(k, 6) << load_bit(k, 7) << "\n";
 			}
 			std::cout << std::endl;
 		}
