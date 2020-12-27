@@ -20,3 +20,12 @@ Every file contains its own mandatory includes and can include more with some pr
 To avoid typing one macro per file to include every option possible, the following macro before all the inclusions can achieve full includes all at once :
 
 	#define WELP_ALWAYS_INCLUDE_ALL
+
+Every file welp_name.hpp can have its own debug mode (if available) activated with the following macro :
+
+	#define WELP_NAME_DEBUG_MODE
+	#include "welp_name.hpp"
+
+To avoid typing one macro per file to activate the debug mode, the following macro before all the inclusions can be used :
+
+	#define WELP_ALWAYS_DEBUG_MODE
