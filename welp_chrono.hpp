@@ -11,7 +11,8 @@
 #include <chrono>
 
 
-#ifdef WELP_CHRONO_INCLUDE_ALL // include all in one line with #define WELP_CHRONO_INCLUDE_ALL
+// include all in one line with #define WELP_CHRONO_INCLUDE_ALL
+#if defined(WELP_CHRONO_INCLUDE_ALL) || defined(WELP_ALWAYS_INCLUDE_ALL)
 #ifndef WELP_CHRONO_INCLUDE_IOSTREAM
 #define WELP_CHRONO_INCLUDE_IOSTREAM
 #endif
