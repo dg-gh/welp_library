@@ -25,7 +25,8 @@
 #endif // WELP_MATRIX_AVX_EXT
 
 
-#ifdef WELP_MATRIX_INCLUDE_ALL // include all in one line with #define WELP_MATRIX_INCLUDE_ALL
+// include all in one line with #define WELP_MATRIX_INCLUDE_ALL
+#if defined(WELP_MATRIX_INCLUDE_ALL) || defined(WELP_ALWAYS_INCLUDE_ALL)
 
 #ifndef WELP_MATRIX_INCLUDE_FUNCTIONAL
 #define WELP_MATRIX_INCLUDE_FUNCTIONAL
