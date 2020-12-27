@@ -12,14 +12,6 @@
 #include <cmath>
 
 
-#ifdef WELP_MATRIX_DEBUG_MODE
-#include <cassert>
-#ifndef WELP_MATRIX_INCLUDE_IOSTREAM
-#define WELP_MATRIX_INCLUDE_IOSTREAM
-#endif // WELP_MATRIX_INCLUDE_IOSTREAM
-#endif // WELP_MATRIX_DEBUG_MODE
-
-
 #ifdef WELP_MATRIX_AVX_EXT
 #include <immintrin.h>
 #endif // WELP_MATRIX_AVX_EXT
@@ -51,6 +43,14 @@
 #endif
 
 #endif // WELP_MATRIX_INCLUDE_ALL
+
+
+#ifdef WELP_MATRIX_DEBUG_MODE
+#include <cassert>
+#ifndef WELP_MATRIX_INCLUDE_IOSTREAM
+#define WELP_MATRIX_INCLUDE_IOSTREAM
+#endif // WELP_MATRIX_INCLUDE_IOSTREAM
+#endif // WELP_MATRIX_DEBUG_MODE
 
 
 #ifdef WELP_MATRIX_INCLUDE_FUNCTIONAL
