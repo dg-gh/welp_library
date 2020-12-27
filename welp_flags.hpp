@@ -12,8 +12,8 @@
 #include <cstdint>
 #include <cstring>
 
-
-#ifdef WELP_FLAGS_INCLUDE_ALL // include all in one line with #define WELP_FLAGS_INCLUDE_ALL
+// include all in one line with #define WELP_FLAGS_INCLUDE_ALL
+#if defined(WELP_FLAGS_INCLUDE_ALL) || defined(WELP_ALWAYS_INCLUDE_ALL)
 #ifndef WELP_FLAGS_INCLUDE_IOSTREAM
 #define WELP_FLAGS_INCLUDE_IOSTREAM
 #endif
