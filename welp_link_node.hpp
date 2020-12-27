@@ -12,7 +12,8 @@
 #include <map>
 
 
-#ifdef WELP_LINK_NODE_INCLUDE_ALL // include all in one line with #define WELP_LINK_NODE_INCLUDE_ALL
+// include all in one line with #define WELP_LINK_NODE_INCLUDE_ALL
+#if defined(WELP_LINK_NODE_INCLUDE_ALL) || defined(WELP_ALWAYS_INCLUDE_ALL)
 #ifndef WELP_LINK_NODE_INCLUDE_MUTEX
 #define WELP_LINK_NODE_INCLUDE_MUTEX
 #endif
