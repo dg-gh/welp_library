@@ -17,7 +17,8 @@
 #include <utility>
 
 
-#ifdef WELP_THREADS_INCLUDE_ALL // include all in one line with #define WELP_THREADS_INCLUDE_ALL
+// include all in one line with #define WELP_THREADS_INCLUDE_ALL
+#if defined(WELP_THREADS_INCLUDE_ALL) || defined(WELP_ALWAYS_INCLUDE_ALL)
 #ifndef WELP_THREADS_INCLUDE_FSTREAM
 #define WELP_THREADS_INCLUDE_FSTREAM
 #endif
