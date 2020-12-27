@@ -12,6 +12,7 @@ Depedency free single-header files all under the Unlicense license that could be
 - **welp_threads.hpp** : Provide a thread pool that avoids std::future, std::result_of, std::invoke_result, and can avoid dynamic allocations if the functions launched as asynchronous tasks don't take too many arguments by using a fixed buffer for tasks. It can queue tasks at the end or the beginning of the waiting line depending on the desired level of priority.
 - **welp_timer.hpp** : Provides classes for scheduling timings.
 
+### Optional includes and debug mode
 Every file contains its own mandatory includes and can include more with some preprocessor macros to unlock additional options. However, for every file welp_name.hpp, the macro WELP_NAME_INCLUDE_ALL will include all the necessary headers (those without hardware specifics) at once to unlock all the possible options. A full include would be done like this :
 
 	#define WELP_NAME_INCLUDE_ALL
