@@ -63,8 +63,8 @@ namespace welp
 		inline const std::uint8_t& operator[](std::size_t byte_offset) const noexcept;
 		inline std::uint8_t& operator[](std::size_t byte_offset) noexcept;
 
-		inline const std::uint8_t* data() const noexcept;
-		inline std::uint8_t* data() noexcept;
+		constexpr const std::uint8_t* data() const noexcept { return static_cast<const std::uint8_t*>(field); }
+		constexpr std::uint8_t* data() noexcept { return static_cast<std::uint8_t*>(field); }
 
 
 		// member functions below are unavailable when template parameter bits == 0
@@ -326,19 +326,6 @@ inline std::uint8_t& welp::flags<bits>::operator[](std::size_t byte_offset) noex
 	assert(8 * byte_offset < bits);
 #endif // WELP_FLAGS_DEBUG_MODE
 	return field[byte_offset];
-}
-
-
-template <std::size_t bits>
-inline const std::uint8_t* welp::flags<bits>::data() const noexcept
-{
-	return static_cast<const std::uint8_t*>(field);
-}
-
-template <std::size_t bits>
-inline std::uint8_t* welp::flags<bits>::data() noexcept
-{
-	return static_cast<std::uint8_t*>(field);
 }
 
 
@@ -1040,14 +1027,8 @@ namespace welp
 			return *(static_cast<std::uint8_t*>(field) + byte_offset);
 		}
 
-		inline const std::uint8_t* data() const noexcept
-		{
-			return static_cast<const std::uint8_t*>(field);
-		}
-		inline std::uint8_t* data() noexcept
-		{
-			return static_cast<std::uint8_t*>(field);
-		}
+		constexpr const std::uint8_t* data() const noexcept { return static_cast<const std::uint8_t*>(field); }
+		constexpr std::uint8_t* data() noexcept { return static_cast<std::uint8_t*>(field); }
 
 #ifdef WELP_FLAGS_INCLUDE_IOSTREAM
 		const welp::flags<0>& say_bits(std::size_t bits) const { say_bits_sub(0, bits); return *this; }
