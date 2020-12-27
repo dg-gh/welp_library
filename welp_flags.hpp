@@ -69,14 +69,14 @@ namespace welp
 
 		// member functions below are unavailable when template parameter bits == 0
 
-		inline welp::flags<bits>& set_bits(bool flag) noexcept;
-		inline welp::flags<bits>& set_hex(bool flag0, bool flag1, bool flag2, bool flag3) noexcept;
+		inline welp::flags<bits>& set_bits(bool bit) noexcept;
+		inline welp::flags<bits>& set_hex(bool bit3, bool bit2, bool bit1, bool bit0) noexcept;
 		inline welp::flags<bits>& set_hex(char hex) noexcept;
-		inline welp::flags<bits>& set_bytes(bool flag0, bool flag1, bool flag2, bool flag3,
-			bool flag4, bool flag5, bool flag6, bool flag7) noexcept;
-		inline welp::flags<bits>& set_bytes(char lower_hex, char upper_hex) noexcept;
+		inline welp::flags<bits>& set_bytes(bool bit7, bool bit6, bool bit5, bool bit4,
+			bool bit3, bool bit2, bool bit1, bool bit0) noexcept;
+		inline welp::flags<bits>& set_bytes(char upper_hex, char lower_hex) noexcept;
 		inline welp::flags<bits>& set_bytes(std::uint8_t number) noexcept;
-		
+
 		constexpr std::uint8_t* begin() noexcept { return static_cast<std::uint8_t*>(field); }
 		constexpr const std::uint8_t* cbegin() const noexcept { return static_cast<const std::uint8_t*>(field); }
 		constexpr std::uint8_t* end() noexcept { return static_cast<std::uint8_t*>(field) + ((bits + ((8 - (bits & 7)) & 7)) >> 3); }
@@ -139,6 +139,10 @@ namespace welp
 		inline std::uint8_t char_to_uint8_t(char hex) const noexcept;
 		inline char uint8_t_to_char_lc(std::uint8_t number) const noexcept;
 		inline char uint8_t_to_char_uc(std::uint8_t number) const noexcept;
+
+		void say_bits_sub() const;
+		void say_hex_sub() const;
+		void say_bytes_sub() const;
 	};
 
 	template <std::size_t bits> inline bool operator==(const welp::flags<bits>& A, const welp::flags<bits>& B) noexcept;
@@ -335,11 +339,11 @@ inline std::uint8_t& welp::flags<bits>::operator[](std::size_t byte_offset) noex
 
 
 template <std::size_t bits>
-inline welp::flags<bits>& welp::flags<bits>::set_bits(bool flag) noexcept
+inline welp::flags<bits>& welp::flags<bits>::set_bits(bool bit) noexcept
 {
 	constexpr std::size_t bytes = bits >> 3;
 	constexpr std::size_t remainder_bits = bits & 7;
-	if (flag)
+	if (bit)
 	{
 		std::memset(static_cast<std::uint8_t*>(field), -static_cast<std::uint8_t>(1), bytes);
 		*(static_cast<std::uint8_t*>(field) + bytes) |= bitmask_true(remainder_bits);
@@ -354,14 +358,14 @@ inline welp::flags<bits>& welp::flags<bits>::set_bits(bool flag) noexcept
 }
 
 template <std::size_t bits>
-inline welp::flags<bits>& welp::flags<bits>::set_hex(bool flag0, bool flag1, bool flag2, bool flag3) noexcept
+inline welp::flags<bits>& welp::flags<bits>::set_hex(bool bit3, bool bit2, bool bit1, bool bit0) noexcept
 {
 	constexpr std::size_t bytes = bits >> 3;
 	std::uint8_t temp = 0;
-	if (flag0) { temp |= shift_true(0); }
-	if (flag1) { temp |= shift_true(1); }
-	if (flag2) { temp |= shift_true(2); }
-	if (flag3) { temp |= shift_true(3); }
+	if (bit0) { temp |= shift_true(0); }
+	if (bit1) { temp |= shift_true(1); }
+	if (bit2) { temp |= shift_true(2); }
+	if (bit3) { temp |= shift_true(3); }
 	if ((bits & 7) > 3)
 	{
 		*(static_cast<std::uint8_t*>(field) + bytes) &= bitmask_false(4);
@@ -388,25 +392,25 @@ inline welp::flags<bits>& welp::flags<bits>::set_hex(char hex) noexcept
 }
 
 template <std::size_t bits>
-inline welp::flags<bits>& welp::flags<bits>::set_bytes(bool flag0, bool flag1, bool flag2, bool flag3,
-	bool flag4, bool flag5, bool flag6, bool flag7) noexcept
+inline welp::flags<bits>& welp::flags<bits>::set_bytes(bool bit7, bool bit6, bool bit5, bool bit4,
+	bool bit3, bool bit2, bool bit1, bool bit0) noexcept
 {
 	constexpr std::size_t bytes = bits >> 3;
 	std::uint8_t temp = 0;
-	if (flag0) { temp |= shift_true(0); }
-	if (flag1) { temp |= shift_true(1); }
-	if (flag2) { temp |= shift_true(2); }
-	if (flag3) { temp |= shift_true(3); }
-	if (flag4) { temp |= shift_true(4); }
-	if (flag5) { temp |= shift_true(5); }
-	if (flag6) { temp |= shift_true(6); }
-	if (flag7) { temp |= shift_true(7); }
+	if (bit0) { temp |= shift_true(0); }
+	if (bit1) { temp |= shift_true(1); }
+	if (bit2) { temp |= shift_true(2); }
+	if (bit3) { temp |= shift_true(3); }
+	if (bit4) { temp |= shift_true(4); }
+	if (bit5) { temp |= shift_true(5); }
+	if (bit6) { temp |= shift_true(6); }
+	if (bit7) { temp |= shift_true(7); }
 	std::memset(static_cast<std::uint8_t*>(field), temp, bytes);
 	return *this;
 }
 
 template <std::size_t bits>
-inline welp::flags<bits>& welp::flags<bits>::set_bytes(char lower_hex, char upper_hex) noexcept
+inline welp::flags<bits>& welp::flags<bits>::set_bytes(char upper_hex, char lower_hex) noexcept
 {
 	constexpr std::size_t bytes = bits >> 3;
 	std::uint8_t number = char_to_uint8_t(lower_hex) | (char_to_uint8_t(upper_hex) << 4);
@@ -509,95 +513,37 @@ inline welp::flags<bits>& welp::flags<bits>::flip() noexcept
 template <std::size_t bits>
 const welp::flags<bits>& welp::flags<bits>::say_bits() const
 {
-	std::cout << ">>>  bit 0  >  " << load_bit(0) << "\n";
-	for (std::size_t k = 1; k < bits; k++)
-	{
-		std::cout << "     bit " << k << "  >  " << load_bit(k) << "\n";
-	}
-	std::cout << std::endl;
-	return *this;
+	say_bits_sub(); return *this;
 }
 
 template <std::size_t bits>
 welp::flags<bits>& welp::flags<bits>::say_bits()
 {
-	std::cout << ">>>  bit 0  >  " << load_bit(0) << "\n";
-	for (std::size_t k = 1; k < bits; k++)
-	{
-		std::cout << "     bit " << k << "  >  " << load_bit(k) << "\n";
-	}
-	std::cout << std::endl;
-	return *this;
+	say_bits_sub(); return *this;
 }
 
 template <std::size_t bits>
 const welp::flags<bits>& welp::flags<bits>::say_hex() const
 {
-	constexpr std::size_t hex = bits >> 2;
-	std::cout << ">>>  hex 0  >  " << load_hex_uc(0)
-		<< " :: " << load_bit(0) << load_bit(1) << load_bit(2) << load_bit(3) << "\n";
-	for (std::size_t k = 1; k < hex; k++)
-	{
-		std::cout << "     hex " << k << "  >  " << load_hex_uc(k)
-			<< " :: " << load_bit(4 * k) << load_bit(4 * k + 1)
-			<< load_bit(4 * k + 2) << load_bit(4 * k + 3) << "\n";
-	}
-	std::cout << std::endl;
-	return *this;
+	say_hex_sub(); return *this;
 }
 
 template <std::size_t bits>
 welp::flags<bits>& welp::flags<bits>::say_hex()
 {
-	constexpr std::size_t hex = bits >> 2;
-	std::cout << ">>>  hex 0  >  " << load_hex_uc(0)
-		<< " :: " << load_bit(0) << load_bit(1) << load_bit(2) << load_bit(3) << "\n";
-	for (std::size_t k = 1; k < hex; k++)
-	{
-		std::cout << "     hex " << k << "  >  " << load_hex_uc(k)
-			<< " :: " << load_bit(4 * k) << load_bit(4 * k + 1)
-			<< load_bit(4 * k + 2) << load_bit(4 * k + 3) << "\n";
-	}
-	std::cout << std::endl;
-	return *this;
+	say_hex_sub(); return *this;
 }
 
 template <std::size_t bits>
 const welp::flags<bits>& welp::flags<bits>::say_bytes() const
 {
-	constexpr std::size_t bytes = bits >> 3;
-	std::cout << ">>>  byte 0  >  " << static_cast<unsigned int>(field[0])
-		<< " :: " << load_hex_uc(0, false) << load_hex_uc(0, true)
-		<< " > " << load_bit(0, 0) << load_bit(0, 1) << load_bit(0, 2) << load_bit(0, 3)
-		<< load_bit(0, 4) << load_bit(0, 5) << load_bit(0, 6) << load_bit(0, 7) << "\n";
-	for (std::size_t k = 1; k < bytes; k++)
-	{
-		std::cout << "     byte " << k << "  >  " << static_cast<unsigned int>(field[k])
-			<< " :: " << load_hex_uc(k, false) << load_hex_uc(k, true)
-			<< " :: " << load_bit(k, 0) << load_bit(k, 1) << load_bit(k, 2) << load_bit(k, 3)
-			<< load_bit(k, 4) << load_bit(k, 5) << load_bit(k, 6) << load_bit(k, 7) << "\n";
-	}
-	std::cout << std::endl;
-	return *this;
+	say_bytes_sub(); return *this;
 }
 
 template <std::size_t bits>
 welp::flags<bits>& welp::flags<bits>::say_bytes()
 {
-	constexpr std::size_t bytes = bits >> 3;
-	std::cout << ">>>  byte 0  >  " << static_cast<unsigned int>(field[0])
-		<< " :: " << load_hex_uc(0, false) << load_hex_uc(0, true)
-		<< " :: " << load_bit(0, 0) << load_bit(0, 1) << load_bit(0, 2) << load_bit(0, 3)
-		<< load_bit(0, 4) << load_bit(0, 5) << load_bit(0, 6) << load_bit(0, 7) << "\n";
-	for (std::size_t k = 1; k < bytes; k++)
-	{
-		std::cout << "     byte " << k << "  >  " << static_cast<unsigned int>(field[k])
-			<< " :: " << load_hex_uc(k, false) << load_hex_uc(k, true)
-			<< " :: " << load_bit(k, 0) << load_bit(k, 1) << load_bit(k, 2) << load_bit(k, 3)
-			<< load_bit(k, 4) << load_bit(k, 5) << load_bit(k, 6) << load_bit(k, 7) << "\n";
-	}
-	std::cout << std::endl;
-	return *this;
+	say_bytes_sub(); return *this;
 }
 #endif // WELP_FLAGS_INCLUDE_IOSTREAM
 
@@ -798,6 +744,53 @@ inline char welp::flags<bits>::uint8_t_to_char_lc(std::uint8_t number) const noe
 	default: return '?'; break;
 	}
 }
+
+
+#ifdef WELP_FLAGS_INCLUDE_IOSTREAM
+template <std::size_t bits>
+void welp::flags<bits>::say_bits_sub() const
+{
+	std::cout << ">>>  bit 0  >  " << load_bit(0) << "\n";
+	for (std::size_t k = 1; k < bits; k++)
+	{
+		std::cout << "     bit " << k << "  >  " << load_bit(k) << "\n";
+	}
+	std::cout << std::endl;
+}
+
+template <std::size_t bits>
+void welp::flags<bits>::say_hex_sub() const
+{
+	constexpr std::size_t hex = bits >> 2;
+	std::cout << ">>>  hex 0  >  " << load_hex_uc(0)
+		<< " :: " << load_bit(3) << load_bit(2) << load_bit(1) << load_bit(0) << "\n";
+	for (std::size_t k = 1; k < hex; k++)
+	{
+		std::cout << "     hex " << k << "  >  " << load_hex_uc(k)
+			<< " :: " << load_bit(4 * k + 3) << load_bit(4 * k + 2)
+			<< load_bit(4 * k + 1) << load_bit(4 * k) << "\n";
+	}
+	std::cout << std::endl;
+}
+
+template <std::size_t bits>
+void welp::flags<bits>::say_bytes_sub() const
+{
+	constexpr std::size_t bytes = bits >> 3;
+	std::cout << ">>>  byte 0  >  " << static_cast<unsigned int>(field[0])
+		<< " :: " << load_hex_uc(0, true) << load_hex_uc(0, false)
+		<< " > " << load_bit(0, 7) << load_bit(0, 6) << load_bit(0, 5) << load_bit(0, 4)
+		<< load_bit(0, 3) << load_bit(0, 2) << load_bit(0, 1) << load_bit(0, 0) << "\n";
+	for (std::size_t k = 1; k < bytes; k++)
+	{
+		std::cout << "     byte " << k << "  >  " << static_cast<unsigned int>(field[k])
+			<< " :: " << load_hex_uc(k, true) << load_hex_uc(k, false)
+			<< " :: " << load_bit(k, 7) << load_bit(k, 6) << load_bit(k, 5) << load_bit(k, 4)
+			<< load_bit(k, 3) << load_bit(k, 2) << load_bit(k, 1) << load_bit(k, 0) << "\n";
+	}
+	std::cout << std::endl;
+}
+#endif // WELP_FLAGS_INCLUDE_IOSTREAM
 
 
 namespace welp
@@ -1189,27 +1182,27 @@ namespace welp
 		void say_hex_sub(std::size_t start_hex, std::size_t end_hex) const
 		{
 			std::cout << ">>>  hex " << start_hex << "  >  " << load_hex_uc(start_hex)
-				<< " :: " << load_bit(4 * start_hex) << load_bit(4 * start_hex + 1)
-				<< load_bit(4 * start_hex + 2) << load_bit(4 * start_hex + 3) << "\n";
+				<< " :: " << load_bit(4 * start_hex + 3) << load_bit(4 * start_hex + 2)
+				<< load_bit(4 * start_hex + 1) << load_bit(4 * start_hex) << "\n";
 			for (std::size_t k = start_hex + 1; k < end_hex; k++)
 			{
 				std::cout << "     hex " << k << "  >  " << load_hex_uc(k)
-					<< " :: " << load_bit(4 * k) << load_bit(4 * k + 1)
-					<< load_bit(4 * k + 2) << load_bit(4 * k + 3) << "\n";
+					<< " :: " << load_bit(4 * k + 3) << load_bit(4 * k + 2)
+					<< load_bit(4 * k + 1) << load_bit(4 * k) << "\n";
 			}
 		}
 		void say_bytes_sub(std::size_t start_byte, std::size_t end_byte) const
 		{
 			std::cout << ">>>  byte " << start_byte << "  >  " << static_cast<unsigned int>(load_byte(start_byte))
-				<< " :: " << load_hex_uc(start_byte, false) << load_hex_uc(start_byte, true)
-				<< " :: " << load_bit(start_byte, 0) << load_bit(start_byte, 1) << load_bit(start_byte, 2) << load_bit(start_byte, 3)
-				<< load_bit(start_byte, 4) << load_bit(start_byte, 5) << load_bit(start_byte, 6) << load_bit(start_byte, 7) << "\n";
+				<< " :: " << load_hex_uc(start_byte, true) << load_hex_uc(start_byte, false)
+				<< " :: " << load_bit(start_byte, 7) << load_bit(start_byte, 6) << load_bit(start_byte, 5) << load_bit(start_byte, 4)
+				<< load_bit(start_byte, 3) << load_bit(start_byte, 2) << load_bit(start_byte, 1) << load_bit(start_byte, 0) << "\n";
 			for (std::size_t k = start_byte + 1; k < end_byte; k++)
 			{
 				std::cout << "     byte " << k << "  >  " << static_cast<unsigned int>(load_byte(k))
-					<< " :: " << load_hex_uc(k, false) << load_hex_uc(k, true)
-					<< " :: " << load_bit(k, 0) << load_bit(k, 1) << load_bit(k, 2) << load_bit(k, 3)
-					<< load_bit(k, 4) << load_bit(k, 5) << load_bit(k, 6) << load_bit(k, 7) << "\n";
+					<< " :: " << load_hex_uc(k, true) << load_hex_uc(k, false)
+					<< " :: " << load_bit(k, 7) << load_bit(k, 6) << load_bit(k, 5) << load_bit(k, 4)
+					<< load_bit(k, 3) << load_bit(k, 2) << load_bit(k, 1) << load_bit(k, 0) << "\n";
 			}
 			std::cout << std::endl;
 		}
