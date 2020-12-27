@@ -31,7 +31,7 @@
 #endif // WELP_MULTIPOOL_INCLUDE_ALL
 
 
-#ifdef WELP_MULTIPOOL_DEBUG_MODE
+#if defined(WELP_MULTIPOOL_DEBUG_MODE) || defined(WELP_ALWAYS_DEBUG_MODE)
 #include <iostream>
 #ifdef WELP_MULTIPOOL_INCLUDE_FSTREAM
 #include <fstream>
