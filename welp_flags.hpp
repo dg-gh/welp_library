@@ -64,10 +64,15 @@ namespace welp
 		inline const std::uint8_t* data() const noexcept;
 		inline std::uint8_t* data() noexcept;
 
+
 		// member functions below are unavailable when template parameter bits == 0
 
 		inline welp::flags<bits>& set_bits(bool flag) noexcept;
-		inline welp::flags<bits>& set_hex(char lower_half_byte, char upper_half_byte) noexcept;
+		inline welp::flags<bits>& set_hex(bool flag0, bool flag1, bool flag2, bool flag3) noexcept;
+		inline welp::flags<bits>& set_hex(char hex) noexcept;
+		inline welp::flags<bits>& set_bytes(bool flag0, bool flag1, bool flag2, bool flag3,
+			bool flag4, bool flag5, bool flag6, bool flag7) noexcept;
+		inline welp::flags<bits>& set_bytes(char lower_hex, char upper_hex) noexcept;
 		inline welp::flags<bits>& set_bytes(std::uint8_t number) noexcept;
 
 		template <class Ty> inline welp::flags<bits>& cpy(const Ty& rhs) noexcept;
@@ -82,6 +87,7 @@ namespace welp
 		constexpr std::size_t size_in_bytes() const noexcept { return bits >> 3; }
 		constexpr std::size_t size_in_memory() const noexcept { return (bits + ((8 - (bits & 7)) & 7)) >> 3; }
 
+
 #ifdef WELP_FLAGS_INCLUDE_IOSTREAM
 		const welp::flags<bits>& say_bits() const;
 		welp::flags<bits>& say_bits();
@@ -91,8 +97,9 @@ namespace welp
 		welp::flags<bits>& say_bytes();
 #endif // WELP_FLAGS_INCLUDE_IOSTREAM
 
+
 		// constructor, copy ops and move ops are deleted when template parameter bits == 0,
-		// welp::flags<0> can only be made as a reference
+		// welp::flags<0> should only exist as a reference
 
 		flags() noexcept;
 		flags(const welp::flags<bits>&) noexcept = default;
@@ -123,7 +130,7 @@ namespace welp
 		inline std::uint8_t bitmask_true(std::size_t digits) const noexcept;
 		inline std::uint8_t bitmask_false(std::size_t digits) const noexcept;
 		inline std::uint8_t char_to_uint8_t(char hex) const noexcept;
-		inline char uint8_t_to_char(std::uint8_t value) const noexcept;
+		inline char uint8_t_to_char(std::uint8_t number) const noexcept;
 	};
 
 	template <std::size_t bits> inline bool operator==(const welp::flags<bits>& A, const welp::flags<bits>& B) noexcept;
@@ -331,10 +338,62 @@ inline welp::flags<bits>& welp::flags<bits>::set_bits(bool flag) noexcept
 }
 
 template <std::size_t bits>
-inline welp::flags<bits>& welp::flags<bits>::set_hex(char lower_half_byte, char upper_half_byte) noexcept
+inline welp::flags<bits>& welp::flags<bits>::set_hex(bool flag0, bool flag1, bool flag2, bool flag3) noexcept
 {
 	constexpr std::size_t bytes = bits >> 3;
-	std::uint8_t value = char_to_uint8_t(lower_half_byte) | (char_to_uint8_t(upper_half_byte) << 4);
+	std::uint8_t temp = 0;
+	if (flag0) { temp |= shift_true(0); }
+	if (flag1) { temp |= shift_true(1); }
+	if (flag2) { temp |= shift_true(2); }
+	if (flag3) { temp |= shift_true(3); }
+	if ((bits & 7) > 3)
+	{
+		*(static_cast<std::uint8_t*>(field) + bytes) &= bitmask_false(4);
+		*(static_cast<std::uint8_t*>(field) + bytes) |= temp;
+	}
+	temp |= (temp << 4);
+	std::memset(static_cast<std::uint8_t*>(field), temp, bytes);
+	return *this;
+}
+
+template <std::size_t bits>
+inline welp::flags<bits>& welp::flags<bits>::set_hex(char hex) noexcept
+{
+	constexpr std::size_t bytes = bits >> 3;
+	std::uint8_t temp = char_to_uint8_t(hex);
+	if ((bits & 7) > 3)
+	{
+		*(static_cast<std::uint8_t*>(field) + bytes) &= bitmask_false(4);
+		*(static_cast<std::uint8_t*>(field) + bytes) |= temp;
+	}
+	temp |= (temp << 4);
+	std::memset(static_cast<std::uint8_t*>(field), temp, bytes);
+	return *this;
+}
+
+template <std::size_t bits>
+inline welp::flags<bits>& welp::flags<bits>::set_bytes(bool flag0, bool flag1, bool flag2, bool flag3,
+	bool flag4, bool flag5, bool flag6, bool flag7) noexcept
+{
+	constexpr std::size_t bytes = bits >> 3;
+	std::uint8_t temp = 0;
+	if (flag0) { temp |= shift_true(0); }
+	if (flag1) { temp |= shift_true(1); }
+	if (flag2) { temp |= shift_true(2); }
+	if (flag3) { temp |= shift_true(3); }
+	if (flag4) { temp |= shift_true(4); }
+	if (flag5) { temp |= shift_true(5); }
+	if (flag6) { temp |= shift_true(6); }
+	if (flag7) { temp |= shift_true(7); }
+	std::memset(static_cast<std::uint8_t*>(field), temp, bytes);
+	return *this;
+}
+
+template <std::size_t bits>
+inline welp::flags<bits>& welp::flags<bits>::set_bytes(char lower_hex, char upper_hex) noexcept
+{
+	constexpr std::size_t bytes = bits >> 3;
+	std::uint8_t value = char_to_uint8_t(lower_hex) | (char_to_uint8_t(upper_hex) << 4);
 	std::memset(static_cast<std::uint8_t*>(field), value, bytes);
 	return *this;
 }
@@ -647,9 +706,9 @@ inline std::uint8_t welp::flags<bits>::char_to_uint8_t(char hex) const noexcept
 }
 
 template <std::size_t bits>
-inline char welp::flags<bits>::uint8_t_to_char(std::uint8_t value) const noexcept
+inline char welp::flags<bits>::uint8_t_to_char(std::uint8_t number) const noexcept
 {
-	switch (value)
+	switch (number)
 	{
 	case 0: return '0'; break;
 	case 1: return '1'; break;
@@ -984,9 +1043,9 @@ namespace welp
 			default: return static_cast<std::uint8_t>(0); break;
 			}
 		}
-		inline char uint8_t_to_char(std::uint8_t value) const noexcept
+		inline char uint8_t_to_char(std::uint8_t number) const noexcept
 		{
-			switch (value)
+			switch (number)
 			{
 			case 0: return '0'; break;
 			case 1: return '1'; break;
