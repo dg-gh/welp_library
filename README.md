@@ -16,3 +16,7 @@ Every file contains its own mandatory includes and can include more with some pr
 
 	#define WELP_NAME_INCLUDE_ALL
 	#include "welp_name.hpp"
+
+To avoid typing one macro per file to include every option possible, the following macro before all the inclusions can achieve full includes all at once :
+
+	#define WELP_ALWAYS_INCLUDE_ALL
