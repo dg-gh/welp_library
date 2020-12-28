@@ -729,7 +729,7 @@ void welp::flags<bits>::say_bytes_sub() const
 	constexpr std::size_t bytes = bits >> 3;
 	std::cout << ">>>  byte 0  >  " << static_cast<unsigned int>(field[0])
 		<< " :: " << load_hex_uc(0, true) << load_hex_uc(0, false)
-		<< " > " << load_bit(0, 7) << load_bit(0, 6) << load_bit(0, 5) << load_bit(0, 4)
+		<< " :: " << load_bit(0, 7) << load_bit(0, 6) << load_bit(0, 5) << load_bit(0, 4)
 		<< load_bit(0, 3) << load_bit(0, 2) << load_bit(0, 1) << load_bit(0, 0) << "\n";
 	for (std::size_t k = 1; k < bytes; k++)
 	{
