@@ -1237,13 +1237,13 @@ namespace welp
 			}
 			else
 			{
-				std::cout << ">>>  byte " << start_byte << "  >  " << load_char(start_byte)
+				std::cout << ">>>  char " << start_byte << "  >  " << load_char(start_byte)
 					<< " :: " << load_hex_uc(start_byte, true) << load_hex_uc(start_byte, false)
 					<< " :: " << load_bit(start_byte, 7) << load_bit(start_byte, 6) << load_bit(start_byte, 5) << load_bit(start_byte, 4)
 					<< load_bit(start_byte, 3) << load_bit(start_byte, 2) << load_bit(start_byte, 1) << load_bit(start_byte, 0) << "\n";
 				for (std::size_t k = start_byte + 1; k < end_byte; k++)
 				{
-					std::cout << "     byte " << k << "  >  " << load_char(k)
+					std::cout << "     char " << k << "  >  " << load_char(k)
 						<< " :: " << load_hex_uc(k, true) << load_hex_uc(k, false)
 						<< " :: " << load_bit(k, 7) << load_bit(k, 6) << load_bit(k, 5) << load_bit(k, 4)
 						<< load_bit(k, 3) << load_bit(k, 2) << load_bit(k, 1) << load_bit(k, 0) << "\n";
