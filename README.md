@@ -2,7 +2,7 @@
 Depedency free single-header files all under the Unlicense license that could be welpful some day.
 
 ### Description of the files
-- **welp_bits.hpp** : Wraps arrays of std::uint8_t into a class where bits, hexadecimals and bytes can be accessed and modified individually. Starting from a memory space of one byte. Needs little-endian memory layout.
+- **welp_bits.hpp** : Wraps arrays of std::uint8_t into a class where bits, hexadecimals and bytes (as std::uint8_t or char) can be accessed and modified individually. Starting from a memory space of one byte. Needs little-endian memory layout.
 - **welp_chrono.hpp** : Provides classes for measuring timings.
 - **welp_cyclic_resource.hpp** : Provides a cyclic memory buffer that acts a a resource backing an allocator.
 - **welp_global_type.hpp** : Wraps any class into a unique and globally accessible instance.
