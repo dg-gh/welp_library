@@ -519,7 +519,7 @@ inline welp::flags<bits>& welp::flags<bits>::operator=(const welp::flags<bits>& 
 	if (remainder_bits != 0)
 	{
 		*(static_cast<std::uint8_t*>(field) + bytes) &= bitmask_false(remainder_bits);
-		*(static_cast<std::uint8_t*>(field) + bytes) & bitmask_true(remainder_bits);
+		*(static_cast<std::uint8_t*>(field) + bytes)& bitmask_true(remainder_bits);
 	}
 	return *this;
 }
@@ -712,33 +712,47 @@ template <std::size_t bits>
 void welp::flags<bits>::say_hex_sub() const
 {
 	constexpr std::size_t hex = bits >> 2;
-	std::cout << ">>>  hex 0  >  " << load_hex_uc(0)
-		<< " :: " << load_bit(3) << load_bit(2) << load_bit(1) << load_bit(0) << "\n";
-	for (std::size_t k = 1; k < hex; k++)
+	if (bits < 4)
 	{
-		std::cout << "     hex " << k << "  >  " << load_hex_uc(k)
-			<< " :: " << load_bit(4 * k + 3) << load_bit(4 * k + 2)
-			<< load_bit(4 * k + 1) << load_bit(4 * k) << "\n";
+		std::cout << ">>>  size smaller than a hexadecimal" << std::endl;
 	}
-	std::cout << std::endl;
+	else
+	{
+		std::cout << ">>>  hex 0  >  " << load_hex_uc(0)
+			<< " :: " << load_bit(3) << load_bit(2) << load_bit(1) << load_bit(0) << "\n";
+		for (std::size_t k = 1; k < hex; k++)
+		{
+			std::cout << "     hex " << k << "  >  " << load_hex_uc(k)
+				<< " :: " << load_bit(4 * k + 3) << load_bit(4 * k + 2)
+				<< load_bit(4 * k + 1) << load_bit(4 * k) << "\n";
+		}
+		std::cout << std::endl;
+	}
 }
 
 template <std::size_t bits>
 void welp::flags<bits>::say_bytes_sub() const
 {
 	constexpr std::size_t bytes = bits >> 3;
-	std::cout << ">>>  byte 0  >  " << static_cast<unsigned int>(field[0])
-		<< " :: " << load_hex_uc(0, true) << load_hex_uc(0, false)
-		<< " :: " << load_bit(0, 7) << load_bit(0, 6) << load_bit(0, 5) << load_bit(0, 4)
-		<< load_bit(0, 3) << load_bit(0, 2) << load_bit(0, 1) << load_bit(0, 0) << "\n";
-	for (std::size_t k = 1; k < bytes; k++)
+	if (bits < 8)
 	{
-		std::cout << "     byte " << k << "  >  " << static_cast<unsigned int>(field[k])
-			<< " :: " << load_hex_uc(k, true) << load_hex_uc(k, false)
-			<< " :: " << load_bit(k, 7) << load_bit(k, 6) << load_bit(k, 5) << load_bit(k, 4)
-			<< load_bit(k, 3) << load_bit(k, 2) << load_bit(k, 1) << load_bit(k, 0) << "\n";
+		std::cout << ">>>  size smaller than a byte" << std::endl;
 	}
-	std::cout << std::endl;
+	else
+	{
+		std::cout << ">>>  byte 0  >  " << static_cast<unsigned int>(field[0])
+			<< " :: " << load_hex_uc(0, true) << load_hex_uc(0, false)
+			<< " :: " << load_bit(0, 7) << load_bit(0, 6) << load_bit(0, 5) << load_bit(0, 4)
+			<< load_bit(0, 3) << load_bit(0, 2) << load_bit(0, 1) << load_bit(0, 0) << "\n";
+		for (std::size_t k = 1; k < bytes; k++)
+		{
+			std::cout << "     byte " << k << "  >  " << static_cast<unsigned int>(field[k])
+				<< " :: " << load_hex_uc(k, true) << load_hex_uc(k, false)
+				<< " :: " << load_bit(k, 7) << load_bit(k, 6) << load_bit(k, 5) << load_bit(k, 4)
+				<< load_bit(k, 3) << load_bit(k, 2) << load_bit(k, 1) << load_bit(k, 0) << "\n";
+		}
+		std::cout << std::endl;
+	}
 }
 #endif // WELP_FLAGS_INCLUDE_IOSTREAM
 
@@ -1131,30 +1145,44 @@ namespace welp
 		}
 		void say_hex_sub(std::size_t start_hex, std::size_t end_hex) const
 		{
-			std::cout << ">>>  hex " << start_hex << "  >  " << load_hex_uc(start_hex)
-				<< " :: " << load_bit(4 * start_hex + 3) << load_bit(4 * start_hex + 2)
-				<< load_bit(4 * start_hex + 1) << load_bit(4 * start_hex) << "\n";
-			for (std::size_t k = start_hex + 1; k < end_hex; k++)
+			if (start_hex >= end_hex)
 			{
-				std::cout << "     hex " << k << "  >  " << load_hex_uc(k)
-					<< " :: " << load_bit(4 * k + 3) << load_bit(4 * k + 2)
-					<< load_bit(4 * k + 1) << load_bit(4 * k) << "\n";
+				std::cout << ">>>" << std::endl;
+			}
+			else
+			{
+				std::cout << ">>>  hex " << start_hex << "  >  " << load_hex_uc(start_hex)
+					<< " :: " << load_bit(4 * start_hex + 3) << load_bit(4 * start_hex + 2)
+					<< load_bit(4 * start_hex + 1) << load_bit(4 * start_hex) << "\n";
+				for (std::size_t k = start_hex + 1; k < end_hex; k++)
+				{
+					std::cout << "     hex " << k << "  >  " << load_hex_uc(k)
+						<< " :: " << load_bit(4 * k + 3) << load_bit(4 * k + 2)
+						<< load_bit(4 * k + 1) << load_bit(4 * k) << "\n";
+				}
 			}
 		}
 		void say_bytes_sub(std::size_t start_byte, std::size_t end_byte) const
 		{
-			std::cout << ">>>  byte " << start_byte << "  >  " << static_cast<unsigned int>(load_byte(start_byte))
-				<< " :: " << load_hex_uc(start_byte, true) << load_hex_uc(start_byte, false)
-				<< " :: " << load_bit(start_byte, 7) << load_bit(start_byte, 6) << load_bit(start_byte, 5) << load_bit(start_byte, 4)
-				<< load_bit(start_byte, 3) << load_bit(start_byte, 2) << load_bit(start_byte, 1) << load_bit(start_byte, 0) << "\n";
-			for (std::size_t k = start_byte + 1; k < end_byte; k++)
+			if (start_byte >= end_byte)
 			{
-				std::cout << "     byte " << k << "  >  " << static_cast<unsigned int>(load_byte(k))
-					<< " :: " << load_hex_uc(k, true) << load_hex_uc(k, false)
-					<< " :: " << load_bit(k, 7) << load_bit(k, 6) << load_bit(k, 5) << load_bit(k, 4)
-					<< load_bit(k, 3) << load_bit(k, 2) << load_bit(k, 1) << load_bit(k, 0) << "\n";
+				std::cout << ">>>" << std::endl;
 			}
-			std::cout << std::endl;
+			else
+			{
+				std::cout << ">>>  byte " << start_byte << "  >  " << static_cast<unsigned int>(load_byte(start_byte))
+					<< " :: " << load_hex_uc(start_byte, true) << load_hex_uc(start_byte, false)
+					<< " :: " << load_bit(start_byte, 7) << load_bit(start_byte, 6) << load_bit(start_byte, 5) << load_bit(start_byte, 4)
+					<< load_bit(start_byte, 3) << load_bit(start_byte, 2) << load_bit(start_byte, 1) << load_bit(start_byte, 0) << "\n";
+				for (std::size_t k = start_byte + 1; k < end_byte; k++)
+				{
+					std::cout << "     byte " << k << "  >  " << static_cast<unsigned int>(load_byte(k))
+						<< " :: " << load_hex_uc(k, true) << load_hex_uc(k, false)
+						<< " :: " << load_bit(k, 7) << load_bit(k, 6) << load_bit(k, 5) << load_bit(k, 4)
+						<< load_bit(k, 3) << load_bit(k, 2) << load_bit(k, 1) << load_bit(k, 0) << "\n";
+				}
+				std::cout << std::endl;
+			}
 		}
 #endif // WELP_FLAGS_INCLUDE_IOSTREAM
 	};
