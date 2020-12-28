@@ -70,11 +70,7 @@ namespace welp
 		// member functions below are unavailable when template parameter bits == 0
 
 		inline welp::flags<bits>& set_bits(bool bit) noexcept;
-		inline welp::flags<bits>& set_hex(bool bit3, bool bit2, bool bit1, bool bit0) noexcept;
 		inline welp::flags<bits>& set_hex(char hex) noexcept;
-		inline welp::flags<bits>& set_bytes(bool bit7, bool bit6, bool bit5, bool bit4,
-			bool bit3, bool bit2, bool bit1, bool bit0) noexcept;
-		inline welp::flags<bits>& set_bytes(char upper_hex, char lower_hex) noexcept;
 		inline welp::flags<bits>& set_bytes(std::uint8_t number) noexcept;
 
 		constexpr std::uint8_t* begin() noexcept { return static_cast<std::uint8_t*>(field); }
@@ -358,25 +354,6 @@ inline welp::flags<bits>& welp::flags<bits>::set_bits(bool bit) noexcept
 }
 
 template <std::size_t bits>
-inline welp::flags<bits>& welp::flags<bits>::set_hex(bool bit3, bool bit2, bool bit1, bool bit0) noexcept
-{
-	constexpr std::size_t bytes = bits >> 3;
-	std::uint8_t temp = 0;
-	if (bit0) { temp |= shift_true(0); }
-	if (bit1) { temp |= shift_true(1); }
-	if (bit2) { temp |= shift_true(2); }
-	if (bit3) { temp |= shift_true(3); }
-	if ((bits & 7) > 3)
-	{
-		*(static_cast<std::uint8_t*>(field) + bytes) &= bitmask_false(4);
-		*(static_cast<std::uint8_t*>(field) + bytes) |= temp;
-	}
-	temp |= (temp << 4);
-	std::memset(static_cast<std::uint8_t*>(field), temp, bytes);
-	return *this;
-}
-
-template <std::size_t bits>
 inline welp::flags<bits>& welp::flags<bits>::set_hex(char hex) noexcept
 {
 	constexpr std::size_t bytes = bits >> 3;
@@ -388,33 +365,6 @@ inline welp::flags<bits>& welp::flags<bits>::set_hex(char hex) noexcept
 	}
 	temp |= (temp << 4);
 	std::memset(static_cast<std::uint8_t*>(field), temp, bytes);
-	return *this;
-}
-
-template <std::size_t bits>
-inline welp::flags<bits>& welp::flags<bits>::set_bytes(bool bit7, bool bit6, bool bit5, bool bit4,
-	bool bit3, bool bit2, bool bit1, bool bit0) noexcept
-{
-	constexpr std::size_t bytes = bits >> 3;
-	std::uint8_t temp = 0;
-	if (bit0) { temp |= shift_true(0); }
-	if (bit1) { temp |= shift_true(1); }
-	if (bit2) { temp |= shift_true(2); }
-	if (bit3) { temp |= shift_true(3); }
-	if (bit4) { temp |= shift_true(4); }
-	if (bit5) { temp |= shift_true(5); }
-	if (bit6) { temp |= shift_true(6); }
-	if (bit7) { temp |= shift_true(7); }
-	std::memset(static_cast<std::uint8_t*>(field), temp, bytes);
-	return *this;
-}
-
-template <std::size_t bits>
-inline welp::flags<bits>& welp::flags<bits>::set_bytes(char upper_hex, char lower_hex) noexcept
-{
-	constexpr std::size_t bytes = bits >> 3;
-	std::uint8_t number = char_to_uint8_t(lower_hex) | (char_to_uint8_t(upper_hex) << 4);
-	std::memset(static_cast<std::uint8_t*>(field), number, bytes);
 	return *this;
 }
 
