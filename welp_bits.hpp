@@ -890,14 +890,6 @@ namespace welp
 }
 
 
-#ifdef WELP_BITS_INCLUDE_IOSTREAM
-template <std::size_t number_of_bits> std::ostream& operator<<(std::ostream& out, const welp::bits<number_of_bits>& A)
-{
-	A.say_bits(); return out;
-}
-#endif // WELP_BITS_INCLUDE_IOSTREAM
-
-
 namespace welp
 {
 	template <> class bits<0>
