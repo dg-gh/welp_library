@@ -60,7 +60,7 @@ namespace welp
 
 		inline std::uint8_t load_byte(std::size_t byte_offset) const noexcept;
 		inline bits<number_of_bits>& store_byte(std::size_t byte_offset, std::uint8_t number) noexcept;
-		
+
 		inline char load_char(std::size_t byte_offset) const noexcept;
 		inline bits<number_of_bits>& store_char(std::size_t byte_offset, char character) noexcept;
 
@@ -81,10 +81,11 @@ namespace welp
 		inline welp::bits<number_of_bits>& operator^=(const welp::bits<number_of_bits>& rhs) noexcept;
 		inline welp::bits<number_of_bits>& flip() noexcept;
 
-		constexpr std::size_t size_in_bits() const noexcept { return number_of_bits; }
-		constexpr std::size_t size_in_hex() const noexcept { return number_of_bits >> 2; }
-		constexpr std::size_t size_in_bytes() const noexcept { return number_of_bits >> 3; }
-		constexpr std::size_t size_in_memory() const noexcept { return (number_of_bits + ((8 - (number_of_bits & 7)) & 7)) >> 3; }
+		constexpr std::size_t capacity_in_bits() const noexcept { return number_of_bits; }
+		constexpr std::size_t capacity_in_hex() const noexcept { return number_of_bits >> 2; }
+		constexpr std::size_t capacity_in_bytes() const noexcept { return number_of_bits >> 3; }
+		constexpr std::size_t capacity_in_chars() const noexcept { return number_of_bits >> 3; }
+		constexpr std::size_t size_in_bytes() const noexcept { return (number_of_bits + ((8 - (number_of_bits & 7)) & 7)) >> 3; }
 
 
 #ifdef WELP_BITS_INCLUDE_IOSTREAM
@@ -94,6 +95,8 @@ namespace welp
 		welp::bits<number_of_bits>& say_hex();
 		const welp::bits<number_of_bits>& say_bytes() const;
 		welp::bits<number_of_bits>& say_bytes();
+		const welp::bits<number_of_bits>& say_chars() const;
+		welp::bits<number_of_bits>& say_chars();
 #endif // WELP_BITS_INCLUDE_IOSTREAM
 
 
@@ -135,6 +138,7 @@ namespace welp
 		void say_bits_sub() const;
 		void say_hex_sub() const;
 		void say_bytes_sub() const;
+		void say_chars_sub() const;
 	};
 
 	template <std::size_t number_of_bits> inline bool operator==(const welp::bits<number_of_bits>& A, const welp::bits<number_of_bits>& B) noexcept;
@@ -326,7 +330,7 @@ inline welp::bits<number_of_bits>& welp::bits<number_of_bits>::store_char(std::s
 #ifdef WELP_BITS_DEBUG_MODE
 	assert(8 * byte_offset < bits);
 #endif // WELP_BITS_DEBUG_MODE
-	*(reinterpret_cast<char*>(field) + byte_offset) = character;
+	* (reinterpret_cast<char*>(field) + byte_offset) = character;
 	return *this;
 }
 
@@ -491,6 +495,18 @@ template <std::size_t number_of_bits>
 welp::bits<number_of_bits>& welp::bits<number_of_bits>::say_bytes()
 {
 	say_bytes_sub(); return *this;
+}
+
+template <std::size_t number_of_bits>
+const welp::bits<number_of_bits>& welp::bits<number_of_bits>::say_chars() const
+{
+	say_chars_sub(); return *this;
+}
+
+template <std::size_t number_of_bits>
+welp::bits<number_of_bits>& welp::bits<number_of_bits>::say_chars()
+{
+	say_chars_sub(); return *this;
 }
 #endif // WELP_BITS_INCLUDE_IOSTREAM
 
@@ -711,7 +727,7 @@ void welp::bits<number_of_bits>::say_hex_sub() const
 	constexpr std::size_t hex = number_of_bits >> 2;
 	if (number_of_bits < 4)
 	{
-		std::cout << ">>>  size smaller than a hexadecimal" << std::endl;
+		std::cout << ">>>  capacity smaller than a hexadecimal" << std::endl;
 	}
 	else
 	{
@@ -733,17 +749,42 @@ void welp::bits<number_of_bits>::say_bytes_sub() const
 	constexpr std::size_t bytes = number_of_bits >> 3;
 	if (number_of_bits < 8)
 	{
-		std::cout << ">>>  size smaller than a byte" << std::endl;
+		std::cout << ">>>  capacity smaller than a byte" << std::endl;
 	}
 	else
 	{
-		std::cout << ">>>  byte 0  >  " << static_cast<unsigned int>(field[0])
+		std::cout << ">>>  byte 0  >  " << static_cast<unsigned int>(load_byte(0))
 			<< " :: " << load_hex_uc(0, true) << load_hex_uc(0, false)
 			<< " :: " << load_bit(0, 7) << load_bit(0, 6) << load_bit(0, 5) << load_bit(0, 4)
 			<< load_bit(0, 3) << load_bit(0, 2) << load_bit(0, 1) << load_bit(0, 0) << "\n";
 		for (std::size_t k = 1; k < bytes; k++)
 		{
-			std::cout << "     byte " << k << "  >  " << static_cast<unsigned int>(field[k])
+			std::cout << "     byte " << k << "  >  " << static_cast<unsigned int>(load_byte(k))
+				<< " :: " << load_hex_uc(k, true) << load_hex_uc(k, false)
+				<< " :: " << load_bit(k, 7) << load_bit(k, 6) << load_bit(k, 5) << load_bit(k, 4)
+				<< load_bit(k, 3) << load_bit(k, 2) << load_bit(k, 1) << load_bit(k, 0) << "\n";
+		}
+		std::cout << std::endl;
+	}
+}
+
+template <std::size_t number_of_bits>
+void welp::bits<number_of_bits>::say_chars_sub() const
+{
+	constexpr std::size_t bytes = number_of_bits >> 3;
+	if (number_of_bits < 8)
+	{
+		std::cout << ">>>  capacity smaller than a char" << std::endl;
+	}
+	else
+	{
+		std::cout << ">>>  char 0  >  " << load_char(0)
+			<< " :: " << load_hex_uc(0, true) << load_hex_uc(0, false)
+			<< " :: " << load_bit(0, 7) << load_bit(0, 6) << load_bit(0, 5) << load_bit(0, 4)
+			<< load_bit(0, 3) << load_bit(0, 2) << load_bit(0, 1) << load_bit(0, 0) << "\n";
+		for (std::size_t k = 1; k < bytes; k++)
+		{
+			std::cout << "     char " << k << "  >  " << load_char(k)
 				<< " :: " << load_hex_uc(k, true) << load_hex_uc(k, false)
 				<< " :: " << load_bit(k, 7) << load_bit(k, 6) << load_bit(k, 5) << load_bit(k, 4)
 				<< load_bit(k, 3) << load_bit(k, 2) << load_bit(k, 1) << load_bit(k, 0) << "\n";
@@ -977,12 +1018,11 @@ namespace welp
 			*(static_cast<std::uint8_t*>(field) + byte_offset) = number;
 			return *this;
 		}
-		
+
 		inline char load_char(std::size_t byte_offset) const noexcept
 		{
 			return *(reinterpret_cast<const char*>(field) + byte_offset);
 		}
-
 		inline welp::bits<0>& store_char(std::size_t byte_offset, char character) noexcept
 		{
 			*(reinterpret_cast<char*>(field) + byte_offset) = character;
@@ -1007,6 +1047,11 @@ namespace welp
 		welp::bits<0>& say_bytes(std::size_t bytes) { say_bytes_sub(0, bytes); return *this; }
 		const welp::bits<0>& say_bytes(std::size_t start_byte, std::size_t end_byte) const { say_bytes_sub(start_byte, end_byte); return *this; }
 		welp::bits<0>& say_bytes(std::size_t start_byte, std::size_t end_byte) { say_bytes_sub(start_byte, end_byte); return *this; }
+
+		const welp::bits<0>& say_chars(std::size_t bytes) const { say_chars_sub(0, bytes); return *this; }
+		welp::bits<0>& say_chars(std::size_t bytes) { say_chars_sub(0, bytes); return *this; }
+		const welp::bits<0>& say_chars(std::size_t start_byte, std::size_t end_byte) const { say_chars_sub(start_byte, end_byte); return *this; }
+		welp::bits<0>& say_chars(std::size_t start_byte, std::size_t end_byte) { say_chars_sub(start_byte, end_byte); return *this; }
 #endif // WELP_BITS_INCLUDE_IOSTREAM
 
 		bits() = delete;
@@ -1177,6 +1222,28 @@ namespace welp
 				for (std::size_t k = start_byte + 1; k < end_byte; k++)
 				{
 					std::cout << "     byte " << k << "  >  " << static_cast<unsigned int>(load_byte(k))
+						<< " :: " << load_hex_uc(k, true) << load_hex_uc(k, false)
+						<< " :: " << load_bit(k, 7) << load_bit(k, 6) << load_bit(k, 5) << load_bit(k, 4)
+						<< load_bit(k, 3) << load_bit(k, 2) << load_bit(k, 1) << load_bit(k, 0) << "\n";
+				}
+				std::cout << std::endl;
+			}
+		}
+		void say_chars_sub(std::size_t start_byte, std::size_t end_byte) const
+		{
+			if (start_byte >= end_byte)
+			{
+				std::cout << ">>>" << std::endl;
+			}
+			else
+			{
+				std::cout << ">>>  byte " << start_byte << "  >  " << load_char(start_byte)
+					<< " :: " << load_hex_uc(start_byte, true) << load_hex_uc(start_byte, false)
+					<< " :: " << load_bit(start_byte, 7) << load_bit(start_byte, 6) << load_bit(start_byte, 5) << load_bit(start_byte, 4)
+					<< load_bit(start_byte, 3) << load_bit(start_byte, 2) << load_bit(start_byte, 1) << load_bit(start_byte, 0) << "\n";
+				for (std::size_t k = start_byte + 1; k < end_byte; k++)
+				{
+					std::cout << "     byte " << k << "  >  " << load_char(k)
 						<< " :: " << load_hex_uc(k, true) << load_hex_uc(k, false)
 						<< " :: " << load_bit(k, 7) << load_bit(k, 6) << load_bit(k, 5) << load_bit(k, 4)
 						<< load_bit(k, 3) << load_bit(k, 2) << load_bit(k, 1) << load_bit(k, 0) << "\n";
