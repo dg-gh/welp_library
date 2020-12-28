@@ -1,33 +1,30 @@
-# welp_flags.hpp
+# welp_bits.hpp
 
-welp_flags.hpp provides two classes :
+welp_flags.hpp provides one class welp::bits<number_of_bits> is a class that can store n booleans packed as 8 booleas per byte.
 
-- welp::bit_flags<number_of_bits> is a class that can store n booleans packed as 8 booleas per byte.
-- welp::byte_flags<number_of_bytes> is a class that can store n uint8_t.
-
-# Member functions of welp::bit_flags<number_of_bits> B
+# Member functions of welp::bits<number_of_bits> B
 
 Template parameter number_of_bits is the number of booleans stored in welp::bit_flags<number_of_bits>.
 
 ### Setting and getting booleans
 
-	B.load(n); 
+	B.load_bit(n); 
 
 Loads the nth boolean of B.
 
-	B.store(n, false); 
+	B.store_bit(n, false); 
 
 Stores boolean false at the nth position of B.
 
-	B.store(n, true); 
+	B.store_bit(n, true); 
 
 Stores boolean true at the nth position of B.
 
-	B.set(false); 
+	B.set_bits(false); 
 
 Sets all the booleans of B as false.
 
-	B.set(true); 
+	B.set_bits(true); 
 
 Sets all the booleans of B as true.
 
@@ -57,20 +54,10 @@ Prints the bits of B. Requires the macro WELP_BIT_FLAGS_INCLUDE_IOSTREAM to be d
 
 ### Reinterpret as bits
 
-	welp::as_bit_flags(A);
+	welp::as_bits(A);
 
-Reinterprets any object A as a bit flags reference of 8 * sizeof(A) bits.
+Reinterprets any object A as a bits reference of 8 * sizeof(A) bits.
 
-	welp::as_bit_flags<n>(A);
+	welp::as_bits<n>(A);
 
 Reinterprets any object A as a bit flags reference of n bits.
-
-### Reinterpret as bytes
-
-	welp::as_byte_flags(A);
-
-Reinterprets any object A as a byte flags reference of sizeof(A) bytes.
-
-	welp::as_byte_flags<n>(A);
-
-Reinterprets any object A as a byte flags reference of n bytes.
