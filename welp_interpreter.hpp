@@ -1,9 +1,9 @@
-// welp_flags.h - last update : 27 / 12 / 2020
+// welp_interpreter.h - last update : 27 / 12 / 2020
 // License <http://unlicense.org/> (statement below at the end of the file)
 
 
-#ifndef WELP_FLAGS_H
-#define WELP_FLAGS_H
+#ifndef WELP_INTERPRETER_H
+#define WELP_INTERPRETER_H
 
 
 ////// INCLUDES //////
@@ -13,53 +13,53 @@
 #include <cstring>
 
 
-// include all in one line with #define WELP_FLAGS_INCLUDE_ALL
-#if defined(WELP_FLAGS_INCLUDE_ALL) || defined(WELP_ALWAYS_INCLUDE_ALL)
-#ifndef WELP_FLAGS_INCLUDE_IOSTREAM
-#define WELP_FLAGS_INCLUDE_IOSTREAM
+// include all in one line with #define WELP_INTERPRETER_INCLUDE_ALL
+#if defined(WELP_INTERPRETER_INCLUDE_ALL) || defined(WELP_ALWAYS_INCLUDE_ALL)
+#ifndef WELP_INTERPRETER_INCLUDE_IOSTREAM
+#define WELP_INTERPRETER_INCLUDE_IOSTREAM
 #endif
-#endif // WELP_FLAGS_INCLUDE_ALL
+#endif // WELP_INTERPRETER_INCLUDE_ALL
 
 
-#if defined(WELP_ALWAYS_DEBUG_MODE) && !defined(WELP_FLAGS_DEBUG_MODE)
-#define WELP_FLAGS_DEBUG_MODE
+#if defined(WELP_ALWAYS_DEBUG_MODE) && !defined(WELP_INTERPRETER_DEBUG_MODE)
+#define WELP_INTERPRETER_DEBUG_MODE
 #endif // WELP_ALWAYS_DEBUG_MODE
 
-#ifdef WELP_FLAGS_DEBUG_MODE
+#ifdef WELP_INTERPRETER_DEBUG_MODE
 #include <cassert>
-#ifndef WELP_FLAGS_INCLUDE_IOSTREAM
-#define WELP_FLAGS_INCLUDE_IOSTREAM
+#ifndef WELP_INTERPRETER_INCLUDE_IOSTREAM
+#define WELP_INTERPRETER_INCLUDE_IOSTREAM
 #endif
-#endif // WELP_FLAGS_DEBUG_MODE
+#endif // WELP_INTERPRETER_DEBUG_MODE
 
-#ifdef WELP_FLAGS_INCLUDE_IOSTREAM
+#ifdef WELP_INTERPRETER_INCLUDE_IOSTREAM
 #include <iostream>
-#endif // WELP_FLAGS_INCLUDE_IOSTREAM
+#endif // WELP_INTERPRETER_INCLUDE_IOSTREAM
 
 
 ////// DESCRIPTIONS //////
 
 namespace welp
 {
-	template <std::size_t bits> class flags
+	template <std::size_t bits> class interpreter
 	{
 
 	public:
 
 		inline bool load_bit(std::size_t bit_offset) const noexcept;
-		inline welp::flags<bits>& store_bit(std::size_t bit_offset, bool flag) noexcept;
+		inline welp::interpreter<bits>& store_bit(std::size_t bit_offset, bool bit) noexcept;
 		inline bool load_bit(std::size_t byte_offset, std::size_t bit_offset) const noexcept;
-		inline welp::flags<bits>& store_bit(std::size_t byte_offset, std::size_t bit_offset, bool flag) noexcept;
+		inline welp::interpreter<bits>& store_bit(std::size_t byte_offset, std::size_t bit_offset, bool bit) noexcept;
 
 		inline char load_hex_lc(std::size_t hex_offset) const noexcept;
 		inline char load_hex_uc(std::size_t hex_offset) const noexcept;
-		inline flags<bits>& store_hex(std::size_t hex_offset, char hex) noexcept;
+		inline interpreter<bits>& store_hex(std::size_t hex_offset, char hex) noexcept;
 		inline char load_hex_lc(std::size_t byte_offset, bool upper_half_byte) const noexcept;
 		inline char load_hex_uc(std::size_t byte_offset, bool upper_half_byte) const noexcept;
-		inline flags<bits>& store_hex(std::size_t byte_offset, bool upper_half_byte, char hex) noexcept;
+		inline interpreter<bits>& store_hex(std::size_t byte_offset, bool upper_half_byte, char hex) noexcept;
 
 		inline std::uint8_t load_byte(std::size_t byte_offset) const noexcept;
-		inline flags<bits>& store_byte(std::size_t byte_offset, std::uint8_t number) noexcept;
+		inline interpreter<bits>& store_byte(std::size_t byte_offset, std::uint8_t number) noexcept;
 		inline const std::uint8_t& operator[](std::size_t byte_offset) const noexcept;
 		inline std::uint8_t& operator[](std::size_t byte_offset) noexcept;
 
@@ -69,21 +69,21 @@ namespace welp
 
 		// member functions below are unavailable when template parameter bits == 0
 
-		inline welp::flags<bits>& set_bits(bool bit) noexcept;
-		inline welp::flags<bits>& set_hex(char hex) noexcept;
-		inline welp::flags<bits>& set_bytes(std::uint8_t number) noexcept;
+		inline welp::interpreter<bits>& set_bits(bool bit) noexcept;
+		inline welp::interpreter<bits>& set_hex(char hex) noexcept;
+		inline welp::interpreter<bits>& set_bytes(std::uint8_t number) noexcept;
 
 		constexpr std::uint8_t* begin() noexcept { return static_cast<std::uint8_t*>(field); }
 		constexpr const std::uint8_t* cbegin() const noexcept { return static_cast<const std::uint8_t*>(field); }
 		constexpr std::uint8_t* end() noexcept { return static_cast<std::uint8_t*>(field) + ((bits + ((8 - (bits & 7)) & 7)) >> 3); }
 		constexpr const std::uint8_t* cend() const noexcept { return static_cast<const std::uint8_t*>(field) + ((bits + ((8 - (bits & 7)) & 7)) >> 3); }
 
-		template <class Ty> inline welp::flags<bits>& cpy(const Ty& rhs) noexcept;
+		template <class Ty> inline welp::interpreter<bits>& cpy(const Ty& rhs) noexcept;
 
-		inline welp::flags<bits>& operator&=(const welp::flags<bits>& rhs) noexcept;
-		inline welp::flags<bits>& operator|=(const welp::flags<bits>& rhs) noexcept;
-		inline welp::flags<bits>& operator^=(const welp::flags<bits>& rhs) noexcept;
-		inline welp::flags<bits>& flip() noexcept;
+		inline welp::interpreter<bits>& operator&=(const welp::interpreter<bits>& rhs) noexcept;
+		inline welp::interpreter<bits>& operator|=(const welp::interpreter<bits>& rhs) noexcept;
+		inline welp::interpreter<bits>& operator^=(const welp::interpreter<bits>& rhs) noexcept;
+		inline welp::interpreter<bits>& flip() noexcept;
 
 		constexpr std::size_t size_in_bits() const noexcept { return bits; }
 		constexpr std::size_t size_in_hex() const noexcept { return bits >> 2; }
@@ -91,38 +91,38 @@ namespace welp
 		constexpr std::size_t size_in_memory() const noexcept { return (bits + ((8 - (bits & 7)) & 7)) >> 3; }
 
 
-#ifdef WELP_FLAGS_INCLUDE_IOSTREAM
-		const welp::flags<bits>& say_bits() const;
-		welp::flags<bits>& say_bits();
-		const welp::flags<bits>& say_hex() const;
-		welp::flags<bits>& say_hex();
-		const welp::flags<bits>& say_bytes() const;
-		welp::flags<bits>& say_bytes();
-#endif // WELP_FLAGS_INCLUDE_IOSTREAM
+#ifdef WELP_INTERPRETER_INCLUDE_IOSTREAM
+		const welp::interpreter<bits>& say_bits() const;
+		welp::interpreter<bits>& say_bits();
+		const welp::interpreter<bits>& say_hex() const;
+		welp::interpreter<bits>& say_hex();
+		const welp::interpreter<bits>& say_bytes() const;
+		welp::interpreter<bits>& say_bytes();
+#endif // WELP_INTERPRETER_INCLUDE_IOSTREAM
 
 
 		// constructor, copy ops and move ops are deleted when template parameter bits == 0,
-		// welp::flags<0> should only exist as a reference
+		// welp::interpreter<0> should only exist as a reference
 
-		flags() noexcept;
-		flags(const welp::flags<bits>&) noexcept = default;
-		welp::flags<bits>& operator=(const welp::flags<bits>&) noexcept;
-		flags(welp::flags<bits>&&) noexcept = default;
-		welp::flags<bits>& operator=(welp::flags<bits>&&) noexcept;
-		~flags() = default;
+		interpreter() noexcept;
+		interpreter(const welp::interpreter<bits>&) noexcept = default;
+		welp::interpreter<bits>& operator=(const welp::interpreter<bits>&) noexcept;
+		interpreter(welp::interpreter<bits>&&) noexcept = default;
+		welp::interpreter<bits>& operator=(welp::interpreter<bits>&&) noexcept;
+		~interpreter() = default;
 
 		template <std::size_t bits2>
-		friend inline bool operator==(const welp::flags<bits2>&, const welp::flags<bits2>&) noexcept;
+		friend inline bool operator==(const welp::interpreter<bits2>&, const welp::interpreter<bits2>&) noexcept;
 		template <std::size_t bits2>
-		friend inline bool operator!=(const welp::flags<bits2>&, const welp::flags<bits2>&) noexcept;
+		friend inline bool operator!=(const welp::interpreter<bits2>&, const welp::interpreter<bits2>&) noexcept;
 		template <std::size_t bits2>
-		friend inline welp::flags<bits2> operator&(const welp::flags<bits2>&, const welp::flags<bits2>&) noexcept;
+		friend inline welp::interpreter<bits2> operator&(const welp::interpreter<bits2>&, const welp::interpreter<bits2>&) noexcept;
 		template <std::size_t bits2>
-		friend inline welp::flags<bits2> operator|(const welp::flags<bits2>&, const welp::flags<bits2>&) noexcept;
+		friend inline welp::interpreter<bits2> operator|(const welp::interpreter<bits2>&, const welp::interpreter<bits2>&) noexcept;
 		template <std::size_t bits2>
-		friend inline welp::flags<bits2> operator^(const welp::flags<bits2>&, const welp::flags<bits2>&) noexcept;
+		friend inline welp::interpreter<bits2> operator^(const welp::interpreter<bits2>&, const welp::interpreter<bits2>&) noexcept;
 		template <std::size_t bits2>
-		friend inline welp::flags<bits2> operator~(const welp::flags<bits2>&) noexcept;
+		friend inline welp::interpreter<bits2> operator~(const welp::interpreter<bits2>&) noexcept;
 
 	private:
 
@@ -141,39 +141,39 @@ namespace welp
 		void say_bytes_sub() const;
 	};
 
-	template <std::size_t bits> inline bool operator==(const welp::flags<bits>& A, const welp::flags<bits>& B) noexcept;
-	template <std::size_t bits> inline bool operator!=(const welp::flags<bits>& A, const welp::flags<bits>& B) noexcept;
+	template <std::size_t bits> inline bool operator==(const welp::interpreter<bits>& A, const welp::interpreter<bits>& B) noexcept;
+	template <std::size_t bits> inline bool operator!=(const welp::interpreter<bits>& A, const welp::interpreter<bits>& B) noexcept;
 
-	template <std::size_t bits> inline welp::flags<bits> operator&(const welp::flags<bits>& A, const welp::flags<bits>& B) noexcept;
-	template <std::size_t bits> inline welp::flags<bits> operator|(const welp::flags<bits>& A, const welp::flags<bits>& B) noexcept;
-	template <std::size_t bits> inline welp::flags<bits> operator^(const welp::flags<bits>& A, const welp::flags<bits>& B) noexcept;
-	template <std::size_t bits> inline welp::flags<bits> operator~(const welp::flags<bits>& A) noexcept;
+	template <std::size_t bits> inline welp::interpreter<bits> operator&(const welp::interpreter<bits>& A, const welp::interpreter<bits>& B) noexcept;
+	template <std::size_t bits> inline welp::interpreter<bits> operator|(const welp::interpreter<bits>& A, const welp::interpreter<bits>& B) noexcept;
+	template <std::size_t bits> inline welp::interpreter<bits> operator^(const welp::interpreter<bits>& A, const welp::interpreter<bits>& B) noexcept;
+	template <std::size_t bits> inline welp::interpreter<bits> operator~(const welp::interpreter<bits>& A) noexcept;
 
-	template <class Ty> inline const welp::flags<8 * sizeof(Ty)>& as_flags(const Ty& rhs) noexcept;
-	template <class Ty> inline welp::flags<8 * sizeof(Ty)>& as_flags(Ty& rhs) noexcept;
-	template <std::size_t bits, class Ty> inline const welp::flags<bits>& as_flags(const Ty& rhs) noexcept;
-	template <std::size_t bits, class Ty> inline welp::flags<bits>& as_flags(Ty& rhs) noexcept;
+	template <class Ty> inline const welp::interpreter<8 * sizeof(Ty)>& as_interpreter(const Ty& rhs) noexcept;
+	template <class Ty> inline welp::interpreter<8 * sizeof(Ty)>& as_interpreter(Ty& rhs) noexcept;
+	template <std::size_t bits, class Ty> inline const welp::interpreter<bits>& as_interpreter(const Ty& rhs) noexcept;
+	template <std::size_t bits, class Ty> inline welp::interpreter<bits>& as_interpreter(Ty& rhs) noexcept;
 }
 
 
 ////// IMPLEMENTATIONS //////
 
 template <std::size_t bits>
-inline bool welp::flags<bits>::load_bit(std::size_t bit_offset) const noexcept
+inline bool welp::interpreter<bits>::load_bit(std::size_t bit_offset) const noexcept
 {
-#ifdef WELP_FLAGS_DEBUG_MODE
+#ifdef WELP_INTERPRETER_DEBUG_MODE
 	assert(bit_offset < bits);
-#endif // WELP_FLAGS_DEBUG_MODE
+#endif // WELP_INTERPRETER_DEBUG_MODE
 	return (field[bit_offset >> 3] & shift_true(bit_offset & 7)) != static_cast<std::uint8_t>(0);
 }
 
 template <std::size_t bits>
-inline welp::flags<bits>& welp::flags<bits>::store_bit(std::size_t bit_offset, bool flag) noexcept
+inline welp::interpreter<bits>& welp::interpreter<bits>::store_bit(std::size_t bit_offset, bool bit) noexcept
 {
-#ifdef WELP_FLAGS_DEBUG_MODE
+#ifdef WELP_INTERPRETER_DEBUG_MODE
 	assert(bit_offset < bits);
-#endif // WELP_FLAGS_DEBUG_MODE
-	if (flag)
+#endif // WELP_INTERPRETER_DEBUG_MODE
+	if (bit)
 	{
 		field[bit_offset >> 3] |= shift_true(bit_offset & 7);
 		return *this;
@@ -186,23 +186,23 @@ inline welp::flags<bits>& welp::flags<bits>::store_bit(std::size_t bit_offset, b
 }
 
 template <std::size_t bits>
-inline bool welp::flags<bits>::load_bit(std::size_t byte_offset, std::size_t bit_offset) const noexcept
+inline bool welp::interpreter<bits>::load_bit(std::size_t byte_offset, std::size_t bit_offset) const noexcept
 {
-#ifdef WELP_FLAGS_DEBUG_MODE
+#ifdef WELP_INTERPRETER_DEBUG_MODE
 	assert(8 * byte_offset + bit_offset < bits);
 	assert(bit_offset < 8);
-#endif // WELP_FLAGS_DEBUG_MODE
+#endif // WELP_INTERPRETER_DEBUG_MODE
 	return (field[byte_offset] & shift_true(bit_offset)) != static_cast<std::uint8_t>(0);
 }
 
 template <std::size_t bits>
-inline welp::flags<bits>& welp::flags<bits>::store_bit(std::size_t byte_offset, std::size_t bit_offset, bool flag) noexcept
+inline welp::interpreter<bits>& welp::interpreter<bits>::store_bit(std::size_t byte_offset, std::size_t bit_offset, bool bit) noexcept
 {
-#ifdef WELP_FLAGS_DEBUG_MODE
+#ifdef WELP_INTERPRETER_DEBUG_MODE
 	assert(8 * byte_offset + bit_offset < bits);
 	assert(bit_offset < 8);
-#endif // WELP_FLAGS_DEBUG_MODE
-	if (flag)
+#endif // WELP_INTERPRETER_DEBUG_MODE
+	if (bit)
 	{
 		field[byte_offset] |= shift_true(bit_offset);
 		return *this;
@@ -215,33 +215,33 @@ inline welp::flags<bits>& welp::flags<bits>::store_bit(std::size_t byte_offset, 
 }
 
 template <std::size_t bits>
-inline char welp::flags<bits>::load_hex_lc(std::size_t hex_offset) const noexcept
+inline char welp::interpreter<bits>::load_hex_lc(std::size_t hex_offset) const noexcept
 {
-#ifdef WELP_FLAGS_DEBUG_MODE
+#ifdef WELP_INTERPRETER_DEBUG_MODE
 	assert(4 * hex_offset + 3 < bits);
-#endif // WELP_FLAGS_DEBUG_MODE
+#endif // WELP_INTERPRETER_DEBUG_MODE
 	std::uint8_t temp = ((hex_offset & static_cast<std::size_t>(1)) != 0) ?
 		(field[hex_offset >> 1] >> 4) : (field[hex_offset >> 1] & static_cast<std::uint8_t>(15));
 	return uint8_t_to_char_lc(temp);
 }
 
 template <std::size_t bits>
-inline char welp::flags<bits>::load_hex_uc(std::size_t hex_offset) const noexcept
+inline char welp::interpreter<bits>::load_hex_uc(std::size_t hex_offset) const noexcept
 {
-#ifdef WELP_FLAGS_DEBUG_MODE
+#ifdef WELP_INTERPRETER_DEBUG_MODE
 	assert(4 * hex_offset + 3 < bits);
-#endif // WELP_FLAGS_DEBUG_MODE
+#endif // WELP_INTERPRETER_DEBUG_MODE
 	std::uint8_t temp = ((hex_offset & static_cast<std::size_t>(1)) != 0) ?
 		(field[hex_offset >> 1] >> 4) : (field[hex_offset >> 1] & static_cast<std::uint8_t>(15));
 	return uint8_t_to_char_uc(temp);
 }
 
 template <std::size_t bits>
-inline welp::flags<bits>& welp::flags<bits>::store_hex(std::size_t hex_offset, char hex) noexcept
+inline welp::interpreter<bits>& welp::interpreter<bits>::store_hex(std::size_t hex_offset, char hex) noexcept
 {
-#ifdef WELP_FLAGS_DEBUG_MODE
+#ifdef WELP_INTERPRETER_DEBUG_MODE
 	assert(4 * hex_offset + 3 < bits);
-#endif // WELP_FLAGS_DEBUG_MODE
+#endif // WELP_INTERPRETER_DEBUG_MODE
 	std::uint8_t temp = char_to_uint8_t(hex);
 	std::size_t byte_offset = hex_offset >> 1;
 	if ((hex_offset & static_cast<std::size_t>(1)) != 0)
@@ -257,31 +257,31 @@ inline welp::flags<bits>& welp::flags<bits>::store_hex(std::size_t hex_offset, c
 }
 
 template <std::size_t bits>
-inline char welp::flags<bits>::load_hex_lc(std::size_t byte_offset, bool upper_half_byte) const noexcept
+inline char welp::interpreter<bits>::load_hex_lc(std::size_t byte_offset, bool upper_half_byte) const noexcept
 {
-#ifdef WELP_FLAGS_DEBUG_MODE
+#ifdef WELP_INTERPRETER_DEBUG_MODE
 	assert(8 * byte_offset + 4 * static_cast<std::size_t>(upper_half_byte) + 3 < bits);
-#endif // WELP_FLAGS_DEBUG_MODE
+#endif // WELP_INTERPRETER_DEBUG_MODE
 	std::uint8_t temp = (upper_half_byte) ? (field[byte_offset] >> 4) : (field[byte_offset] & static_cast<std::uint8_t>(15));
 	return uint8_t_to_char_lc(temp);
 }
 
 template <std::size_t bits>
-inline char welp::flags<bits>::load_hex_uc(std::size_t byte_offset, bool upper_half_byte) const noexcept
+inline char welp::interpreter<bits>::load_hex_uc(std::size_t byte_offset, bool upper_half_byte) const noexcept
 {
-#ifdef WELP_FLAGS_DEBUG_MODE
+#ifdef WELP_INTERPRETER_DEBUG_MODE
 	assert(8 * byte_offset + 4 * static_cast<std::size_t>(upper_half_byte) + 3 < bits);
-#endif // WELP_FLAGS_DEBUG_MODE
+#endif // WELP_INTERPRETER_DEBUG_MODE
 	std::uint8_t temp = (upper_half_byte) ? (field[byte_offset] >> 4) : (field[byte_offset] & static_cast<std::uint8_t>(15));
 	return uint8_t_to_char_uc(temp);
 }
 
 template <std::size_t bits>
-inline welp::flags<bits>& welp::flags<bits>::store_hex(std::size_t byte_offset, bool upper_half_byte, char hex) noexcept
+inline welp::interpreter<bits>& welp::interpreter<bits>::store_hex(std::size_t byte_offset, bool upper_half_byte, char hex) noexcept
 {
-#ifdef WELP_FLAGS_DEBUG_MODE
+#ifdef WELP_INTERPRETER_DEBUG_MODE
 	assert(8 * byte_offset + 4 * static_cast<std::size_t>(upper_half_byte) + 3 < bits);
-#endif // WELP_FLAGS_DEBUG_MODE
+#endif // WELP_INTERPRETER_DEBUG_MODE
 	std::uint8_t temp = char_to_uint8_t(hex);
 
 	if (upper_half_byte)
@@ -297,45 +297,45 @@ inline welp::flags<bits>& welp::flags<bits>::store_hex(std::size_t byte_offset, 
 }
 
 template <std::size_t bits>
-inline std::uint8_t welp::flags<bits>::load_byte(std::size_t byte_offset) const noexcept
+inline std::uint8_t welp::interpreter<bits>::load_byte(std::size_t byte_offset) const noexcept
 {
-#ifdef WELP_FLAGS_DEBUG_MODE
+#ifdef WELP_INTERPRETER_DEBUG_MODE
 	assert(8 * byte_offset < bits);
-#endif // WELP_FLAGS_DEBUG_MODE
+#endif // WELP_INTERPRETER_DEBUG_MODE
 	return field[byte_offset];
 }
 
 template <std::size_t bits>
-inline welp::flags<bits>& welp::flags<bits>::store_byte(std::size_t byte_offset, std::uint8_t number) noexcept
+inline welp::interpreter<bits>& welp::interpreter<bits>::store_byte(std::size_t byte_offset, std::uint8_t number) noexcept
 {
-#ifdef WELP_FLAGS_DEBUG_MODE
+#ifdef WELP_INTERPRETER_DEBUG_MODE
 	assert(8 * byte_offset < bits);
-#endif // WELP_FLAGS_DEBUG_MODE
+#endif // WELP_INTERPRETER_DEBUG_MODE
 	field[byte_offset] = number;
 	return *this;
 }
 
 template <std::size_t bits>
-inline const std::uint8_t& welp::flags<bits>::operator[](std::size_t byte_offset) const noexcept
+inline const std::uint8_t& welp::interpreter<bits>::operator[](std::size_t byte_offset) const noexcept
 {
-#ifdef WELP_FLAGS_DEBUG_MODE
+#ifdef WELP_INTERPRETER_DEBUG_MODE
 	assert(8 * byte_offset < bits);
-#endif // WELP_FLAGS_DEBUG_MODE
+#endif // WELP_INTERPRETER_DEBUG_MODE
 	return field[byte_offset];
 }
 
 template <std::size_t bits>
-inline std::uint8_t& welp::flags<bits>::operator[](std::size_t byte_offset) noexcept
+inline std::uint8_t& welp::interpreter<bits>::operator[](std::size_t byte_offset) noexcept
 {
-#ifdef WELP_FLAGS_DEBUG_MODE
+#ifdef WELP_INTERPRETER_DEBUG_MODE
 	assert(8 * byte_offset < bits);
-#endif // WELP_FLAGS_DEBUG_MODE
+#endif // WELP_INTERPRETER_DEBUG_MODE
 	return field[byte_offset];
 }
 
 
 template <std::size_t bits>
-inline welp::flags<bits>& welp::flags<bits>::set_bits(bool bit) noexcept
+inline welp::interpreter<bits>& welp::interpreter<bits>::set_bits(bool bit) noexcept
 {
 	constexpr std::size_t bytes = bits >> 3;
 	constexpr std::size_t remainder_bits = bits & 7;
@@ -354,7 +354,7 @@ inline welp::flags<bits>& welp::flags<bits>::set_bits(bool bit) noexcept
 }
 
 template <std::size_t bits>
-inline welp::flags<bits>& welp::flags<bits>::set_hex(char hex) noexcept
+inline welp::interpreter<bits>& welp::interpreter<bits>::set_hex(char hex) noexcept
 {
 	constexpr std::size_t bytes = bits >> 3;
 	std::uint8_t temp = char_to_uint8_t(hex);
@@ -369,7 +369,7 @@ inline welp::flags<bits>& welp::flags<bits>::set_hex(char hex) noexcept
 }
 
 template <std::size_t bits>
-inline welp::flags<bits>& welp::flags<bits>::set_bytes(std::uint8_t number) noexcept
+inline welp::interpreter<bits>& welp::interpreter<bits>::set_bytes(std::uint8_t number) noexcept
 {
 	constexpr std::size_t bytes = bits >> 3;
 	std::memset(static_cast<std::uint8_t*>(field), number, bytes);
@@ -379,7 +379,7 @@ inline welp::flags<bits>& welp::flags<bits>::set_bytes(std::uint8_t number) noex
 
 
 template <std::size_t bits> template <class Ty>
-inline welp::flags<bits>& welp::flags<bits>::cpy(const Ty& rhs) noexcept
+inline welp::interpreter<bits>& welp::interpreter<bits>::cpy(const Ty& rhs) noexcept
 {
 	constexpr std::size_t bytes = bits >> 3;
 	constexpr std::size_t remainder_bits = bits & 7;
@@ -394,7 +394,7 @@ inline welp::flags<bits>& welp::flags<bits>::cpy(const Ty& rhs) noexcept
 
 
 template <std::size_t bits>
-inline welp::flags<bits>& welp::flags<bits>::operator&=(const welp::flags<bits>& rhs) noexcept
+inline welp::interpreter<bits>& welp::interpreter<bits>::operator&=(const welp::interpreter<bits>& rhs) noexcept
 {
 	constexpr std::size_t bytes = bits >> 3;
 	constexpr std::size_t remainder_bits = bits & 7;
@@ -410,7 +410,7 @@ inline welp::flags<bits>& welp::flags<bits>::operator&=(const welp::flags<bits>&
 }
 
 template <std::size_t bits>
-inline welp::flags<bits>& welp::flags<bits>::operator|=(const welp::flags<bits>& rhs) noexcept
+inline welp::interpreter<bits>& welp::interpreter<bits>::operator|=(const welp::interpreter<bits>& rhs) noexcept
 {
 	constexpr std::size_t bytes = bits >> 3;
 	constexpr std::size_t remainder_bits = bits & 7;
@@ -426,7 +426,7 @@ inline welp::flags<bits>& welp::flags<bits>::operator|=(const welp::flags<bits>&
 }
 
 template <std::size_t bits>
-inline welp::flags<bits>& welp::flags<bits>::operator^=(const welp::flags<bits>& rhs) noexcept
+inline welp::interpreter<bits>& welp::interpreter<bits>::operator^=(const welp::interpreter<bits>& rhs) noexcept
 {
 	constexpr std::size_t bytes = bits >> 3;
 	constexpr std::size_t remainder_bits = bits & 7;
@@ -442,7 +442,7 @@ inline welp::flags<bits>& welp::flags<bits>::operator^=(const welp::flags<bits>&
 }
 
 template <std::size_t bits>
-inline welp::flags<bits>& welp::flags<bits>::flip() noexcept
+inline welp::interpreter<bits>& welp::interpreter<bits>::flip() noexcept
 {
 	constexpr std::size_t bytes = bits >> 3;
 	constexpr std::size_t remainder_bits = bits & 7;
@@ -459,47 +459,47 @@ inline welp::flags<bits>& welp::flags<bits>::flip() noexcept
 }
 
 
-#ifdef WELP_FLAGS_INCLUDE_IOSTREAM
+#ifdef WELP_INTERPRETER_INCLUDE_IOSTREAM
 template <std::size_t bits>
-const welp::flags<bits>& welp::flags<bits>::say_bits() const
+const welp::interpreter<bits>& welp::interpreter<bits>::say_bits() const
 {
 	say_bits_sub(); return *this;
 }
 
 template <std::size_t bits>
-welp::flags<bits>& welp::flags<bits>::say_bits()
+welp::interpreter<bits>& welp::interpreter<bits>::say_bits()
 {
 	say_bits_sub(); return *this;
 }
 
 template <std::size_t bits>
-const welp::flags<bits>& welp::flags<bits>::say_hex() const
+const welp::interpreter<bits>& welp::interpreter<bits>::say_hex() const
 {
 	say_hex_sub(); return *this;
 }
 
 template <std::size_t bits>
-welp::flags<bits>& welp::flags<bits>::say_hex()
+welp::interpreter<bits>& welp::interpreter<bits>::say_hex()
 {
 	say_hex_sub(); return *this;
 }
 
 template <std::size_t bits>
-const welp::flags<bits>& welp::flags<bits>::say_bytes() const
+const welp::interpreter<bits>& welp::interpreter<bits>::say_bytes() const
 {
 	say_bytes_sub(); return *this;
 }
 
 template <std::size_t bits>
-welp::flags<bits>& welp::flags<bits>::say_bytes()
+welp::interpreter<bits>& welp::interpreter<bits>::say_bytes()
 {
 	say_bytes_sub(); return *this;
 }
-#endif // WELP_FLAGS_INCLUDE_IOSTREAM
+#endif // WELP_INTERPRETER_INCLUDE_IOSTREAM
 
 
 template <std::size_t bits>
-welp::flags<bits>::flags() noexcept
+welp::interpreter<bits>::interpreter() noexcept
 {
 	constexpr std::size_t bytes = bits >> 3;
 	constexpr std::size_t remainder_bits = bits & 7;
@@ -511,7 +511,7 @@ welp::flags<bits>::flags() noexcept
 }
 
 template <std::size_t bits>
-inline welp::flags<bits>& welp::flags<bits>::operator=(const welp::flags<bits>& rhs) noexcept
+inline welp::interpreter<bits>& welp::interpreter<bits>::operator=(const welp::interpreter<bits>& rhs) noexcept
 {
 	constexpr std::size_t bytes = bits >> 3;
 	constexpr std::size_t remainder_bits = bits & 7;
@@ -525,7 +525,7 @@ inline welp::flags<bits>& welp::flags<bits>::operator=(const welp::flags<bits>& 
 }
 
 template <std::size_t bits>
-inline welp::flags<bits>& welp::flags<bits>::operator=(welp::flags<bits>&& rhs) noexcept
+inline welp::interpreter<bits>& welp::interpreter<bits>::operator=(welp::interpreter<bits>&& rhs) noexcept
 {
 	constexpr std::size_t bytes = bits >> 3;
 	constexpr std::size_t remainder_bits = bits & 7;
@@ -540,7 +540,7 @@ inline welp::flags<bits>& welp::flags<bits>::operator=(welp::flags<bits>&& rhs) 
 
 
 template <std::size_t bits>
-inline std::uint8_t welp::flags<bits>::shift_true(std::size_t bit_offset) const noexcept
+inline std::uint8_t welp::interpreter<bits>::shift_true(std::size_t bit_offset) const noexcept
 {
 	switch (bit_offset)
 	{
@@ -557,7 +557,7 @@ inline std::uint8_t welp::flags<bits>::shift_true(std::size_t bit_offset) const 
 }
 
 template <std::size_t bits>
-inline std::uint8_t welp::flags<bits>::shift_false(std::size_t bit_offset) const noexcept
+inline std::uint8_t welp::interpreter<bits>::shift_false(std::size_t bit_offset) const noexcept
 {
 	switch (bit_offset)
 	{
@@ -574,7 +574,7 @@ inline std::uint8_t welp::flags<bits>::shift_false(std::size_t bit_offset) const
 }
 
 template <std::size_t bits>
-inline std::uint8_t welp::flags<bits>::bitmask_true(std::size_t digits) const noexcept
+inline std::uint8_t welp::interpreter<bits>::bitmask_true(std::size_t digits) const noexcept
 {
 	switch (digits)
 	{
@@ -591,7 +591,7 @@ inline std::uint8_t welp::flags<bits>::bitmask_true(std::size_t digits) const no
 }
 
 template <std::size_t bits>
-inline std::uint8_t welp::flags<bits>::bitmask_false(std::size_t digits) const noexcept
+inline std::uint8_t welp::interpreter<bits>::bitmask_false(std::size_t digits) const noexcept
 {
 	switch (digits)
 	{
@@ -608,7 +608,7 @@ inline std::uint8_t welp::flags<bits>::bitmask_false(std::size_t digits) const n
 }
 
 template <std::size_t bits>
-inline std::uint8_t welp::flags<bits>::char_to_uint8_t(char hex) const noexcept
+inline std::uint8_t welp::interpreter<bits>::char_to_uint8_t(char hex) const noexcept
 {
 	switch (hex)
 	{
@@ -642,7 +642,7 @@ inline std::uint8_t welp::flags<bits>::char_to_uint8_t(char hex) const noexcept
 }
 
 template <std::size_t bits>
-inline char welp::flags<bits>::uint8_t_to_char_uc(std::uint8_t number) const noexcept
+inline char welp::interpreter<bits>::uint8_t_to_char_uc(std::uint8_t number) const noexcept
 {
 	switch (number)
 	{
@@ -669,7 +669,7 @@ inline char welp::flags<bits>::uint8_t_to_char_uc(std::uint8_t number) const noe
 }
 
 template <std::size_t bits>
-inline char welp::flags<bits>::uint8_t_to_char_lc(std::uint8_t number) const noexcept
+inline char welp::interpreter<bits>::uint8_t_to_char_lc(std::uint8_t number) const noexcept
 {
 	switch (number)
 	{
@@ -696,9 +696,9 @@ inline char welp::flags<bits>::uint8_t_to_char_lc(std::uint8_t number) const noe
 }
 
 
-#ifdef WELP_FLAGS_INCLUDE_IOSTREAM
+#ifdef WELP_INTERPRETER_INCLUDE_IOSTREAM
 template <std::size_t bits>
-void welp::flags<bits>::say_bits_sub() const
+void welp::interpreter<bits>::say_bits_sub() const
 {
 	std::cout << ">>>  bit 0  >  " << load_bit(0) << "\n";
 	for (std::size_t k = 1; k < bits; k++)
@@ -709,7 +709,7 @@ void welp::flags<bits>::say_bits_sub() const
 }
 
 template <std::size_t bits>
-void welp::flags<bits>::say_hex_sub() const
+void welp::interpreter<bits>::say_hex_sub() const
 {
 	constexpr std::size_t hex = bits >> 2;
 	if (bits < 4)
@@ -731,7 +731,7 @@ void welp::flags<bits>::say_hex_sub() const
 }
 
 template <std::size_t bits>
-void welp::flags<bits>::say_bytes_sub() const
+void welp::interpreter<bits>::say_bytes_sub() const
 {
 	constexpr std::size_t bytes = bits >> 3;
 	if (bits < 8)
@@ -754,12 +754,12 @@ void welp::flags<bits>::say_bytes_sub() const
 		std::cout << std::endl;
 	}
 }
-#endif // WELP_FLAGS_INCLUDE_IOSTREAM
+#endif // WELP_INTERPRETER_INCLUDE_IOSTREAM
 
 
 namespace welp
 {
-	template <std::size_t bits> inline bool operator==(const welp::flags<bits>& A, const welp::flags<bits>& B) noexcept
+	template <std::size_t bits> inline bool operator==(const welp::interpreter<bits>& A, const welp::interpreter<bits>& B) noexcept
 	{
 		constexpr std::size_t bytes = bits >> 3;
 		constexpr std::size_t remainder_bits = bits & 7;
@@ -775,7 +775,7 @@ namespace welp
 		}
 		else { return true; }
 	}
-	template <std::size_t bits> inline bool operator!=(const welp::flags<bits>& A, const welp::flags<bits>& B) noexcept
+	template <std::size_t bits> inline bool operator!=(const welp::interpreter<bits>& A, const welp::interpreter<bits>& B) noexcept
 	{
 		constexpr std::size_t bytes = bits >> 3;
 		constexpr std::size_t remainder_bits = bits & 7;
@@ -792,40 +792,40 @@ namespace welp
 		else { return true; }
 	}
 
-	template <std::size_t bits> inline welp::flags<bits> operator&(const welp::flags<bits>& A, const welp::flags<bits>& B) noexcept
+	template <std::size_t bits> inline welp::interpreter<bits> operator&(const welp::interpreter<bits>& A, const welp::interpreter<bits>& B) noexcept
 	{
 		constexpr std::size_t bytes = (bits + ((8 - (bits & 7)) & 7)) >> 3;
-		welp::flags<bits> C;
+		welp::interpreter<bits> C;
 		for (std::size_t k = 0; k < bytes; k++)
 		{
 			C.field[k] = A.field[k] & B.field[k];
 		}
 		return C;
 	}
-	template <std::size_t bits> inline welp::flags<bits> operator|(const welp::flags<bits>& A, const welp::flags<bits>& B) noexcept
+	template <std::size_t bits> inline welp::interpreter<bits> operator|(const welp::interpreter<bits>& A, const welp::interpreter<bits>& B) noexcept
 	{
 		constexpr std::size_t bytes = (bits + ((8 - (bits & 7)) & 7)) >> 3;
-		welp::flags<bits> C;
+		welp::interpreter<bits> C;
 		for (std::size_t k = 0; k < bytes; k++)
 		{
 			C.field[k] = A.field[k] | B.field[k];
 		}
 		return C;
 	}
-	template <std::size_t bits> inline welp::flags<bits> operator^(const welp::flags<bits>& A, const welp::flags<bits>& B) noexcept
+	template <std::size_t bits> inline welp::interpreter<bits> operator^(const welp::interpreter<bits>& A, const welp::interpreter<bits>& B) noexcept
 	{
 		constexpr std::size_t bytes = (bits + ((8 - (bits & 7)) & 7)) >> 3;
-		welp::flags<bits> C;
+		welp::interpreter<bits> C;
 		for (std::size_t k = 0; k < bytes; k++)
 		{
 			C.field[k] = A.field[k] ^ B.field[k];
 		}
 		return C;
 	}
-	template <std::size_t bits> inline welp::flags<bits> operator~(const welp::flags<bits>& A) noexcept
+	template <std::size_t bits> inline welp::interpreter<bits> operator~(const welp::interpreter<bits>& A) noexcept
 	{
 		constexpr std::size_t bytes = (bits + ((8 - (bits & 7)) & 7)) >> 3;
-		welp::flags<bits> C;
+		welp::interpreter<bits> C;
 		for (std::size_t k = 0; k < bytes; k++)
 		{
 			C.field[k] = ~A.field[k];
@@ -833,36 +833,36 @@ namespace welp
 		return C;
 	}
 
-	template <class Ty> inline const welp::flags<8 * sizeof(Ty)>& as_flags(const Ty& rhs) noexcept
+	template <class Ty> inline const welp::interpreter<8 * sizeof(Ty)>& as_interpreter(const Ty& rhs) noexcept
 	{
-		return reinterpret_cast<const welp::flags<8 * sizeof(Ty)>&>(rhs);
+		return reinterpret_cast<const welp::interpreter<8 * sizeof(Ty)>&>(rhs);
 	}
-	template <class Ty> inline welp::flags<8 * sizeof(Ty)>& as_flags(Ty& rhs) noexcept
+	template <class Ty> inline welp::interpreter<8 * sizeof(Ty)>& as_interpreter(Ty& rhs) noexcept
 	{
-		return reinterpret_cast<welp::flags<8 * sizeof(Ty)>&>(rhs);
+		return reinterpret_cast<welp::interpreter<8 * sizeof(Ty)>&>(rhs);
 	}
-	template <std::size_t bits, class Ty> inline const welp::flags<bits>& as_flags(const Ty& rhs) noexcept
+	template <std::size_t bits, class Ty> inline const welp::interpreter<bits>& as_interpreter(const Ty& rhs) noexcept
 	{
-		return reinterpret_cast<const welp::flags<bits>&>(rhs);
+		return reinterpret_cast<const welp::interpreter<bits>&>(rhs);
 	}
-	template <std::size_t bits, class Ty> inline welp::flags<bits>& as_flags(Ty& rhs) noexcept
+	template <std::size_t bits, class Ty> inline welp::interpreter<bits>& as_interpreter(Ty& rhs) noexcept
 	{
-		return reinterpret_cast<welp::flags<bits>&>(rhs);
+		return reinterpret_cast<welp::interpreter<bits>&>(rhs);
 	}
 }
 
 
-#ifdef WELP_FLAGS_INCLUDE_IOSTREAM
-template <std::size_t bits> std::ostream& operator<<(std::ostream& out, const welp::flags<bits>& A)
+#ifdef WELP_INTERPRETER_INCLUDE_IOSTREAM
+template <std::size_t bits> std::ostream& operator<<(std::ostream& out, const welp::interpreter<bits>& A)
 {
 	A.say_bits(); return out;
 }
-#endif // WELP_FLAGS_INCLUDE_IOSTREAM
+#endif // WELP_INTERPRETER_INCLUDE_IOSTREAM
 
 
 namespace welp
 {
-	template <> class flags<0>
+	template <> class interpreter<0>
 	{
 
 	public:
@@ -871,9 +871,9 @@ namespace welp
 		{
 			return (*(static_cast<const std::uint8_t*>(field) + (bit_offset >> 3)) & shift_true(bit_offset & 7)) != static_cast<std::uint8_t>(0);
 		}
-		inline welp::flags<0>& store_bit(std::size_t bit_offset, bool flag) noexcept
+		inline welp::interpreter<0>& store_bit(std::size_t bit_offset, bool bit) noexcept
 		{
-			if (flag)
+			if (bit)
 			{
 				*(static_cast<std::uint8_t*>(field) + (bit_offset >> 3)) |= shift_true(bit_offset & 7);
 				return *this;
@@ -886,17 +886,17 @@ namespace welp
 		}
 		inline bool load_bit(std::size_t byte_offset, std::size_t bit_offset) const noexcept
 		{
-#ifdef WELP_FLAGS_DEBUG_MODE
+#ifdef WELP_INTERPRETER_DEBUG_MODE
 			assert(bit_offset < 8);
-#endif // WELP_FLAGS_DEBUG_MODE
+#endif // WELP_INTERPRETER_DEBUG_MODE
 			return (*(static_cast<const std::uint8_t*>(field) + byte_offset) & shift_true(bit_offset)) != static_cast<std::uint8_t>(0);
 		}
-		inline welp::flags<0>& store_bit(std::size_t byte_offset, std::size_t bit_offset, bool flag) noexcept
+		inline welp::interpreter<0>& store_bit(std::size_t byte_offset, std::size_t bit_offset, bool bit) noexcept
 		{
-#ifdef WELP_FLAGS_DEBUG_MODE
+#ifdef WELP_INTERPRETER_DEBUG_MODE
 			assert(bit_offset < 8);
-#endif // WELP_FLAGS_DEBUG_MODE
-			if (flag)
+#endif // WELP_INTERPRETER_DEBUG_MODE
+			if (bit)
 			{
 				*(static_cast<std::uint8_t*>(field) + byte_offset) |= shift_true(bit_offset);
 				return *this;
@@ -922,7 +922,7 @@ namespace welp
 				: (*(static_cast<const std::uint8_t*>(field) + (hex_offset >> 1)) & static_cast<std::uint8_t>(15));
 			return uint8_t_to_char_uc(temp);
 		}
-		inline welp::flags<0>& store_hex(std::size_t hex_offset, char hex) noexcept
+		inline welp::interpreter<0>& store_hex(std::size_t hex_offset, char hex) noexcept
 		{
 			std::uint8_t temp = char_to_uint8_t(hex);
 			std::size_t byte_offset = hex_offset >> 1;
@@ -953,7 +953,7 @@ namespace welp
 				: (*(static_cast<const std::uint8_t*>(field) + byte_offset) & static_cast<std::uint8_t>(15));
 			return uint8_t_to_char_uc(temp);
 		}
-		inline welp::flags<0>& store_hex(std::size_t byte_offset, bool upper_half_byte, char hex) noexcept
+		inline welp::interpreter<0>& store_hex(std::size_t byte_offset, bool upper_half_byte, char hex) noexcept
 		{
 			std::uint8_t temp = char_to_uint8_t(hex);
 
@@ -975,7 +975,7 @@ namespace welp
 		{
 			return *(static_cast<const std::uint8_t*>(field) + byte_offset);
 		}
-		inline welp::flags<0>& store_byte(std::size_t byte_offset, std::uint8_t number) noexcept
+		inline welp::interpreter<0>& store_byte(std::size_t byte_offset, std::uint8_t number) noexcept
 		{
 			*(static_cast<std::uint8_t*>(field) + byte_offset) = number;
 			return *this;
@@ -992,29 +992,29 @@ namespace welp
 		constexpr const std::uint8_t* data() const noexcept { return static_cast<const std::uint8_t*>(field); }
 		constexpr std::uint8_t* data() noexcept { return static_cast<std::uint8_t*>(field); }
 
-#ifdef WELP_FLAGS_INCLUDE_IOSTREAM
-		const welp::flags<0>& say_bits(std::size_t bits) const { say_bits_sub(0, bits); return *this; }
-		welp::flags<0>& say_bits(std::size_t bits) { say_bits_sub(0, bits); return *this; }
-		const welp::flags<0>& say_bits(std::size_t start_bit, std::size_t end_bit) const { say_bits_sub(start_bit, end_bit); return *this; }
-		welp::flags<0>& say_bits(std::size_t start_bit, std::size_t end_bit) { say_bits_sub(start_bit, end_bit); return *this; }
+#ifdef WELP_INTERPRETER_INCLUDE_IOSTREAM
+		const welp::interpreter<0>& say_bits(std::size_t bits) const { say_bits_sub(0, bits); return *this; }
+		welp::interpreter<0>& say_bits(std::size_t bits) { say_bits_sub(0, bits); return *this; }
+		const welp::interpreter<0>& say_bits(std::size_t start_bit, std::size_t end_bit) const { say_bits_sub(start_bit, end_bit); return *this; }
+		welp::interpreter<0>& say_bits(std::size_t start_bit, std::size_t end_bit) { say_bits_sub(start_bit, end_bit); return *this; }
 
-		const welp::flags<0>& say_hex(std::size_t hex) const { say_hex_sub(0, hex); return *this; }
-		welp::flags<0>& say_hex(std::size_t hex) { say_hex_sub(0, hex); return *this; }
-		const welp::flags<0>& say_hex(std::size_t start_hex, std::size_t end_hex) const { say_hex_sub(start_hex, end_hex); return *this; }
-		welp::flags<0>& say_hex(std::size_t start_hex, std::size_t end_hex) { say_hex_sub(start_hex, end_hex); return *this; }
+		const welp::interpreter<0>& say_hex(std::size_t hex) const { say_hex_sub(0, hex); return *this; }
+		welp::interpreter<0>& say_hex(std::size_t hex) { say_hex_sub(0, hex); return *this; }
+		const welp::interpreter<0>& say_hex(std::size_t start_hex, std::size_t end_hex) const { say_hex_sub(start_hex, end_hex); return *this; }
+		welp::interpreter<0>& say_hex(std::size_t start_hex, std::size_t end_hex) { say_hex_sub(start_hex, end_hex); return *this; }
 
-		const welp::flags<0>& say_bytes(std::size_t bytes) const { say_bytes_sub(0, bytes); return *this; }
-		welp::flags<0>& say_bytes(std::size_t bytes) { say_bytes_sub(0, bytes); return *this; }
-		const welp::flags<0>& say_bytes(std::size_t start_byte, std::size_t end_byte) const { say_bytes_sub(start_byte, end_byte); return *this; }
-		welp::flags<0>& say_bytes(std::size_t start_byte, std::size_t end_byte) { say_bytes_sub(start_byte, end_byte); return *this; }
-#endif // WELP_FLAGS_INCLUDE_IOSTREAM
+		const welp::interpreter<0>& say_bytes(std::size_t bytes) const { say_bytes_sub(0, bytes); return *this; }
+		welp::interpreter<0>& say_bytes(std::size_t bytes) { say_bytes_sub(0, bytes); return *this; }
+		const welp::interpreter<0>& say_bytes(std::size_t start_byte, std::size_t end_byte) const { say_bytes_sub(start_byte, end_byte); return *this; }
+		welp::interpreter<0>& say_bytes(std::size_t start_byte, std::size_t end_byte) { say_bytes_sub(start_byte, end_byte); return *this; }
+#endif // WELP_INTERPRETER_INCLUDE_IOSTREAM
 
-		flags() = delete;
-		flags(const welp::flags<0>&) = delete;
-		welp::flags<0>& operator=(const welp::flags<0>&) = delete;
-		flags(welp::flags<0>&&) = delete;
-		welp::flags<0>& operator=(welp::flags<0>&&) = delete;
-		~flags() = default;
+		interpreter() = delete;
+		interpreter(const welp::interpreter<0>&) = delete;
+		welp::interpreter<0>& operator=(const welp::interpreter<0>&) = delete;
+		interpreter(welp::interpreter<0>&&) = delete;
+		welp::interpreter<0>& operator=(welp::interpreter<0>&&) = delete;
+		~interpreter() = default;
 
 	private:
 
@@ -1133,7 +1133,7 @@ namespace welp
 			}
 		}
 
-#ifdef WELP_FLAGS_INCLUDE_IOSTREAM
+#ifdef WELP_INTERPRETER_INCLUDE_IOSTREAM
 		void say_bits_sub(std::size_t start_bit, std::size_t end_bit) const
 		{
 			std::cout << ">>>  bit " << start_bit << "  >  " << load_bit(start_bit) << "\n";
@@ -1184,15 +1184,15 @@ namespace welp
 				std::cout << std::endl;
 			}
 		}
-#endif // WELP_FLAGS_INCLUDE_IOSTREAM
+#endif // WELP_INTERPRETER_INCLUDE_IOSTREAM
 	};
 }
 
 
-#endif // WELP_FLAGS_H
+#endif // WELP_INTERPRETER_H
 
 
-// welp_flags.hpp
+// welp_interpreter.hpp
 // 
 // This is free software released into the public domain.
 // 
