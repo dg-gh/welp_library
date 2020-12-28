@@ -6,7 +6,7 @@ welp_flags.hpp provides one class welp::bits<number_of_bits> is a class that can
 
 Template parameter number_of_bits is the number of booleans stored in welp::bit_flags<number_of_bits>.
 
-### Setting and getting booleans
+### Setting, getting and printing booleans
 
 	B.load_bit(n); 
 
@@ -24,9 +24,13 @@ Stores boolean true at the nth position of B.
 
 Sets all the booleans of B as false.
 
-	B.set_bits(true); 
-
+	B.set_bits(true);
+	
 Sets all the booleans of B as true.
+
+	B.say_bit(); 
+
+Prints all the bits of B.
 
 	B.cpy(A); 
 
