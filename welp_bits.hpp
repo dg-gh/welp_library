@@ -71,11 +71,6 @@ namespace welp
 		inline welp::bits<number_of_bits>& set_hex(char hex) noexcept;
 		inline welp::bits<number_of_bits>& set_bytes(std::uint8_t number) noexcept;
 
-		constexpr std::uint8_t* begin() noexcept { return static_cast<std::uint8_t*>(field); }
-		constexpr const std::uint8_t* cbegin() const noexcept { return static_cast<const std::uint8_t*>(field); }
-		constexpr std::uint8_t* end() noexcept { return static_cast<std::uint8_t*>(field) + ((number_of_bits + ((8 - (number_of_bits & 7)) & 7)) >> 3); }
-		constexpr const std::uint8_t* cend() const noexcept { return static_cast<const std::uint8_t*>(field) + ((number_of_bits + ((8 - (number_of_bits & 7)) & 7)) >> 3); }
-
 		template <class Ty> inline welp::bits<number_of_bits>& cpy(const Ty& rhs) noexcept;
 
 		inline welp::bits<number_of_bits>& operator&=(const welp::bits<number_of_bits>& rhs) noexcept;
