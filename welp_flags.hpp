@@ -519,7 +519,7 @@ inline welp::flags<bits>& welp::flags<bits>::operator=(const welp::flags<bits>& 
 	if (remainder_bits != 0)
 	{
 		*(static_cast<std::uint8_t*>(field) + bytes) &= bitmask_false(remainder_bits);
-		*(static_cast<std::uint8_t*>(field) + bytes)& bitmask_true(remainder_bits));
+		*(static_cast<std::uint8_t*>(field) + bytes) & bitmask_true(remainder_bits);
 	}
 	return *this;
 }
