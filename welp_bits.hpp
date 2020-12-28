@@ -60,6 +60,9 @@ namespace welp
 
 		inline std::uint8_t load_byte(std::size_t byte_offset) const noexcept;
 		inline bits<number_of_bits>& store_byte(std::size_t byte_offset, std::uint8_t number) noexcept;
+		
+		inline std::uint8_t load_char(std::size_t byte_offset) const noexcept;
+		inline bits<number_of_bits>& store_char(std::size_t byte_offset, std::uint8_t character) noexcept;
 
 		constexpr const std::uint8_t* data() const noexcept { return static_cast<const std::uint8_t*>(field); }
 		constexpr std::uint8_t* data() noexcept { return static_cast<std::uint8_t*>(field); }
@@ -305,6 +308,25 @@ inline welp::bits<number_of_bits>& welp::bits<number_of_bits>::store_byte(std::s
 	assert(8 * byte_offset < bits);
 #endif // WELP_BITS_DEBUG_MODE
 	field[byte_offset] = number;
+	return *this;
+}
+
+template <std::size_t number_of_bits>
+inline std::uint8_t welp::bits<number_of_bits>::load_char(std::size_t byte_offset) const noexcept
+{
+#ifdef WELP_BITS_DEBUG_MODE
+	assert(8 * byte_offset < bits);
+#endif // WELP_BITS_DEBUG_MODE
+	return *(reinterpret_cast<const char*>(field) + byte_offset);
+}
+
+template <std::size_t number_of_bits>
+inline welp::bits<number_of_bits>& welp::bits<number_of_bits>::store_char(std::size_t byte_offset, std::uint8_t character) noexcept
+{
+#ifdef WELP_BITS_DEBUG_MODE
+	assert(8 * byte_offset < bits);
+#endif // WELP_BITS_DEBUG_MODE
+	*(reinterpret_cast<char*>(field) + byte_offset) = character;
 	return *this;
 }
 
