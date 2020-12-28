@@ -65,3 +65,75 @@ Reinterprets any object A as a bits reference of 8 * sizeof(A) bits.
 	welp::as_bits<n>(A);
 
 Reinterprets any object A as a bit flags reference of n bits.
+
+### Code example
+
+	#define WELP_BITS_INCLUDE_IOSTREAM
+	#include "welp_bits.hpp"
+	#include <string>
+	#include <fstream>
+	
+	
+	class vec4
+	{
+	
+	public:
+
+		float x = 0.0f;
+		float y = 0.0f;
+		float z = 0.0f;
+		float w = 0.0f;
+	};
+	
+	
+	int main()
+	{
+		std::string buffer;
+		buffer.reserve(10000);
+	
+		vec4 A = { .x = 1.3f, .y = 2.3f, .z = -0.999f, .w = 2000.0f };
+	
+		std::cout << "vec4 initially :  ";
+		std::cout << A.x << "  " << A.y << "  " << A.z << "  " << A.w << "\n" << std::endl;
+	
+		{
+			std::ofstream filedump;
+			filedump.open("dump.bin");
+			if (filedump.good())
+			{
+				welp::bits<8 * sizeof(A)>& ref = welp::as_bits(A);
+				buffer.resize(ref.capacity_in_hex());
+				for (std::size_t n = 0; n < ref.capacity_in_hex(); n++)
+				{
+					buffer[n] = ref.load_hex_lc(n);
+				}
+				filedump << buffer;
+			}
+			filedump.close();
+		}
+	
+		vec4 B;
+	
+		{
+			std::ifstream filedump;
+			filedump.open("dump.bin");
+			if (filedump.good())
+			{
+				welp::bits<8 * sizeof(A)>& ref = welp::as_bits(B);
+				buffer.resize(ref.capacity_in_hex());
+				std::getline(filedump, buffer);
+				for (std::size_t n = 0; n < ref.capacity_in_hex(); n++)
+				{
+					ref.store_hex(n, buffer[n]);
+				}
+				ref.say_bytes();
+			}
+			filedump.close();
+		}
+	
+		std::cout << "vec4 after reconstruction :  " << B.x << "  " <<
+			B.y << "  " << B.z << "  " << B.w << std::endl;
+	
+		std::cin.get();
+		return 0;
+	}
