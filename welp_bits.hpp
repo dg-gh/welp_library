@@ -330,7 +330,7 @@ inline welp::bits<number_of_bits>& welp::bits<number_of_bits>::store_char(std::s
 #ifdef WELP_BITS_DEBUG_MODE
 	assert(8 * byte_offset < bits);
 #endif // WELP_BITS_DEBUG_MODE
-	* (reinterpret_cast<char*>(field) + byte_offset) = character;
+	*(reinterpret_cast<char*>(field) + byte_offset) = character;
 	return *this;
 }
 
