@@ -54,11 +54,15 @@ Bitwise operations and, or, xor, not of B1 with B2 (modifies B1).
 	B1 ^ B2;
 	~B;
 
-### Setting, getting and printing hex
+### Setting, getting and printing hexidecimals
 
-	B.load_hex(n); 
+	B.load_hex_lc(n); 
 
-Loads the nth hexidecimal (half of a byte) of B.
+Loads the nth hexidecimal (half of a byte) of B and returns a char that prints a number or an lower-case letter representing that hexadecimal
+
+	B.load_hex_uc(n); 
+
+Loads the nth hexidecimal (half of a byte) of B and returns a char that prints a number or an upper-case letter representing that hexadecimal
 
 	B.store_hex(n, h); 
 
