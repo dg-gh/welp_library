@@ -207,7 +207,7 @@ Reinterprets any object A as a reference of welp::bits< n>.
 					std::cout << buffer[n];
 					ref.store_hex(n, buffer[n]);
 				}
-				std::cout << "\n\nprinting welp::bits<number_of_bits> recoreved from file :\n" << std::endl;
+				std::cout << "\n\nprinting welp::bits<number_of_bits> recovered from file :\n" << std::endl;
 				ref.say_bytes();
 			}
 			filedump.close();
