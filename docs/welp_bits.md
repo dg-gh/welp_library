@@ -116,6 +116,14 @@ Sets all the bytes of B as std::uint8_t x.
 
 Sets all the bytes of B as char x.
 
+	B.say_bytes(); 
+
+Prints the bytes of B as std::uint8_t. Requires the macro WELP_BITS_INCLUDE_IOSTREAM to be defined.
+
+	B.say_chars(); 
+
+Prints the bytes of B as chars. Requires the macro WELP_BITS_INCLUDE_IOSTREAM to be defined.
+
 	B.capacity_in_bytes(); 
 
 Returns the number of bytes that can be stored in B.
