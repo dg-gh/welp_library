@@ -73,6 +73,7 @@ namespace welp
 		inline welp::bits<number_of_bits>& set_bits(bool bit) noexcept;
 		inline welp::bits<number_of_bits>& set_hex(char hex) noexcept;
 		inline welp::bits<number_of_bits>& set_bytes(std::uint8_t number) noexcept;
+		inline welp::bits<number_of_bits>& set_chars(char character) noexcept;
 
 		template <class Ty> inline welp::bits<number_of_bits>& cpy(const Ty& rhs) noexcept;
 
@@ -377,6 +378,13 @@ inline welp::bits<number_of_bits>& welp::bits<number_of_bits>::set_bytes(std::ui
 	return *this;
 }
 
+template <std::size_t number_of_bits>
+inline welp::bits<number_of_bits>& welp::bits<number_of_bits>::set_chars(char character) noexcept
+{
+	constexpr std::size_t bytes = number_of_bits >> 3;
+	std::memset(reinterpret_cast<char*>(field), character, bytes);
+	return *this;
+}
 
 
 template <std::size_t number_of_bits> template <class Ty>
