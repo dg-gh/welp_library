@@ -633,6 +633,7 @@ inline std::uint8_t welp::bits<number_of_bits>::bitmask_false(std::size_t digits
 template <std::size_t number_of_bits>
 inline std::uint8_t welp::bits<number_of_bits>::char_to_uint8_t(char hex) const noexcept
 {
+#ifndef WELP_BITS_USE_CHAR_ARITHMETIC
 	switch (hex)
 	{
 	case '0': return static_cast<std::uint8_t>(0); break;
@@ -662,11 +663,17 @@ inline std::uint8_t welp::bits<number_of_bits>::char_to_uint8_t(char hex) const 
 
 	default: return static_cast<std::uint8_t>(0); break;
 	}
+#else // WELP_BITS_USE_CHAR_ARITHMETIC
+	if (hex < ':') { return static_cast<std::uint8_t>(hex - '0'); }
+	else if (hex < 'G') { return static_cast<std::uint8_t>(hex - '7'); }
+	else { return static_cast<std::uint8_t>(hex - 'W'); }
+#endif // WELP_BITS_USE_CHAR_ARITHMETIC
 }
 
 template <std::size_t number_of_bits>
 inline char welp::bits<number_of_bits>::uint8_t_to_char_lc(std::uint8_t number) const noexcept
 {
+#ifndef WELP_BITS_USE_CHAR_ARITHMETIC
 	switch (number)
 	{
 	case 0: return '0'; break;
@@ -689,11 +696,16 @@ inline char welp::bits<number_of_bits>::uint8_t_to_char_lc(std::uint8_t number) 
 
 	default: return '?'; break;
 	}
+#else // WELP_BITS_USE_CHAR_ARITHMETIC
+	if (number < static_cast< std::uint8_t>(10)) { return reinterpret_cast<char&>(number) + '0'; }
+	else { return reinterpret_cast<char&>(number) + 'W'; }
+#endif // WELP_BITS_USE_CHAR_ARITHMETIC
 }
 
 template <std::size_t number_of_bits>
 inline char welp::bits<number_of_bits>::uint8_t_to_char_uc(std::uint8_t number) const noexcept
 {
+#ifndef WELP_BITS_USE_CHAR_ARITHMETIC
 	switch (number)
 	{
 	case 0: return '0'; break;
@@ -716,6 +728,10 @@ inline char welp::bits<number_of_bits>::uint8_t_to_char_uc(std::uint8_t number) 
 
 	default: return '?'; break;
 	}
+#else // WELP_BITS_USE_CHAR_ARITHMETIC
+	if (number < static_cast< std::uint8_t>(10)) { return reinterpret_cast<char&>(number) + '0'; }
+	else { return reinterpret_cast<char&>(number) + '7'; }
+#endif // WELP_BITS_USE_CHAR_ARITHMETIC
 }
 
 
@@ -1099,6 +1115,7 @@ namespace welp
 		}
 		inline std::uint8_t char_to_uint8_t(char hex) const noexcept
 		{
+#ifndef WELP_BITS_USE_CHAR_ARITHMETIC
 			switch (hex)
 			{
 			case '0': return static_cast<std::uint8_t>(0); break;
@@ -1128,9 +1145,15 @@ namespace welp
 
 			default: return static_cast<std::uint8_t>(0); break;
 			}
+#else // WELP_BITS_USE_CHAR_ARITHMETIC
+			if (hex < ':') { return static_cast<std::uint8_t>(hex - '0'); }
+			else if (hex < 'G') { return static_cast<std::uint8_t>(hex - '7'); }
+			else { return static_cast<std::uint8_t>(hex - 'W'); }
+#endif // WELP_BITS_USE_CHAR_ARITHMETIC
 		}
 		inline char uint8_t_to_char_lc(std::uint8_t number) const noexcept
 		{
+#ifndef WELP_BITS_USE_CHAR_ARITHMETIC
 			switch (number)
 			{
 			case 0: return '0'; break;
@@ -1153,9 +1176,14 @@ namespace welp
 
 			default: return '?'; break;
 			}
+#else // WELP_BITS_USE_CHAR_ARITHMETIC
+			if (number < static_cast< std::uint8_t>(10)) { return reinterpret_cast<char&>(number) + '0'; }
+			else { return reinterpret_cast<char&>(number) + 'W'; }
+#endif // WELP_BITS_USE_CHAR_ARITHMETIC
 		}
 		inline char uint8_t_to_char_uc(std::uint8_t number) const noexcept
 		{
+#ifndef WELP_BITS_USE_CHAR_ARITHMETIC
 			switch (number)
 			{
 			case 0: return '0'; break;
@@ -1178,6 +1206,10 @@ namespace welp
 
 			default: return '?'; break;
 			}
+#else // WELP_BITS_USE_CHAR_ARITHMETIC
+			if (number < static_cast< std::uint8_t>(10)) { return reinterpret_cast<char&>(number) + '0'; }
+			else { return reinterpret_cast<char&>(number) + '7'; }
+#endif // WELP_BITS_USE_CHAR_ARITHMETIC
 		}
 
 #ifdef WELP_BITS_INCLUDE_IOSTREAM
