@@ -134,6 +134,10 @@ Prints the bytes of B as chars. Requires the macro WELP_BITS_INCLUDE_IOSTREAM to
 
 Copies the first bits of A (A can be any class or object) into B.
 
+	B.data(); 
+
+Returns a pointer of type std::uint8_t to the first byte of B.
+
 	B.size_in_bytes(); 
 
 Returns the size in bytes of the class.
