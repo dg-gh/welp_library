@@ -93,8 +93,8 @@ Reinterprets any object A as a bit flags reference of n bits.
 	
 		vec4 A = { .x = 1.3f, .y = 2.3f, .z = -0.999f, .w = 2000.0f };
 	
-		std::cout << "vec4 initially :  ";
-		std::cout << A.x << "  " << A.y << "  " << A.z << "  " << A.w << "\n" << std::endl;
+		std::cout << "vec4 initially :  " << A.x << "  " << A.y << "  "
+			<< A.z << "  " << A.w << "\n" << std::endl;
 	
 		{
 			std::ofstream filedump;
