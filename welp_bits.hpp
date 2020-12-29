@@ -665,33 +665,6 @@ inline std::uint8_t welp::bits<number_of_bits>::char_to_uint8_t(char hex) const 
 }
 
 template <std::size_t number_of_bits>
-inline char welp::bits<number_of_bits>::uint8_t_to_char_uc(std::uint8_t number) const noexcept
-{
-	switch (number)
-	{
-	case 0: return '0'; break;
-	case 1: return '1'; break;
-	case 2: return '2'; break;
-	case 3: return '3'; break;
-	case 4: return '4'; break;
-	case 5: return '5'; break;
-	case 6: return '6'; break;
-	case 7: return '7'; break;
-	case 8: return '8'; break;
-	case 9: return '9'; break;
-
-	case 10: return 'A'; break;
-	case 11: return 'B'; break;
-	case 12: return 'C'; break;
-	case 13: return 'D'; break;
-	case 14: return 'E'; break;
-	case 15: return 'F'; break;
-
-	default: return '?'; break;
-	}
-}
-
-template <std::size_t number_of_bits>
 inline char welp::bits<number_of_bits>::uint8_t_to_char_lc(std::uint8_t number) const noexcept
 {
 	switch (number)
@@ -713,6 +686,33 @@ inline char welp::bits<number_of_bits>::uint8_t_to_char_lc(std::uint8_t number) 
 	case 13: return 'd'; break;
 	case 14: return 'e'; break;
 	case 15: return 'f'; break;
+
+	default: return '?'; break;
+	}
+}
+
+template <std::size_t number_of_bits>
+inline char welp::bits<number_of_bits>::uint8_t_to_char_uc(std::uint8_t number) const noexcept
+{
+	switch (number)
+	{
+	case 0: return '0'; break;
+	case 1: return '1'; break;
+	case 2: return '2'; break;
+	case 3: return '3'; break;
+	case 4: return '4'; break;
+	case 5: return '5'; break;
+	case 6: return '6'; break;
+	case 7: return '7'; break;
+	case 8: return '8'; break;
+	case 9: return '9'; break;
+
+	case 10: return 'A'; break;
+	case 11: return 'B'; break;
+	case 12: return 'C'; break;
+	case 13: return 'D'; break;
+	case 14: return 'E'; break;
+	case 15: return 'F'; break;
 
 	default: return '?'; break;
 	}
