@@ -148,6 +148,14 @@ Reinterprets any object A as a reference of welp::bits<8 * sizeof(A)>.
 
 Reinterprets any object A as a reference of welp::bits< n>.
 
+# Member functions of welp::bits< 0> B
+
+The class welp::bits< 0> can't be instantiated and can only be created as a reference with the welp::as_bits< 0> function.
+
+	welp::as_bits<0>& B = welp::as_bit<0>(A);
+
+In this code above, B is a reference with the bits of A reinterpreted. It allows access to bits, hexadecimals and bytes of A the same way as welp::as_bit<number_of_bits>, without any boundary checks for indices however, so it can be suitable for operating on bits of arrays of sizes decided at runtime.
+
 ### Code example
 
 	#define WELP_BITS_INCLUDE_IOSTREAM
