@@ -131,8 +131,8 @@ Reinterprets any object A as a bit flags reference of n bits.
 			filedump.close();
 		}
 	
-		std::cout << "vec4 after reconstruction :  " << B.x << "  " <<
-			B.y << "  " << B.z << "  " << B.w << std::endl;
+		std::cout << "vec4 after reconstruction :  " << B.x << "  "
+			<< B.y << "  " << B.z << "  " << B.w << std::endl;
 	
 		std::cin.get();
 		return 0;
