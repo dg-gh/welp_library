@@ -10,15 +10,15 @@ Template parameter number_of_bits is the number of booleans stored in welp::bit_
 
 	B.load_bit(n); 
 
-Loads the nth boolean of B.
+Loads the nth boolean of B (there are 8 bits for every byte).
 
 	B.store_bit(n, false); 
 
-Stores boolean false at the nth position of B.
+Stores boolean false at the nth position of B (there are 8 bits for every byte).
 
 	B.store_bit(n, true); 
 
-Stores boolean true at the nth position of B.
+Stores boolean true at the nth position of B (there are 8 bits for every byte).
 
 	B.set_bits(false); 
 
@@ -58,11 +58,11 @@ Bitwise operations and, or, xor, not of B1 with B2 (modifies B1).
 
 	B.load_hex_lc(n); 
 
-Loads the nth hexidecimal (half of a byte) of B and returns a char that prints a number or an lower-case letter representing that hexadecimal
+Loads the nth hexidecimal (half of a byte) of B and returns a char that prints a number or an lower-case letter representing that hexadecimal (there are two hex for every byte).
 
 	B.load_hex_uc(n); 
 
-Loads the nth hexidecimal (half of a byte) of B and returns a char that prints a number or an upper-case letter representing that hexadecimal
+Loads the nth hexidecimal (half of a byte) of B and returns a char that prints a number or an upper-case letter representing that hexadecimal (there are two hex for every byte).
 
 	B.store_hex(n, h); 
 
@@ -70,7 +70,7 @@ Stores char h as a hexidecimal at the nth hex position of B. h can be '0', '1', 
 
 	B.set_hex(h); 
 
-Sets all the hex of B as h.
+Sets all the hex of B as h (there are two hex for every byte).
 
 	B.say_hex(); 
 
