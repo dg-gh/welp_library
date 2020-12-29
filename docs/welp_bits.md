@@ -24,17 +24,13 @@ Stores boolean b at the nth position after the mth byte of B.
 	
 Sets all the booleans of B as b.
 
-	B.say_bits(); 
-
-Prints the bits of B. Requires the macro WELP_BITS_INCLUDE_IOSTREAM to be defined.
-
 	B.capacity_in_bits(); 
 
 Returns the number of bits that can be stored in B.
 
-	B.cpy(A); 
+	B.say_bits(); 
 
-Copies the first bits of A (A can be any class or object) into B.
+Prints the bits of B. Requires the macro WELP_BITS_INCLUDE_IOSTREAM to be defined.
 
 ### Bitwise operations
 
@@ -74,13 +70,13 @@ Stores char h as a hexidecimal at the nth (n can either be 0 or 1, true or false
 
 Sets all the hex of B as h.
 
-	B.say_hex(); 
-
-Prints the hexidecimals of B. Requires the macro WELP_BITS_INCLUDE_IOSTREAM to be defined.
-
 	B.capacity_in_hex(); 
 
 Returns the number of hexadecimals that can be stored in B.
+
+	B.say_hex(); 
+
+Prints the hexidecimals of B. Requires the macro WELP_BITS_INCLUDE_IOSTREAM to be defined.
 
 ### Setting, getting and printing bytes
 
@@ -116,6 +112,14 @@ Sets all the bytes of B as std::uint8_t x.
 
 Sets all the bytes of B as char x.
 
+	B.capacity_in_bytes(); 
+
+Returns the number of bytes that can be stored in B.
+
+	B.capacity_in_chars(); 
+
+Returns the number of chars that can be stored in B.
+
 	B.say_bytes(); 
 
 Prints the bytes of B as std::uint8_t. Requires the macro WELP_BITS_INCLUDE_IOSTREAM to be defined.
@@ -124,13 +128,15 @@ Prints the bytes of B as std::uint8_t. Requires the macro WELP_BITS_INCLUDE_IOST
 
 Prints the bytes of B as chars. Requires the macro WELP_BITS_INCLUDE_IOSTREAM to be defined.
 
-	B.capacity_in_bytes(); 
+### Other functions
 
-Returns the number of bytes that can be stored in B.
+	B.cpy(A); 
 
-	B.capacity_in_chars(); 
+Copies the first bits of A (A can be any class or object) into B.
 
-Returns the number of chars that can be stored in B.
+	B.size_in_bytes(); 
+
+Returns the size in bytes of the class.
 
 ### Reinterpret as bits
 
