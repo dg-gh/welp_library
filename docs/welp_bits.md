@@ -54,6 +54,8 @@ Bitwise operations and, or, xor, not of B1 with B2 (modifies B1).
 	B1 ^ B2;
 	~B;
 
+Bitwise operations and, or, xor, not of B1 with B2 (returns a new object).
+
 ### Setting, getting and printing hexidecimals
 
 	B.load_hex_lc(n); 
@@ -79,20 +81,6 @@ Prints the hexidecimals of B. Requires the macro WELP_BITS_INCLUDE_IOSTREAM to b
 	B.capacity_in_hex(); 
 
 Returns the number of hexadecimals that can be stored in B.
-
-### Bitwise operations
-
-	B1 &= B2; 
-	B1 |= B2; 
-	B1 ^= B2; 
-	B1.flip();
-
-Bitwise operations and, or, xor, not of B1 with B2 (modifies B1).
-
-	B1 & B2; 
-	B1 | B2; 
-	B1 ^ B2;
-	~B;
 
 ### Reinterpret as bits
 
