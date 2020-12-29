@@ -201,12 +201,13 @@ Reinterprets any object A as a reference of welp::bits< n>.
 				welp::bits<8 * sizeof(A)>& ref = welp::as_bits(B);
 				buffer.resize(ref.capacity_in_hex());
 				std::getline(filedump, buffer);
+				std::cout << "sequence of hex read from file : ";
 				for (std::size_t n = 0; n < ref.capacity_in_hex(); n++)
 				{
+					std::cout << buffer[n];
 					ref.store_hex(n, buffer[n]);
 				}
-				std::cout << "sequence of hex read from file : " << buffer << "\n" << std::endl;
-				std::cout << "printing welp::bits<number_of_bits> recoreved from file :\n" << std::endl;
+				std::cout << "\n\nprinting welp::bits<number_of_bits> recoreved from file :\n" << std::endl;
 				ref.say_bytes();
 			}
 			filedump.close();
