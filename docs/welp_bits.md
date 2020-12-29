@@ -89,7 +89,7 @@ Reinterprets any object A as a bit flags reference of n bits.
 	int main()
 	{
 		std::string buffer;
-		buffer.reserve(10000);
+		buffer.reserve(std::size_t(1) << 10);
 	
 		vec4 A = { .x = 1.3f, .y = 2.3f, .z = -0.999f, .w = 2000.0f };
 	
