@@ -1,6 +1,8 @@
 // welp_bits.h - last update : 28 / 12 / 2020
 // License <http://unlicense.org/> (statement below at the end of the file)
 
+// ATTN : requires little-endian layout for unsigned integers
+
 
 #ifndef WELP_BITS_H
 #define WELP_BITS_H
