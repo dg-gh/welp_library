@@ -102,7 +102,7 @@ Reinterprets any object A as a reference of welp::bits<8 * sizeof(A)>.
 
 	welp::as_bits<n>(A);
 
-Reinterprets any object A as a bit flags reference of n bits.
+Reinterprets any object A as a reference of welp::bits<n * sizeof(A)>.
 
 ### Code example
 
