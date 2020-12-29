@@ -20,13 +20,9 @@ Stores boolean b at the nth position of B.
 
 Stores boolean b at the nth position after the mth byte of B.
 
-	B.set_bits(false); 
-
-Sets all the booleans of B as false.
-
-	B.set_bits(true);
+	B.set_bits(b); 
 	
-Sets all the booleans of B as true.
+Sets all the booleans of B as b.
 
 	B.say_bits(); 
 
