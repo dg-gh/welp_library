@@ -82,6 +82,48 @@ Prints the hexidecimals of B. Requires the macro WELP_BITS_INCLUDE_IOSTREAM to b
 
 Returns the number of hexadecimals that can be stored in B.
 
+### Setting, getting and printing bytes
+
+	B.load_byte(n); 
+
+Loads the nth byte of B as a std::uint8_t.
+
+	B.load_char(n); 
+
+Loads the nth byte of B as a char.
+
+	B.load_byte(n); 
+
+Loads the nth byte of B as a std::uint8_t.
+
+	B.load_char(n); 
+
+Loads the nth byte of B as a char.
+
+	B.store_byte(n, x); 
+
+Stores std::uint8_t x at the nth byte of B.
+
+	B.store_char(n, x); 
+
+Stores char x at the nth byte of B.
+
+	B.set_bytes(x); 
+
+Sets all the bytes of B as std::uint8_t x.
+
+	B.set_chars(x); 
+
+Sets all the bytes of B as char x.
+
+	B.capacity_in_bytes(); 
+
+Returns the number of bytes that can be stored in B.
+
+	B.capacity_in_chars(); 
+
+Returns the number of chars that can be stored in B.
+
 ### Reinterpret as bits
 
 	welp::as_bits(A);
