@@ -14,11 +14,11 @@ Loads the nth boolean of B (B packs 8 booleans in every byte).
 
 	B.store_bit(n, false); 
 
-Stores boolean false at the nth position of B (B packs 8 booleans in every byte).
+Stores boolean false at the nth position of B.
 
 	B.store_bit(n, true); 
 
-Stores boolean true at the nth position of B (B packs 8 booleans in every byte).
+Stores boolean true at the nth position of B.
 
 	B.set_bits(false); 
 
@@ -30,7 +30,7 @@ Sets all the booleans of B as true.
 
 	B.say_bits(); 
 
-Prints the bits of B. Requires the macro WELP_BIT_FLAGS_INCLUDE_IOSTREAM to be defined.
+Prints the bits of B. Requires the macro WELP_BITS_INCLUDE_IOSTREAM to be defined.
 
 	B.capacity_in_bits(); 
 
@@ -62,19 +62,19 @@ Loads the nth hexidecimal (half of a byte) of B and returns a char that prints a
 
 	B.load_hex_uc(n); 
 
-Loads the nth hexidecimal (half of a byte) of B and returns a char that prints a number or an upper-case letter representing that hexadecimal (B packs two hex in every byte).
+Loads the nth hexidecimal (half of a byte) of B and returns a char that prints a number or an upper-case letter representing that hexadecimal.
 
 	B.store_hex(n, h); 
 
-Stores char h as a hexidecimal at the nth hex position of B. h can be '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'a', 'b', 'c', 'd', 'e', 'f' (B packs two hex in every byte).
+Stores char h as a hexidecimal at the nth hex position of B. h can be '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'a', 'b', 'c', 'd', 'e', 'f'.
 
 	B.set_hex(h); 
 
-Sets all the hex of B as h (there are two hex for every byte).
+Sets all the hex of B as h.
 
 	B.say_hex(); 
 
-Prints the hexidecimals of B. Requires the macro WELP_BIT_FLAGS_INCLUDE_IOSTREAM to be defined.
+Prints the hexidecimals of B. Requires the macro WELP_BITS_INCLUDE_IOSTREAM to be defined.
 
 	B.capacity_in_hex(); 
 
