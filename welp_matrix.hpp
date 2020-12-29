@@ -13770,7 +13770,7 @@ namespace welp
 ////// display //////
 
 #ifdef WELP_MATRIX_INCLUDE_IOSTREAM
-template <typename Ty, class _Allocator> std::ostream& operator<<(std::ostream& out, const welp::matrix<Ty, _Allocator>& A)
+template <typename Ty, class _Allocator> std::ostream& operator<<(std::ostream & out, const welp::matrix<Ty, _Allocator> & A)
 {
 	A.say(); return out;
 }
@@ -15337,11 +15337,11 @@ namespace welp
 					*pC++ = std::move(line);
 					Cr++;
 				}
-				loadmat.close();
 				C.resize(Cr, 1);
 				if (shrink_to_fit) { C.shrink_to_fit(); }
 			}
 			else { C.make_empty(); }
+			loadmat.close();
 			return C;
 		}
 
@@ -15412,11 +15412,11 @@ namespace welp
 						Cr++;
 					}
 				}
-				loadmat.close();
 				C.resize(Cr, C.c());
 				if (shrink_to_fit) { C.shrink_to_fit(); }
 			}
 			else { C.make_empty(); }
+			loadmat.close();
 			return C;
 		}
 
@@ -15485,11 +15485,11 @@ namespace welp
 						Cr++;
 					}
 				}
-				loadmat.close();
 				C.resize(Cr, C.c());
 				if (shrink_to_fit) { C.shrink_to_fit(); }
 			}
 			else { C.make_empty(); }
+			loadmat.close();
 			return C;
 		}
 #endif // WELP_MATRIX_INCLUDE_ALGORITHM
@@ -15499,15 +15499,18 @@ namespace welp
 		{
 			std::ofstream writemat;
 			writemat.open(filename);
-			std::size_t n = A.size();
-			const Ty1* pA = A.data();
-			std::size_t Ac = A.c();
-			std::size_t k = 1;
-			for (std::size_t j = 0; j < n; j++)
+			if (writemat.good())
 			{
-				writemat << *pA++;
-				if (k == Ac) { writemat << "\n"; k = 1; }
-				else { writemat << delim; k++; }
+				std::size_t n = A.size();
+				const Ty1* pA = A.data();
+				std::size_t Ac = A.c();
+				std::size_t k = 1;
+				for (std::size_t j = 0; j < n; j++)
+				{
+					writemat << *pA++;
+					if (k == Ac) { writemat << "\n"; k = 1; }
+					else { writemat << delim; k++; }
+				}
 			}
 			writemat.close();
 		}
@@ -15521,24 +15524,27 @@ namespace welp
 #endif // WELP_MATRIX_DEBUG_MODE
 			std::ofstream writemat;
 			writemat.open(filename);
-			const Ty1* pA = A.data();
-			const Ty2* pB = B.data();
-			std::size_t Ar = A.r();
-			std::size_t Ac = A.c();
-			std::size_t Bc = B.c();
-			std::size_t j;
-			std::size_t k = 1;
-			for (std::size_t i = 0; i < Ar; i++)
+			if (writemat.good())
 			{
-				for (j = Ac; j > 0; j--)
+				const Ty1* pA = A.data();
+				const Ty2* pB = B.data();
+				std::size_t Ar = A.r();
+				std::size_t Ac = A.c();
+				std::size_t Bc = B.c();
+				std::size_t j;
+				std::size_t k = 1;
+				for (std::size_t i = 0; i < Ar; i++)
 				{
-					writemat << *pA++ << delim;
-				}
-				for (j = Bc; j > 0; j--)
-				{
-					writemat << *pB++;
-					if (k == Bc) { writemat << "\n"; k = 1; }
-					else { writemat << delim; k++; }
+					for (j = Ac; j > 0; j--)
+					{
+						writemat << *pA++ << delim;
+					}
+					for (j = Bc; j > 0; j--)
+					{
+						writemat << *pB++;
+						if (k == Bc) { writemat << "\n"; k = 1; }
+						else { writemat << delim; k++; }
+					}
 				}
 			}
 			writemat.close();
@@ -15554,30 +15560,33 @@ namespace welp
 #endif // WELP_MATRIX_DEBUG_MODE
 			std::ofstream writemat;
 			writemat.open(filename);
-			const Ty1* pA = A.data();
-			const Ty2* pB = B.data();
-			const Ty3* pC = C.data();
-			std::size_t Ar = A.r();
-			std::size_t Ac = A.c();
-			std::size_t Bc = B.c();
-			std::size_t Cc = C.c();
-			std::size_t j;
-			std::size_t k = 1;
-			for (std::size_t i = 0; i < Ar; i++)
+			if (writemat.good())
 			{
-				for (j = Ac; j > 0; j--)
+				const Ty1* pA = A.data();
+				const Ty2* pB = B.data();
+				const Ty3* pC = C.data();
+				std::size_t Ar = A.r();
+				std::size_t Ac = A.c();
+				std::size_t Bc = B.c();
+				std::size_t Cc = C.c();
+				std::size_t j;
+				std::size_t k = 1;
+				for (std::size_t i = 0; i < Ar; i++)
 				{
-					writemat << *pA++ << delim;
-				}
-				for (j = Bc; j > 0; j--)
-				{
-					writemat << *pB++ << delim;
-				}
-				for (j = Cc; j > 0; j--)
-				{
-					writemat << *pC++;
-					if (k == Cc) { writemat << "\n"; k = 1; }
-					else { writemat << delim; k++; }
+					for (j = Ac; j > 0; j--)
+					{
+						writemat << *pA++ << delim;
+					}
+					for (j = Bc; j > 0; j--)
+					{
+						writemat << *pB++ << delim;
+					}
+					for (j = Cc; j > 0; j--)
+					{
+						writemat << *pC++;
+						if (k == Cc) { writemat << "\n"; k = 1; }
+						else { writemat << delim; k++; }
+					}
 				}
 			}
 			writemat.close();
@@ -15595,36 +15604,39 @@ namespace welp
 #endif // WELP_MATRIX_DEBUG_MODE
 			std::ofstream writemat;
 			writemat.open(filename);
-			const Ty1* pA = A.data();
-			const Ty2* pB = B.data();
-			const Ty3* pC = C.data();
-			const Ty4* pD = D.data();
-			std::size_t Ar = A.r();
-			std::size_t Ac = A.c();
-			std::size_t Bc = B.c();
-			std::size_t Cc = C.c();
-			std::size_t Dc = D.c();
-			std::size_t j;
-			std::size_t k = 1;
-			for (std::size_t i = 0; i < Ar; i++)
+			if (writemat.good())
 			{
-				for (j = Ac; j > 0; j--)
+				const Ty1* pA = A.data();
+				const Ty2* pB = B.data();
+				const Ty3* pC = C.data();
+				const Ty4* pD = D.data();
+				std::size_t Ar = A.r();
+				std::size_t Ac = A.c();
+				std::size_t Bc = B.c();
+				std::size_t Cc = C.c();
+				std::size_t Dc = D.c();
+				std::size_t j;
+				std::size_t k = 1;
+				for (std::size_t i = 0; i < Ar; i++)
 				{
-					writemat << *pA++ << delim;
-				}
-				for (j = Bc; j > 0; j--)
-				{
-					writemat << *pB++ << delim;
-				}
-				for (j = Cc; j > 0; j--)
-				{
-					writemat << *pC++ << delim;
-				}
-				for (j = Dc; j > 0; j--)
-				{
-					writemat << *pD++;
-					if (k == Dc) { writemat << "\n"; k = 1; }
-					else { writemat << delim; k++; }
+					for (j = Ac; j > 0; j--)
+					{
+						writemat << *pA++ << delim;
+					}
+					for (j = Bc; j > 0; j--)
+					{
+						writemat << *pB++ << delim;
+					}
+					for (j = Cc; j > 0; j--)
+					{
+						writemat << *pC++ << delim;
+					}
+					for (j = Dc; j > 0; j--)
+					{
+						writemat << *pD++;
+						if (k == Dc) { writemat << "\n"; k = 1; }
+						else { writemat << delim; k++; }
+					}
 				}
 			}
 			writemat.close();
@@ -15643,42 +15655,45 @@ namespace welp
 #endif // WELP_MATRIX_DEBUG_MODE
 			std::ofstream writemat;
 			writemat.open(filename);
-			const Ty1* pA = A.data();
-			const Ty2* pB = B.data();
-			const Ty3* pC = C.data();
-			const Ty4* pD = D.data();
-			const Ty4* pE = E.data();
-			std::size_t Ar = A.r();
-			std::size_t Ac = A.c();
-			std::size_t Bc = B.c();
-			std::size_t Cc = C.c();
-			std::size_t Dc = D.c();
-			std::size_t Ec = E.c();
-			std::size_t j;
-			std::size_t k = 1;
-			for (std::size_t i = 0; i < Ar; i++)
+			if (writemat.good())
 			{
-				for (j = Ac; j > 0; j--)
+				const Ty1* pA = A.data();
+				const Ty2* pB = B.data();
+				const Ty3* pC = C.data();
+				const Ty4* pD = D.data();
+				const Ty4* pE = E.data();
+				std::size_t Ar = A.r();
+				std::size_t Ac = A.c();
+				std::size_t Bc = B.c();
+				std::size_t Cc = C.c();
+				std::size_t Dc = D.c();
+				std::size_t Ec = E.c();
+				std::size_t j;
+				std::size_t k = 1;
+				for (std::size_t i = 0; i < Ar; i++)
 				{
-					writemat << *pA++ << delim;
-				}
-				for (j = Bc; j > 0; j--)
-				{
-					writemat << *pB++ << delim;
-				}
-				for (j = Cc; j > 0; j--)
-				{
-					writemat << *pC++ << delim;
-				}
-				for (j = Dc; j > 0; j--)
-				{
-					writemat << *pD++ << delim;
-				}
-				for (j = Ec; j > 0; j--)
-				{
-					writemat << *pE++;
-					if (k == Ec) { writemat << "\n"; k = 1; }
-					else { writemat << delim; k++; }
+					for (j = Ac; j > 0; j--)
+					{
+						writemat << *pA++ << delim;
+					}
+					for (j = Bc; j > 0; j--)
+					{
+						writemat << *pB++ << delim;
+					}
+					for (j = Cc; j > 0; j--)
+					{
+						writemat << *pC++ << delim;
+					}
+					for (j = Dc; j > 0; j--)
+					{
+						writemat << *pD++ << delim;
+					}
+					for (j = Ec; j > 0; j--)
+					{
+						writemat << *pE++;
+						if (k == Ec) { writemat << "\n"; k = 1; }
+						else { writemat << delim; k++; }
+					}
 				}
 			}
 			writemat.close();
@@ -15689,15 +15704,18 @@ namespace welp
 		{
 			std::ofstream writemat;
 			writemat.open(filename, std::ios::app);
-			std::size_t n = A.size();
-			const Ty1* pA = A.data();
-			std::size_t Ac = A.c();
-			std::size_t k = 1;
-			for (std::size_t j = 0; j < n; j++)
+			if (writemat.good())
 			{
-				writemat << *pA++;
-				if (k == Ac) { writemat << "\n"; k = 1; }
-				else { writemat << delim; k++; }
+				std::size_t n = A.size();
+				const Ty1* pA = A.data();
+				std::size_t Ac = A.c();
+				std::size_t k = 1;
+				for (std::size_t j = 0; j < n; j++)
+				{
+					writemat << *pA++;
+					if (k == Ac) { writemat << "\n"; k = 1; }
+					else { writemat << delim; k++; }
+				}
 			}
 			writemat.close();
 		}
@@ -15711,24 +15729,27 @@ namespace welp
 #endif // WELP_MATRIX_DEBUG_MODE
 			std::ofstream writemat;
 			writemat.open(filename, std::ios::app);
-			const Ty1* pA = A.data();
-			const Ty2* pB = B.data();
-			std::size_t Ar = A.r();
-			std::size_t Ac = A.c();
-			std::size_t Bc = B.c();
-			std::size_t j;
-			std::size_t k = 1;
-			for (std::size_t i = 0; i < Ar; i++)
+			if (writemat.good())
 			{
-				for (j = Ac; j > 0; j--)
+				const Ty1* pA = A.data();
+				const Ty2* pB = B.data();
+				std::size_t Ar = A.r();
+				std::size_t Ac = A.c();
+				std::size_t Bc = B.c();
+				std::size_t j;
+				std::size_t k = 1;
+				for (std::size_t i = 0; i < Ar; i++)
 				{
-					writemat << *pA++ << delim;
-				}
-				for (j = Bc; j > 0; j--)
-				{
-					writemat << *pB++;
-					if (k == Bc) { writemat << "\n"; k = 1; }
-					else { writemat << delim; k++; }
+					for (j = Ac; j > 0; j--)
+					{
+						writemat << *pA++ << delim;
+					}
+					for (j = Bc; j > 0; j--)
+					{
+						writemat << *pB++;
+						if (k == Bc) { writemat << "\n"; k = 1; }
+						else { writemat << delim; k++; }
+					}
 				}
 			}
 			writemat.close();
@@ -15744,30 +15765,33 @@ namespace welp
 #endif // WELP_MATRIX_DEBUG_MODE
 			std::ofstream writemat;
 			writemat.open(filename, std::ios::app);
-			const Ty1* pA = A.data();
-			const Ty2* pB = B.data();
-			const Ty3* pC = C.data();
-			std::size_t Ar = A.r();
-			std::size_t Ac = A.c();
-			std::size_t Bc = B.c();
-			std::size_t Cc = C.c();
-			std::size_t j;
-			std::size_t k = 1;
-			for (std::size_t i = 0; i < Ar; i++)
+			if (writemat.good())
 			{
-				for (j = Ac; j > 0; j--)
+				const Ty1* pA = A.data();
+				const Ty2* pB = B.data();
+				const Ty3* pC = C.data();
+				std::size_t Ar = A.r();
+				std::size_t Ac = A.c();
+				std::size_t Bc = B.c();
+				std::size_t Cc = C.c();
+				std::size_t j;
+				std::size_t k = 1;
+				for (std::size_t i = 0; i < Ar; i++)
 				{
-					writemat << *pA++ << delim;
-				}
-				for (j = Bc; j > 0; j--)
-				{
-					writemat << *pB++ << delim;
-				}
-				for (j = Cc; j > 0; j--)
-				{
-					writemat << *pC++;
-					if (k == Cc) { writemat << "\n"; k = 1; }
-					else { writemat << delim; k++; }
+					for (j = Ac; j > 0; j--)
+					{
+						writemat << *pA++ << delim;
+					}
+					for (j = Bc; j > 0; j--)
+					{
+						writemat << *pB++ << delim;
+					}
+					for (j = Cc; j > 0; j--)
+					{
+						writemat << *pC++;
+						if (k == Cc) { writemat << "\n"; k = 1; }
+						else { writemat << delim; k++; }
+					}
 				}
 			}
 			writemat.close();
@@ -15785,36 +15809,39 @@ namespace welp
 #endif // WELP_MATRIX_DEBUG_MODE
 			std::ofstream writemat;
 			writemat.open(filename, std::ios::app);
-			const Ty1* pA = A.data();
-			const Ty2* pB = B.data();
-			const Ty3* pC = C.data();
-			const Ty4* pD = D.data();
-			std::size_t Ar = A.r();
-			std::size_t Ac = A.c();
-			std::size_t Bc = B.c();
-			std::size_t Cc = C.c();
-			std::size_t Dc = D.c();
-			std::size_t j;
-			std::size_t k = 1;
-			for (std::size_t i = 0; i < Ar; i++)
+			if (writemat.good())
 			{
-				for (j = Ac; j > 0; j--)
+				const Ty1* pA = A.data();
+				const Ty2* pB = B.data();
+				const Ty3* pC = C.data();
+				const Ty4* pD = D.data();
+				std::size_t Ar = A.r();
+				std::size_t Ac = A.c();
+				std::size_t Bc = B.c();
+				std::size_t Cc = C.c();
+				std::size_t Dc = D.c();
+				std::size_t j;
+				std::size_t k = 1;
+				for (std::size_t i = 0; i < Ar; i++)
 				{
-					writemat << *pA++ << delim;
-				}
-				for (j = Bc; j > 0; j--)
-				{
-					writemat << *pB++ << delim;
-				}
-				for (j = Cc; j > 0; j--)
-				{
-					writemat << *pC++ << delim;
-				}
-				for (j = Dc; j > 0; j--)
-				{
-					writemat << *pD++;
-					if (k == Dc) { writemat << "\n"; k = 1; }
-					else { writemat << delim; k++; }
+					for (j = Ac; j > 0; j--)
+					{
+						writemat << *pA++ << delim;
+					}
+					for (j = Bc; j > 0; j--)
+					{
+						writemat << *pB++ << delim;
+					}
+					for (j = Cc; j > 0; j--)
+					{
+						writemat << *pC++ << delim;
+					}
+					for (j = Dc; j > 0; j--)
+					{
+						writemat << *pD++;
+						if (k == Dc) { writemat << "\n"; k = 1; }
+						else { writemat << delim; k++; }
+					}
 				}
 			}
 			writemat.close();
@@ -15833,42 +15860,45 @@ namespace welp
 #endif // WELP_MATRIX_DEBUG_MODE
 			std::ofstream writemat;
 			writemat.open(filename, std::ios::app);
-			const Ty1* pA = A.data();
-			const Ty2* pB = B.data();
-			const Ty3* pC = C.data();
-			const Ty4* pD = D.data();
-			const Ty5* pE = E.data();
-			std::size_t Ar = A.r();
-			std::size_t Ac = A.c();
-			std::size_t Bc = B.c();
-			std::size_t Cc = C.c();
-			std::size_t Dc = D.c();
-			std::size_t Ec = E.c();
-			std::size_t j;
-			std::size_t k = 1;
-			for (std::size_t i = 0; i < Ar; i++)
+			if (writemat.good())
 			{
-				for (j = Ac; j > 0; j--)
+				const Ty1* pA = A.data();
+				const Ty2* pB = B.data();
+				const Ty3* pC = C.data();
+				const Ty4* pD = D.data();
+				const Ty5* pE = E.data();
+				std::size_t Ar = A.r();
+				std::size_t Ac = A.c();
+				std::size_t Bc = B.c();
+				std::size_t Cc = C.c();
+				std::size_t Dc = D.c();
+				std::size_t Ec = E.c();
+				std::size_t j;
+				std::size_t k = 1;
+				for (std::size_t i = 0; i < Ar; i++)
 				{
-					writemat << *pA++ << delim;
-				}
-				for (j = Bc; j > 0; j--)
-				{
-					writemat << *pB++ << delim;
-				}
-				for (j = Cc; j > 0; j--)
-				{
-					writemat << *pC++ << delim;
-				}
-				for (j = Dc; j > 0; j--)
-				{
-					writemat << *pD++ << delim;
-				}
-				for (j = Ec; j > 0; j--)
-				{
-					writemat << *pE++;
-					if (k == Ec) { writemat << "\n"; k = 1; }
-					else { writemat << delim; k++; }
+					for (j = Ac; j > 0; j--)
+					{
+						writemat << *pA++ << delim;
+					}
+					for (j = Bc; j > 0; j--)
+					{
+						writemat << *pB++ << delim;
+					}
+					for (j = Cc; j > 0; j--)
+					{
+						writemat << *pC++ << delim;
+					}
+					for (j = Dc; j > 0; j--)
+					{
+						writemat << *pD++ << delim;
+					}
+					for (j = Ec; j > 0; j--)
+					{
+						writemat << *pE++;
+						if (k == Ec) { writemat << "\n"; k = 1; }
+						else { writemat << delim; k++; }
+					}
 				}
 			}
 			writemat.close();
