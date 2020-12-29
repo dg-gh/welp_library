@@ -30,7 +30,7 @@ Sets all the booleans of B as true.
 
 	B.say_bit(); 
 
-Prints all the bits of B.
+Prints the bits of B. Requires the macro WELP_BIT_FLAGS_INCLUDE_IOSTREAM to be defined.
 
 	B.cpy(A); 
 
@@ -49,12 +49,6 @@ Bitwise operations and, or, xor, not of B1 with B2 (modifies B1).
 	B1 | B2; 
 	B1 ^ B2;
 	~B;
-
-Bitwise operations and, or, xor, not of B1 with B2 (return new objects).
-
-	B.say(); 
-
-Prints the bits of B. Requires the macro WELP_BIT_FLAGS_INCLUDE_IOSTREAM to be defined.
 
 ### Reinterpret as bits
 
