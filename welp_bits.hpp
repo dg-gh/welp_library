@@ -39,6 +39,16 @@
 #endif // WELP_BITS_INCLUDE_IOSTREAM
 
 
+////// OPTIONS //////
+
+// #define WELP_BITS_USE_CHAR_ARITHMETIC will enforce the use of char arithemtic when converting
+// to and from hexadecimals instead of using a switch statemet
+
+// if char arithmetic is not used, any std::uint8_t greater than 15 will convert to '?'
+// and any char different than '0', '1', ... ,'9', 'a', 'b', ... , 'f', 'A', 'B', ... , 'F'
+// will convert to 0, although this situation should not occur in normal circumstances
+
+
 ////// DESCRIPTIONS //////
 
 namespace welp
