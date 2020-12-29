@@ -158,7 +158,7 @@ The class welp::bits< 0> can't be instantiated and can only be created as a refe
 
 	welp::as_bits<0>& B = welp::as_bit<0>(A);
 
-In this code above, B is a reference with the bits of A reinterpreted. It allows access to bits, hexadecimals and bytes of A the same way as welp::as_bit<number_of_bits>, without any boundary checks for indices however, so it can be suitable for operating on bits of arrays of sizes decided at runtime.
+In this code above, B is a reference with the bits of A reinterpreted. It allows access to bits, hexadecimals and bytes of A the same way as welp::as_bit<number_of_bits>, without any boundary checks for indices however (as if it was welp::as_bit<number_of_bits> with number_of_bits being infinite), so it can be suitable for operating on bits of arrays of sizes decided at runtime. It has the load/store/data usual member functions. The say functions take either one of two arguments. With the method call say_...(n) (... for bits/hex/bytes/chars), only n values will be printed. The method call say_...(m, n), is similar to say_...(n) except that the first m values will be skipped.
 
 ### Code example
 
