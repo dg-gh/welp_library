@@ -98,7 +98,7 @@ Bitwise operations and, or, xor, not of B1 with B2 (modifies B1).
 
 	welp::as_bits(A);
 
-Reinterprets any object A as a bits reference of 8 * sizeof(A) bits.
+Reinterprets any object A as a reference of welp::bits<8 * sizeof(A)>.
 
 	welp::as_bits<n>(A);
 
