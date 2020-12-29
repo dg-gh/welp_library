@@ -28,9 +28,13 @@ Sets all the booleans of B as false.
 	
 Sets all the booleans of B as true.
 
-	B.say_bit(); 
+	B.say_bits(); 
 
 Prints the bits of B. Requires the macro WELP_BIT_FLAGS_INCLUDE_IOSTREAM to be defined.
+
+	B.capacity_in_bits(); 
+
+Returns the number of bits that can be stored in B.
 
 	B.cpy(A); 
 
@@ -60,25 +64,17 @@ Loads the nth hexidecimal (half of a byte) of B.
 
 Stores char h as a hexidecimal at the nth hex position of B. X can be '0', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'a', 'b', 'c', 'd', 'e', 'f'.
 
-	B.store_bit(n, true); 
+	B.set_hex(h); 
 
-Stores boolean true at the nth position of B.
+Sets all the hex of B as h.
 
-	B.set_bits(false); 
+	B.say_hex(); 
 
-Sets all the booleans of B as false.
+Prints the hexidecimals of B. Requires the macro WELP_BIT_FLAGS_INCLUDE_IOSTREAM to be defined.
 
-	B.set_bits(true);
-	
-Sets all the booleans of B as true.
+	B.capacity_in_hex(); 
 
-	B.say_bit(); 
-
-Prints the bits of B. Requires the macro WELP_BIT_FLAGS_INCLUDE_IOSTREAM to be defined.
-
-	B.cpy(A); 
-
-Copies the first bits of A (A can be any class or object) into B.
+Returns the number of hexadecimals that can be stored in B.
 
 ### Bitwise operations
 
@@ -93,7 +89,6 @@ Bitwise operations and, or, xor, not of B1 with B2 (modifies B1).
 	B1 | B2; 
 	B1 ^ B2;
 	~B;
-
 
 ### Reinterpret as bits
 
