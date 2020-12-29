@@ -66,6 +66,10 @@ Loads the nth hexidecimal (half of a byte) of B and returns a char that prints a
 
 Stores char h as a hexidecimal at the nth hex position of B. h can be '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'a', 'b', 'c', 'd', 'e', 'f'.
 
+	B.store_hex(m, n, h); 
+
+Stores char h as a hexidecimal at the nth (n can either be 0 or 1, true or false) position after the mth byte of B.
+
 	B.set_hex(h); 
 
 Sets all the hex of B as h.
