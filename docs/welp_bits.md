@@ -12,13 +12,13 @@ Template parameter number_of_bits is the number of booleans stored in welp::bit_
 
 Loads the nth boolean of B (B packs 8 booleans in every byte).
 
-	B.store_bit(n, false); 
+	B.store_bit(n, b); 
 
-Stores boolean false at the nth position of B.
+Stores boolean b at the nth position of B.
 
-	B.store_bit(n, true); 
+	B.store_bit(m, n, b); 
 
-Stores boolean true at the nth position of B.
+Stores boolean b at the nth position after the mth byte of B.
 
 	B.set_bits(false); 
 
