@@ -4,8 +4,8 @@
 // ATTN : requires little-endian layout for unsigned integers
 
 
-#ifndef WELP_BITS_H
-#define WELP_BITS_H
+#ifndef WELP_BITS_HPP
+#define WELP_BITS_HPP
 
 
 ////// INCLUDES //////
@@ -1298,7 +1298,7 @@ namespace welp
 }
 
 
-#endif // WELP_BITS_H
+#endif // WELP_BITS_HPP
 
 
 // welp_bits.hpp
