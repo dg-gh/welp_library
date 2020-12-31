@@ -2,8 +2,8 @@
 // License <http://unlicense.org/> (statement below at the end of the file)
 
 
-#ifndef WELP_THREADS_H
-#define WELP_THREADS_H
+#ifndef WELP_THREADS_HPP
+#define WELP_THREADS_HPP
 
 
 ////// INCLUDES //////
@@ -1395,7 +1395,7 @@ bool welp::threads<_Allocator>::force_priority_async_task_sub(welp::async_task_r
 }
 
 
-#endif // WELP_THREADS_H
+#endif // WELP_THREADS_HPP
 
 
 // welp_threads.hpp
