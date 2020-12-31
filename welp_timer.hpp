@@ -2,8 +2,8 @@
 // License <http://unlicense.org/> (statement below at the end of the file)
 
 
-#ifndef WELP_TIMER_H
-#define WELP_TIMER_H
+#ifndef WELP_TIMER_HPP
+#define WELP_TIMER_HPP
 
 
 ////// INCLUDES //////
@@ -182,7 +182,7 @@ inline void welp::timer_system<float_Ty, set_number>::finish_timeframe_restart_t
 }
 
 
-#endif // WELP_TIMER_H
+#endif // WELP_TIMER_HPP
 
 
 // welp_timer.hpp
