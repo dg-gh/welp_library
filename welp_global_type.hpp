@@ -2,8 +2,8 @@
 // License <http://unlicense.org/> (statement below at the end of the file)
 
 
-#ifndef WELP_GLOBAL_TYPE_H
-#define WELP_GLOBAL_TYPE_H
+#ifndef WELP_GLOBAL_TYPE_HPP
+#define WELP_GLOBAL_TYPE_HPP
 
 
 ////// INCLUDES //////
@@ -266,7 +266,7 @@ welp::_global_pointer<base_type, id_number, _Allocator>::~_global_pointer()
 }
 
 
-#endif // WELP_GLOBAL_TYPE_H
+#endif // WELP_GLOBAL_TYPE_HPP
 
 
 // welp_global_type.hpp
