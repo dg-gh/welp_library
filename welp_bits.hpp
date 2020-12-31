@@ -10,7 +10,6 @@
 
 ////// INCLUDES //////
 
-#include <cstdint>
 #include <cstring>
 
 
@@ -43,7 +42,7 @@
 // #define WELP_BITS_USE_CHAR_ARITHMETIC will enforce the use of char arithemtic when converting
 // to and from hexadecimals instead of using a switch statemet
 
-// if char arithmetic is not used, any std::uint8_t greater than 15 will convert to '?'
+// if char arithmetic is not used, any unsigned char greater than 15 will convert to '?'
 // and any char different than '0', '1', ... ,'9', 'a', 'b', ... , 'f', 'A', 'B', ... , 'F'
 // will convert to 0, although this situation should not occur in normal circumstances
 
@@ -69,21 +68,21 @@ namespace welp
 		inline char load_hex_uc(std::size_t byte_offset, bool upper_half_byte) const noexcept;
 		inline bits<number_of_bits>& store_hex(std::size_t byte_offset, bool upper_half_byte, char hex) noexcept;
 
-		inline std::uint8_t load_byte(std::size_t byte_offset) const noexcept;
-		inline bits<number_of_bits>& store_byte(std::size_t byte_offset, std::uint8_t number) noexcept;
+		inline unsigned char load_byte(std::size_t byte_offset) const noexcept;
+		inline bits<number_of_bits>& store_byte(std::size_t byte_offset, unsigned char number) noexcept;
 
 		inline char load_char(std::size_t byte_offset) const noexcept;
 		inline bits<number_of_bits>& store_char(std::size_t byte_offset, char character) noexcept;
 
-		constexpr const std::uint8_t* data() const noexcept { return static_cast<const std::uint8_t*>(field); }
-		constexpr std::uint8_t* data() noexcept { return static_cast<std::uint8_t*>(field); }
+		constexpr const unsigned char* data() const noexcept { return static_cast<const unsigned char*>(field); }
+		constexpr unsigned char* data() noexcept { return static_cast<unsigned char*>(field); }
 
 
 		// member functions below are unavailable when template parameter bits == 0
 
 		inline welp::bits<number_of_bits>& set_bits(bool bit) noexcept;
 		inline welp::bits<number_of_bits>& set_hex(char hex) noexcept;
-		inline welp::bits<number_of_bits>& set_bytes(std::uint8_t number) noexcept;
+		inline welp::bits<number_of_bits>& set_bytes(unsigned char number) noexcept;
 		inline welp::bits<number_of_bits>& set_chars(char character) noexcept;
 
 		template <class Ty> inline welp::bits<number_of_bits>& cpy(const Ty& rhs) noexcept;
@@ -137,15 +136,15 @@ namespace welp
 
 	private:
 
-		std::uint8_t field[(number_of_bits + ((8 - (number_of_bits & 7)) & 7)) >> 3];
+		unsigned char field[(number_of_bits + ((8 - (number_of_bits & 7)) & 7)) >> 3];
 
-		inline std::uint8_t shift_true(std::size_t bit_offset) const noexcept;
-		inline std::uint8_t shift_false(std::size_t bit_offset) const noexcept;
-		inline std::uint8_t bitmask_true(std::size_t digits) const noexcept;
-		inline std::uint8_t bitmask_false(std::size_t digits) const noexcept;
-		inline std::uint8_t char_to_uint8_t(char hex) const noexcept;
-		inline char uint8_t_to_char_lc(std::uint8_t number) const noexcept;
-		inline char uint8_t_to_char_uc(std::uint8_t number) const noexcept;
+		inline unsigned char shift_true(std::size_t bit_offset) const noexcept;
+		inline unsigned char shift_false(std::size_t bit_offset) const noexcept;
+		inline unsigned char bitmask_true(std::size_t digits) const noexcept;
+		inline unsigned char bitmask_false(std::size_t digits) const noexcept;
+		inline unsigned char char_to_uint8_t(char hex) const noexcept;
+		inline char uint8_t_to_char_lc(unsigned char number) const noexcept;
+		inline char uint8_t_to_char_uc(unsigned char number) const noexcept;
 
 		void say_bits_sub() const;
 		void say_hex_sub() const;
@@ -176,7 +175,7 @@ inline bool welp::bits<number_of_bits>::load_bit(std::size_t bit_offset) const n
 #ifdef WELP_BITS_DEBUG_MODE
 	assert(bit_offset < bits);
 #endif // WELP_BITS_DEBUG_MODE
-	return (field[bit_offset >> 3] & shift_true(bit_offset & 7)) != static_cast<std::uint8_t>(0);
+	return (field[bit_offset >> 3] & shift_true(bit_offset & 7)) != static_cast<unsigned char>(0);
 }
 
 template <std::size_t number_of_bits>
@@ -204,7 +203,7 @@ inline bool welp::bits<number_of_bits>::load_bit(std::size_t byte_offset, std::s
 	assert(8 * byte_offset + bit_offset < bits);
 	assert(bit_offset < 8);
 #endif // WELP_BITS_DEBUG_MODE
-	return (field[byte_offset] & shift_true(bit_offset)) != static_cast<std::uint8_t>(0);
+	return (field[byte_offset] & shift_true(bit_offset)) != static_cast<unsigned char>(0);
 }
 
 template <std::size_t number_of_bits>
@@ -232,8 +231,8 @@ inline char welp::bits<number_of_bits>::load_hex_lc(std::size_t hex_offset) cons
 #ifdef WELP_BITS_DEBUG_MODE
 	assert(4 * hex_offset + 3 < bits);
 #endif // WELP_BITS_DEBUG_MODE
-	std::uint8_t temp = ((hex_offset & static_cast<std::size_t>(1)) != 0) ?
-		(field[hex_offset >> 1] >> 4) : (field[hex_offset >> 1] & static_cast<std::uint8_t>(15));
+	unsigned char temp = ((hex_offset & static_cast<std::size_t>(1)) != 0) ?
+		(field[hex_offset >> 1] >> 4) : (field[hex_offset >> 1] & static_cast<unsigned char>(15));
 	return uint8_t_to_char_lc(temp);
 }
 
@@ -243,8 +242,8 @@ inline char welp::bits<number_of_bits>::load_hex_uc(std::size_t hex_offset) cons
 #ifdef WELP_BITS_DEBUG_MODE
 	assert(4 * hex_offset + 3 < bits);
 #endif // WELP_BITS_DEBUG_MODE
-	std::uint8_t temp = ((hex_offset & static_cast<std::size_t>(1)) != 0) ?
-		(field[hex_offset >> 1] >> 4) : (field[hex_offset >> 1] & static_cast<std::uint8_t>(15));
+	unsigned char temp = ((hex_offset & static_cast<std::size_t>(1)) != 0) ?
+		(field[hex_offset >> 1] >> 4) : (field[hex_offset >> 1] & static_cast<unsigned char>(15));
 	return uint8_t_to_char_uc(temp);
 }
 
@@ -254,15 +253,15 @@ inline welp::bits<number_of_bits>& welp::bits<number_of_bits>::store_hex(std::si
 #ifdef WELP_BITS_DEBUG_MODE
 	assert(4 * hex_offset + 3 < bits);
 #endif // WELP_BITS_DEBUG_MODE
-	std::uint8_t temp = char_to_uint8_t(hex);
+	unsigned char temp = char_to_uint8_t(hex);
 	std::size_t byte_offset = hex_offset >> 1;
 	if ((hex_offset & static_cast<std::size_t>(1)) != 0)
 	{
-		field[byte_offset] = (field[byte_offset] & static_cast<std::uint8_t>(15)) | (temp << 4);
+		field[byte_offset] = (field[byte_offset] & static_cast<unsigned char>(15)) | (temp << 4);
 	}
 	else
 	{
-		field[byte_offset] = (field[byte_offset] & static_cast<std::uint8_t>(240)) | temp;
+		field[byte_offset] = (field[byte_offset] & static_cast<unsigned char>(240)) | temp;
 	}
 
 	return *this;
@@ -274,7 +273,7 @@ inline char welp::bits<number_of_bits>::load_hex_lc(std::size_t byte_offset, boo
 #ifdef WELP_BITS_DEBUG_MODE
 	assert(8 * byte_offset + 4 * static_cast<std::size_t>(upper_half_byte) + 3 < bits);
 #endif // WELP_BITS_DEBUG_MODE
-	std::uint8_t temp = (upper_half_byte) ? (field[byte_offset] >> 4) : (field[byte_offset] & static_cast<std::uint8_t>(15));
+	unsigned char temp = (upper_half_byte) ? (field[byte_offset] >> 4) : (field[byte_offset] & static_cast<unsigned char>(15));
 	return uint8_t_to_char_lc(temp);
 }
 
@@ -284,7 +283,7 @@ inline char welp::bits<number_of_bits>::load_hex_uc(std::size_t byte_offset, boo
 #ifdef WELP_BITS_DEBUG_MODE
 	assert(8 * byte_offset + 4 * static_cast<std::size_t>(upper_half_byte) + 3 < bits);
 #endif // WELP_BITS_DEBUG_MODE
-	std::uint8_t temp = (upper_half_byte) ? (field[byte_offset] >> 4) : (field[byte_offset] & static_cast<std::uint8_t>(15));
+	unsigned char temp = (upper_half_byte) ? (field[byte_offset] >> 4) : (field[byte_offset] & static_cast<unsigned char>(15));
 	return uint8_t_to_char_uc(temp);
 }
 
@@ -294,22 +293,22 @@ inline welp::bits<number_of_bits>& welp::bits<number_of_bits>::store_hex(std::si
 #ifdef WELP_BITS_DEBUG_MODE
 	assert(8 * byte_offset + 4 * static_cast<std::size_t>(upper_half_byte) + 3 < bits);
 #endif // WELP_BITS_DEBUG_MODE
-	std::uint8_t temp = char_to_uint8_t(hex);
+	unsigned char temp = char_to_uint8_t(hex);
 
 	if (upper_half_byte)
 	{
-		field[byte_offset] = (field[byte_offset] & static_cast<std::uint8_t>(15)) | (temp << 4);
+		field[byte_offset] = (field[byte_offset] & static_cast<unsigned char>(15)) | (temp << 4);
 	}
 	else
 	{
-		field[byte_offset] = (field[byte_offset] & static_cast<std::uint8_t>(240)) | temp;
+		field[byte_offset] = (field[byte_offset] & static_cast<unsigned char>(240)) | temp;
 	}
 
 	return *this;
 }
 
 template <std::size_t number_of_bits>
-inline std::uint8_t welp::bits<number_of_bits>::load_byte(std::size_t byte_offset) const noexcept
+inline unsigned char welp::bits<number_of_bits>::load_byte(std::size_t byte_offset) const noexcept
 {
 #ifdef WELP_BITS_DEBUG_MODE
 	assert(8 * byte_offset < bits);
@@ -318,7 +317,7 @@ inline std::uint8_t welp::bits<number_of_bits>::load_byte(std::size_t byte_offse
 }
 
 template <std::size_t number_of_bits>
-inline welp::bits<number_of_bits>& welp::bits<number_of_bits>::store_byte(std::size_t byte_offset, std::uint8_t number) noexcept
+inline welp::bits<number_of_bits>& welp::bits<number_of_bits>::store_byte(std::size_t byte_offset, unsigned char number) noexcept
 {
 #ifdef WELP_BITS_DEBUG_MODE
 	assert(8 * byte_offset < bits);
@@ -342,7 +341,7 @@ inline welp::bits<number_of_bits>& welp::bits<number_of_bits>::store_char(std::s
 #ifdef WELP_BITS_DEBUG_MODE
 	assert(8 * byte_offset < bits);
 #endif // WELP_BITS_DEBUG_MODE
-	*(reinterpret_cast<char*>(field) + byte_offset) = character;
+	* (reinterpret_cast<char*>(field) + byte_offset) = character;
 	return *this;
 }
 
@@ -354,14 +353,14 @@ inline welp::bits<number_of_bits>& welp::bits<number_of_bits>::set_bits(bool bit
 	constexpr std::size_t remainder_bits = number_of_bits & 7;
 	if (bit)
 	{
-		std::memset(static_cast<std::uint8_t*>(field), -static_cast<std::uint8_t>(1), bytes);
-		*(static_cast<std::uint8_t*>(field) + bytes) |= bitmask_true(remainder_bits);
+		std::memset(static_cast<unsigned char*>(field), -static_cast<unsigned char>(1), bytes);
+		*(static_cast<unsigned char*>(field) + bytes) |= bitmask_true(remainder_bits);
 		return *this;
 	}
 	else
 	{
-		std::memset(static_cast<std::uint8_t*>(field), static_cast<std::uint8_t>(0), bytes);
-		*(static_cast<std::uint8_t*>(field) + bytes) &= bitmask_false(remainder_bits);
+		std::memset(static_cast<unsigned char*>(field), static_cast<unsigned char>(0), bytes);
+		*(static_cast<unsigned char*>(field) + bytes) &= bitmask_false(remainder_bits);
 		return *this;
 	}
 }
@@ -370,22 +369,22 @@ template <std::size_t number_of_bits>
 inline welp::bits<number_of_bits>& welp::bits<number_of_bits>::set_hex(char hex) noexcept
 {
 	constexpr std::size_t bytes = number_of_bits >> 3;
-	std::uint8_t temp = char_to_uint8_t(hex);
+	unsigned char temp = char_to_uint8_t(hex);
 	if ((number_of_bits & 7) > 3)
 	{
-		*(static_cast<std::uint8_t*>(field) + bytes) &= bitmask_false(4);
-		*(static_cast<std::uint8_t*>(field) + bytes) |= temp;
+		*(static_cast<unsigned char*>(field) + bytes) &= bitmask_false(4);
+		*(static_cast<unsigned char*>(field) + bytes) |= temp;
 	}
 	temp |= (temp << 4);
-	std::memset(static_cast<std::uint8_t*>(field), temp, bytes);
+	std::memset(static_cast<unsigned char*>(field), temp, bytes);
 	return *this;
 }
 
 template <std::size_t number_of_bits>
-inline welp::bits<number_of_bits>& welp::bits<number_of_bits>::set_bytes(std::uint8_t number) noexcept
+inline welp::bits<number_of_bits>& welp::bits<number_of_bits>::set_bytes(unsigned char number) noexcept
 {
 	constexpr std::size_t bytes = number_of_bits >> 3;
-	std::memset(static_cast<std::uint8_t*>(field), number, bytes);
+	std::memset(static_cast<unsigned char*>(field), number, bytes);
 	return *this;
 }
 
@@ -403,8 +402,8 @@ inline welp::bits<number_of_bits>& welp::bits<number_of_bits>::cpy(const Ty& rhs
 {
 	constexpr std::size_t bytes = number_of_bits >> 3;
 	constexpr std::size_t remainder_bits = number_of_bits & 7;
-	const std::uint8_t* rhs_ptr = static_cast<const std::uint8_t*>(static_cast<const void*>(&rhs));
-	std::memcpy(static_cast<std::uint8_t*>(field), rhs_ptr, bytes);
+	const unsigned char* rhs_ptr = static_cast<const unsigned char*>(static_cast<const void*>(&rhs));
+	std::memcpy(static_cast<unsigned char*>(field), rhs_ptr, bytes);
 	if (remainder_bits != 0)
 	{
 		field[bytes] |= (*(rhs_ptr + bytes) & bitmask_true(remainder_bits));
@@ -466,7 +465,7 @@ inline welp::bits<number_of_bits>& welp::bits<number_of_bits>::flip() noexcept
 {
 	constexpr std::size_t bytes = number_of_bits >> 3;
 	constexpr std::size_t remainder_bits = number_of_bits & 7;
-	constexpr std::uint8_t ones = -static_cast<std::uint8_t>(1);
+	constexpr unsigned char ones = -static_cast<unsigned char>(1);
 	for (std::size_t k = 0; k < bytes; k++)
 	{
 		field[k] ^= ones;
@@ -535,10 +534,10 @@ welp::bits<number_of_bits>::bits() noexcept
 {
 	constexpr std::size_t bytes = number_of_bits >> 3;
 	constexpr std::size_t remainder_bits = number_of_bits & 7;
-	std::memset(static_cast<std::uint8_t*>(field), static_cast<std::uint8_t>(0), bytes);
+	std::memset(static_cast<unsigned char*>(field), static_cast<unsigned char>(0), bytes);
 	if (remainder_bits != 0)
 	{
-		*(static_cast<std::uint8_t*>(field) + bytes) &= bitmask_false(remainder_bits);
+		*(static_cast<unsigned char*>(field) + bytes) &= bitmask_false(remainder_bits);
 	}
 }
 
@@ -547,11 +546,11 @@ inline welp::bits<number_of_bits>& welp::bits<number_of_bits>::operator=(const w
 {
 	constexpr std::size_t bytes = number_of_bits >> 3;
 	constexpr std::size_t remainder_bits = number_of_bits & 7;
-	std::memcpy(static_cast<std::uint8_t*>(field), static_cast<const std::uint8_t*>(rhs.field), bytes);
+	std::memcpy(static_cast<unsigned char*>(field), static_cast<const unsigned char*>(rhs.field), bytes);
 	if (remainder_bits != 0)
 	{
-		*(static_cast<std::uint8_t*>(field) + bytes) &= bitmask_false(remainder_bits);
-		*(static_cast<std::uint8_t*>(field) + bytes)& bitmask_true(remainder_bits);
+		*(static_cast<unsigned char*>(field) + bytes) &= bitmask_false(remainder_bits);
+		*(static_cast<unsigned char*>(field) + bytes)& bitmask_true(remainder_bits);
 	}
 	return *this;
 }
@@ -561,126 +560,126 @@ inline welp::bits<number_of_bits>& welp::bits<number_of_bits>::operator=(welp::b
 {
 	constexpr std::size_t bytes = number_of_bits >> 3;
 	constexpr std::size_t remainder_bits = number_of_bits & 7;
-	std::memcpy(static_cast<std::uint8_t*>(field), static_cast<const std::uint8_t*>(rhs.field), bytes);
+	std::memcpy(static_cast<unsigned char*>(field), static_cast<const unsigned char*>(rhs.field), bytes);
 	if (remainder_bits != 0)
 	{
-		*(static_cast<std::uint8_t*>(field) + bytes) &= bitmask_false(remainder_bits);
-		*(static_cast<std::uint8_t*>(field) + bytes) |= (rhs.field[bytes] & bitmask_true(remainder_bits));
+		*(static_cast<unsigned char*>(field) + bytes) &= bitmask_false(remainder_bits);
+		*(static_cast<unsigned char*>(field) + bytes) |= (rhs.field[bytes] & bitmask_true(remainder_bits));
 	}
 	return *this;
 }
 
 
 template <std::size_t number_of_bits>
-inline std::uint8_t welp::bits<number_of_bits>::shift_true(std::size_t bit_offset) const noexcept
+inline unsigned char welp::bits<number_of_bits>::shift_true(std::size_t bit_offset) const noexcept
 {
 	switch (bit_offset)
 	{
-	case 0: return static_cast<std::uint8_t>(1); break;
-	case 1: return static_cast<std::uint8_t>(2); break;
-	case 2: return static_cast<std::uint8_t>(4); break;
-	case 3: return static_cast<std::uint8_t>(8); break;
-	case 4: return static_cast<std::uint8_t>(16); break;
-	case 5: return static_cast<std::uint8_t>(32); break;
-	case 6: return static_cast<std::uint8_t>(64); break;
-	case 7: return static_cast<std::uint8_t>(128); break;
-	default: return static_cast<std::uint8_t>(0); break;
+	case 0: return static_cast<unsigned char>(1); break;
+	case 1: return static_cast<unsigned char>(2); break;
+	case 2: return static_cast<unsigned char>(4); break;
+	case 3: return static_cast<unsigned char>(8); break;
+	case 4: return static_cast<unsigned char>(16); break;
+	case 5: return static_cast<unsigned char>(32); break;
+	case 6: return static_cast<unsigned char>(64); break;
+	case 7: return static_cast<unsigned char>(128); break;
+	default: return static_cast<unsigned char>(0); break;
 	}
 }
 
 template <std::size_t number_of_bits>
-inline std::uint8_t welp::bits<number_of_bits>::shift_false(std::size_t bit_offset) const noexcept
+inline unsigned char welp::bits<number_of_bits>::shift_false(std::size_t bit_offset) const noexcept
 {
 	switch (bit_offset)
 	{
-	case 0: return static_cast<std::uint8_t>(254); break;
-	case 1: return static_cast<std::uint8_t>(253); break;
-	case 2: return static_cast<std::uint8_t>(251); break;
-	case 3: return static_cast<std::uint8_t>(247); break;
-	case 4: return static_cast<std::uint8_t>(239); break;
-	case 5: return static_cast<std::uint8_t>(223); break;
-	case 6: return static_cast<std::uint8_t>(191); break;
-	case 7: return static_cast<std::uint8_t>(127); break;
-	default: return static_cast<std::uint8_t>(255); break;
+	case 0: return static_cast<unsigned char>(254); break;
+	case 1: return static_cast<unsigned char>(253); break;
+	case 2: return static_cast<unsigned char>(251); break;
+	case 3: return static_cast<unsigned char>(247); break;
+	case 4: return static_cast<unsigned char>(239); break;
+	case 5: return static_cast<unsigned char>(223); break;
+	case 6: return static_cast<unsigned char>(191); break;
+	case 7: return static_cast<unsigned char>(127); break;
+	default: return static_cast<unsigned char>(255); break;
 	}
 }
 
 template <std::size_t number_of_bits>
-inline std::uint8_t welp::bits<number_of_bits>::bitmask_true(std::size_t digits) const noexcept
+inline unsigned char welp::bits<number_of_bits>::bitmask_true(std::size_t digits) const noexcept
 {
 	switch (digits)
 	{
-	case 0: return static_cast<std::uint8_t>(0); break;
-	case 1: return static_cast<std::uint8_t>(1); break;
-	case 2: return static_cast<std::uint8_t>(3); break;
-	case 3: return static_cast<std::uint8_t>(7); break;
-	case 4: return static_cast<std::uint8_t>(15); break;
-	case 5: return static_cast<std::uint8_t>(31); break;
-	case 6: return static_cast<std::uint8_t>(63); break;
-	case 7: return static_cast<std::uint8_t>(127); break;
-	default: return static_cast<std::uint8_t>(255); break;
+	case 0: return static_cast<unsigned char>(0); break;
+	case 1: return static_cast<unsigned char>(1); break;
+	case 2: return static_cast<unsigned char>(3); break;
+	case 3: return static_cast<unsigned char>(7); break;
+	case 4: return static_cast<unsigned char>(15); break;
+	case 5: return static_cast<unsigned char>(31); break;
+	case 6: return static_cast<unsigned char>(63); break;
+	case 7: return static_cast<unsigned char>(127); break;
+	default: return static_cast<unsigned char>(255); break;
 	}
 }
 
 template <std::size_t number_of_bits>
-inline std::uint8_t welp::bits<number_of_bits>::bitmask_false(std::size_t digits) const noexcept
+inline unsigned char welp::bits<number_of_bits>::bitmask_false(std::size_t digits) const noexcept
 {
 	switch (digits)
 	{
-	case 0: return static_cast<std::uint8_t>(255); break;
-	case 1: return static_cast<std::uint8_t>(254); break;
-	case 2: return static_cast<std::uint8_t>(252); break;
-	case 3: return static_cast<std::uint8_t>(248); break;
-	case 4: return static_cast<std::uint8_t>(240); break;
-	case 5: return static_cast<std::uint8_t>(224); break;
-	case 6: return static_cast<std::uint8_t>(192); break;
-	case 7: return static_cast<std::uint8_t>(128); break;
-	default: return static_cast<std::uint8_t>(0); break;
+	case 0: return static_cast<unsigned char>(255); break;
+	case 1: return static_cast<unsigned char>(254); break;
+	case 2: return static_cast<unsigned char>(252); break;
+	case 3: return static_cast<unsigned char>(248); break;
+	case 4: return static_cast<unsigned char>(240); break;
+	case 5: return static_cast<unsigned char>(224); break;
+	case 6: return static_cast<unsigned char>(192); break;
+	case 7: return static_cast<unsigned char>(128); break;
+	default: return static_cast<unsigned char>(0); break;
 	}
 }
 
 template <std::size_t number_of_bits>
-inline std::uint8_t welp::bits<number_of_bits>::char_to_uint8_t(char hex) const noexcept
+inline unsigned char welp::bits<number_of_bits>::char_to_uint8_t(char hex) const noexcept
 {
 #ifndef WELP_BITS_USE_CHAR_ARITHMETIC
 	switch (hex)
 	{
-	case '0': return static_cast<std::uint8_t>(0); break;
-	case '1': return static_cast<std::uint8_t>(1); break;
-	case '2': return static_cast<std::uint8_t>(2); break;
-	case '3': return static_cast<std::uint8_t>(3); break;
-	case '4': return static_cast<std::uint8_t>(4); break;
-	case '5': return static_cast<std::uint8_t>(5); break;
-	case '6': return static_cast<std::uint8_t>(6); break;
-	case '7': return static_cast<std::uint8_t>(7); break;
-	case '8': return static_cast<std::uint8_t>(8); break;
-	case '9': return static_cast<std::uint8_t>(9); break;
+	case '0': return static_cast<unsigned char>(0); break;
+	case '1': return static_cast<unsigned char>(1); break;
+	case '2': return static_cast<unsigned char>(2); break;
+	case '3': return static_cast<unsigned char>(3); break;
+	case '4': return static_cast<unsigned char>(4); break;
+	case '5': return static_cast<unsigned char>(5); break;
+	case '6': return static_cast<unsigned char>(6); break;
+	case '7': return static_cast<unsigned char>(7); break;
+	case '8': return static_cast<unsigned char>(8); break;
+	case '9': return static_cast<unsigned char>(9); break;
 
-	case 'A': return static_cast<std::uint8_t>(10); break;
-	case 'B': return static_cast<std::uint8_t>(11); break;
-	case 'C': return static_cast<std::uint8_t>(12); break;
-	case 'D': return static_cast<std::uint8_t>(13); break;
-	case 'E': return static_cast<std::uint8_t>(14); break;
-	case 'F': return static_cast<std::uint8_t>(15); break;
+	case 'A': return static_cast<unsigned char>(10); break;
+	case 'B': return static_cast<unsigned char>(11); break;
+	case 'C': return static_cast<unsigned char>(12); break;
+	case 'D': return static_cast<unsigned char>(13); break;
+	case 'E': return static_cast<unsigned char>(14); break;
+	case 'F': return static_cast<unsigned char>(15); break;
 
-	case 'a': return static_cast<std::uint8_t>(10); break;
-	case 'b': return static_cast<std::uint8_t>(11); break;
-	case 'c': return static_cast<std::uint8_t>(12); break;
-	case 'd': return static_cast<std::uint8_t>(13); break;
-	case 'e': return static_cast<std::uint8_t>(14); break;
-	case 'f': return static_cast<std::uint8_t>(15); break;
+	case 'a': return static_cast<unsigned char>(10); break;
+	case 'b': return static_cast<unsigned char>(11); break;
+	case 'c': return static_cast<unsigned char>(12); break;
+	case 'd': return static_cast<unsigned char>(13); break;
+	case 'e': return static_cast<unsigned char>(14); break;
+	case 'f': return static_cast<unsigned char>(15); break;
 
-	default: return static_cast<std::uint8_t>(0); break;
+	default: return static_cast<unsigned char>(0); break;
 	}
 #else // WELP_BITS_USE_CHAR_ARITHMETIC
-	if (hex < ':') { return static_cast<std::uint8_t>(hex - '0'); }
-	else if (hex < 'G') { return static_cast<std::uint8_t>(hex - '7'); }
-	else { return static_cast<std::uint8_t>(hex - 'W'); }
+	if (hex < ':') { return static_cast<unsigned char>(hex - '0'); }
+	else if (hex < 'G') { return static_cast<unsigned char>(hex - '7'); }
+	else { return static_cast<unsigned char>(hex - 'W'); }
 #endif // WELP_BITS_USE_CHAR_ARITHMETIC
 }
 
 template <std::size_t number_of_bits>
-inline char welp::bits<number_of_bits>::uint8_t_to_char_lc(std::uint8_t number) const noexcept
+inline char welp::bits<number_of_bits>::uint8_t_to_char_lc(unsigned char number) const noexcept
 {
 #ifndef WELP_BITS_USE_CHAR_ARITHMETIC
 	switch (number)
@@ -706,13 +705,13 @@ inline char welp::bits<number_of_bits>::uint8_t_to_char_lc(std::uint8_t number) 
 	default: return '?'; break;
 	}
 #else // WELP_BITS_USE_CHAR_ARITHMETIC
-	if (number < static_cast< std::uint8_t>(10)) { return reinterpret_cast<char&>(number) + '0'; }
+	if (number < static_cast<unsigned char>(10)) { return reinterpret_cast<char&>(number) + '0'; }
 	else { return reinterpret_cast<char&>(number) + 'W'; }
 #endif // WELP_BITS_USE_CHAR_ARITHMETIC
 }
 
 template <std::size_t number_of_bits>
-inline char welp::bits<number_of_bits>::uint8_t_to_char_uc(std::uint8_t number) const noexcept
+inline char welp::bits<number_of_bits>::uint8_t_to_char_uc(unsigned char number) const noexcept
 {
 #ifndef WELP_BITS_USE_CHAR_ARITHMETIC
 	switch (number)
@@ -738,7 +737,7 @@ inline char welp::bits<number_of_bits>::uint8_t_to_char_uc(std::uint8_t number) 
 	default: return '?'; break;
 	}
 #else // WELP_BITS_USE_CHAR_ARITHMETIC
-	if (number < static_cast< std::uint8_t>(10)) { return reinterpret_cast<char&>(number) + '0'; }
+	if (number < static_cast<unsigned char>(10)) { return reinterpret_cast<char&>(number) + '0'; }
 	else { return reinterpret_cast<char&>(number) + '7'; }
 #endif // WELP_BITS_USE_CHAR_ARITHMETIC
 }
@@ -842,7 +841,7 @@ namespace welp
 		}
 		if (remainder_bits != 0)
 		{
-			std::uint8_t bitmask = A.bitmask_true(remainder_bits);
+			unsigned char bitmask = A.bitmask_true(remainder_bits);
 			if ((A.field[bytes] & bitmask) != (B.field[bytes] & bitmask)) { return false; }
 			else { return true; }
 		}
@@ -858,7 +857,7 @@ namespace welp
 		}
 		if (remainder_bits != 0)
 		{
-			std::uint8_t bitmask = A.bitmask_true(remainder_bits);
+			unsigned char bitmask = A.bitmask_true(remainder_bits);
 			if ((A.field[bytes] & bitmask) != (B.field[bytes] & bitmask)) { return true; }
 			else { return true; }
 		}
@@ -934,18 +933,18 @@ namespace welp
 
 		inline bool load_bit(std::size_t bit_offset) const noexcept
 		{
-			return (*(static_cast<const std::uint8_t*>(field) + (bit_offset >> 3)) & shift_true(bit_offset & 7)) != static_cast<std::uint8_t>(0);
+			return (*(static_cast<const unsigned char*>(field) + (bit_offset >> 3)) & shift_true(bit_offset & 7)) != static_cast<unsigned char>(0);
 		}
 		inline welp::bits<0>& store_bit(std::size_t bit_offset, bool bit) noexcept
 		{
 			if (bit)
 			{
-				*(static_cast<std::uint8_t*>(field) + (bit_offset >> 3)) |= shift_true(bit_offset & 7);
+				*(static_cast<unsigned char*>(field) + (bit_offset >> 3)) |= shift_true(bit_offset & 7);
 				return *this;
 			}
 			else
 			{
-				*(static_cast<std::uint8_t*>(field) + (bit_offset >> 3)) &= shift_false(bit_offset & 7);
+				*(static_cast<unsigned char*>(field) + (bit_offset >> 3)) &= shift_false(bit_offset & 7);
 				return *this;
 			}
 		}
@@ -954,7 +953,7 @@ namespace welp
 #ifdef WELP_BITS_DEBUG_MODE
 			assert(bit_offset < 8);
 #endif // WELP_BITS_DEBUG_MODE
-			return (*(static_cast<const std::uint8_t*>(field) + byte_offset) & shift_true(bit_offset)) != static_cast<std::uint8_t>(0);
+			return (*(static_cast<const unsigned char*>(field) + byte_offset) & shift_true(bit_offset)) != static_cast<unsigned char>(0);
 		}
 		inline welp::bits<0>& store_bit(std::size_t byte_offset, std::size_t bit_offset, bool bit) noexcept
 		{
@@ -963,86 +962,86 @@ namespace welp
 #endif // WELP_BITS_DEBUG_MODE
 			if (bit)
 			{
-				*(static_cast<std::uint8_t*>(field) + byte_offset) |= shift_true(bit_offset);
+				*(static_cast<unsigned char*>(field) + byte_offset) |= shift_true(bit_offset);
 				return *this;
 			}
 			else
 			{
-				*(static_cast<std::uint8_t*>(field) + byte_offset) &= shift_false(bit_offset);
+				*(static_cast<unsigned char*>(field) + byte_offset) &= shift_false(bit_offset);
 				return *this;
 			}
 		}
 
 		inline char load_hex_lc(std::size_t hex_offset) const noexcept
 		{
-			std::uint8_t temp = ((hex_offset & static_cast<std::size_t>(1)) != 0) ?
-				(*(static_cast<const std::uint8_t*>(field) + (hex_offset >> 1)) >> 4)
-				: (*(static_cast<const std::uint8_t*>(field) + (hex_offset >> 1)) & static_cast<std::uint8_t>(15));
+			unsigned char temp = ((hex_offset & static_cast<std::size_t>(1)) != 0) ?
+				(*(static_cast<const unsigned char*>(field) + (hex_offset >> 1)) >> 4)
+				: (*(static_cast<const unsigned char*>(field) + (hex_offset >> 1)) & static_cast<unsigned char>(15));
 			return uint8_t_to_char_lc(temp);
 		}
 		inline char load_hex_uc(std::size_t hex_offset) const noexcept
 		{
-			std::uint8_t temp = ((hex_offset & static_cast<std::size_t>(1)) != 0) ?
-				(*(static_cast<const std::uint8_t*>(field) + (hex_offset >> 1)) >> 4)
-				: (*(static_cast<const std::uint8_t*>(field) + (hex_offset >> 1)) & static_cast<std::uint8_t>(15));
+			unsigned char temp = ((hex_offset & static_cast<std::size_t>(1)) != 0) ?
+				(*(static_cast<const unsigned char*>(field) + (hex_offset >> 1)) >> 4)
+				: (*(static_cast<const unsigned char*>(field) + (hex_offset >> 1)) & static_cast<unsigned char>(15));
 			return uint8_t_to_char_uc(temp);
 		}
 		inline welp::bits<0>& store_hex(std::size_t hex_offset, char hex) noexcept
 		{
-			std::uint8_t temp = char_to_uint8_t(hex);
+			unsigned char temp = char_to_uint8_t(hex);
 			std::size_t byte_offset = hex_offset >> 1;
 			if ((hex_offset & static_cast<std::size_t>(1)) != 0)
 			{
-				*(static_cast<std::uint8_t*>(field) + byte_offset) = (*(static_cast<std::uint8_t*>(field) + byte_offset)
-					& static_cast<std::uint8_t>(15)) | (temp << 4);
+				*(static_cast<unsigned char*>(field) + byte_offset) = (*(static_cast<unsigned char*>(field) + byte_offset)
+					& static_cast<unsigned char>(15)) | (temp << 4);
 			}
 			else
 			{
-				*(static_cast<std::uint8_t*>(field) + byte_offset) = (*(static_cast<std::uint8_t*>(field) + byte_offset)
-					& static_cast<std::uint8_t>(240)) | temp;
+				*(static_cast<unsigned char*>(field) + byte_offset) = (*(static_cast<unsigned char*>(field) + byte_offset)
+					& static_cast<unsigned char>(240)) | temp;
 			}
 
 			return *this;
 		}
 		inline char load_hex_lc(std::size_t byte_offset, bool upper_half_byte) const noexcept
 		{
-			std::uint8_t temp = (upper_half_byte) ?
-				(*(static_cast<const std::uint8_t*>(field) + byte_offset) >> 4)
-				: (*(static_cast<const std::uint8_t*>(field) + byte_offset) & static_cast<std::uint8_t>(15));
+			unsigned char temp = (upper_half_byte) ?
+				(*(static_cast<const unsigned char*>(field) + byte_offset) >> 4)
+				: (*(static_cast<const unsigned char*>(field) + byte_offset) & static_cast<unsigned char>(15));
 			return uint8_t_to_char_lc(temp);
 		}
 		inline char load_hex_uc(std::size_t byte_offset, bool upper_half_byte) const noexcept
 		{
-			std::uint8_t temp = (upper_half_byte) ?
-				(*(static_cast<const std::uint8_t*>(field) + byte_offset) >> 4)
-				: (*(static_cast<const std::uint8_t*>(field) + byte_offset) & static_cast<std::uint8_t>(15));
+			unsigned char temp = (upper_half_byte) ?
+				(*(static_cast<const unsigned char*>(field) + byte_offset) >> 4)
+				: (*(static_cast<const unsigned char*>(field) + byte_offset) & static_cast<unsigned char>(15));
 			return uint8_t_to_char_uc(temp);
 		}
 		inline welp::bits<0>& store_hex(std::size_t byte_offset, bool upper_half_byte, char hex) noexcept
 		{
-			std::uint8_t temp = char_to_uint8_t(hex);
+			unsigned char temp = char_to_uint8_t(hex);
 
 			if (upper_half_byte)
 			{
-				*(static_cast<std::uint8_t*>(field) + byte_offset) = (*(static_cast<std::uint8_t*>(field) + byte_offset)
-					& static_cast<std::uint8_t>(15)) | (temp << 4);
+				*(static_cast<unsigned char*>(field) + byte_offset) = (*(static_cast<unsigned char*>(field) + byte_offset)
+					& static_cast<unsigned char>(15)) | (temp << 4);
 			}
 			else
 			{
-				*(static_cast<std::uint8_t*>(field) + byte_offset) = (*(static_cast<std::uint8_t*>(field) + byte_offset)
-					& static_cast<std::uint8_t>(240)) | temp;
+				*(static_cast<unsigned char*>(field) + byte_offset) = (*(static_cast<unsigned char*>(field) + byte_offset)
+					& static_cast<unsigned char>(240)) | temp;
 			}
 
 			return *this;
 		}
 
-		inline std::uint8_t load_byte(std::size_t byte_offset) const noexcept
+		inline unsigned char load_byte(std::size_t byte_offset) const noexcept
 		{
-			return *(static_cast<const std::uint8_t*>(field) + byte_offset);
+			return *(static_cast<const unsigned char*>(field) + byte_offset);
 		}
-		inline welp::bits<0>& store_byte(std::size_t byte_offset, std::uint8_t number) noexcept
+		inline welp::bits<0>& store_byte(std::size_t byte_offset, unsigned char number) noexcept
 		{
-			*(static_cast<std::uint8_t*>(field) + byte_offset) = number;
+			*(static_cast<unsigned char*>(field) + byte_offset) = number;
 			return *this;
 		}
 
@@ -1056,8 +1055,8 @@ namespace welp
 			return *this;
 		}
 
-		constexpr const std::uint8_t* data() const noexcept { return static_cast<const std::uint8_t*>(field); }
-		constexpr std::uint8_t* data() noexcept { return static_cast<std::uint8_t*>(field); }
+		constexpr const unsigned char* data() const noexcept { return static_cast<const unsigned char*>(field); }
+		constexpr unsigned char* data() noexcept { return static_cast<unsigned char*>(field); }
 
 #ifdef WELP_BITS_INCLUDE_IOSTREAM
 		const welp::bits<0>& say_bits(std::size_t bits) const { say_bits_sub(0, bits); return *this; }
@@ -1090,77 +1089,77 @@ namespace welp
 
 	private:
 
-		std::uint8_t field[1];
+		unsigned char field[1];
 
-		inline std::uint8_t shift_true(std::size_t bit_offset) const noexcept
+		inline unsigned char shift_true(std::size_t bit_offset) const noexcept
 		{
 			switch (bit_offset)
 			{
-			case 0: return static_cast<std::uint8_t>(1); break;
-			case 1: return static_cast<std::uint8_t>(2); break;
-			case 2: return static_cast<std::uint8_t>(4); break;
-			case 3: return static_cast<std::uint8_t>(8); break;
-			case 4: return static_cast<std::uint8_t>(16); break;
-			case 5: return static_cast<std::uint8_t>(32); break;
-			case 6: return static_cast<std::uint8_t>(64); break;
-			case 7: return static_cast<std::uint8_t>(128); break;
-			default: return static_cast<std::uint8_t>(0); break;
+			case 0: return static_cast<unsigned char>(1); break;
+			case 1: return static_cast<unsigned char>(2); break;
+			case 2: return static_cast<unsigned char>(4); break;
+			case 3: return static_cast<unsigned char>(8); break;
+			case 4: return static_cast<unsigned char>(16); break;
+			case 5: return static_cast<unsigned char>(32); break;
+			case 6: return static_cast<unsigned char>(64); break;
+			case 7: return static_cast<unsigned char>(128); break;
+			default: return static_cast<unsigned char>(0); break;
 			}
 		}
-		inline std::uint8_t shift_false(std::size_t bit_offset) const noexcept
+		inline unsigned char shift_false(std::size_t bit_offset) const noexcept
 		{
 			switch (bit_offset)
 			{
-			case 0: return static_cast<std::uint8_t>(254); break;
-			case 1: return static_cast<std::uint8_t>(253); break;
-			case 2: return static_cast<std::uint8_t>(251); break;
-			case 3: return static_cast<std::uint8_t>(247); break;
-			case 4: return static_cast<std::uint8_t>(239); break;
-			case 5: return static_cast<std::uint8_t>(223); break;
-			case 6: return static_cast<std::uint8_t>(191); break;
-			case 7: return static_cast<std::uint8_t>(127); break;
-			default: return static_cast<std::uint8_t>(255); break;
+			case 0: return static_cast<unsigned char>(254); break;
+			case 1: return static_cast<unsigned char>(253); break;
+			case 2: return static_cast<unsigned char>(251); break;
+			case 3: return static_cast<unsigned char>(247); break;
+			case 4: return static_cast<unsigned char>(239); break;
+			case 5: return static_cast<unsigned char>(223); break;
+			case 6: return static_cast<unsigned char>(191); break;
+			case 7: return static_cast<unsigned char>(127); break;
+			default: return static_cast<unsigned char>(255); break;
 			}
 		}
-		inline std::uint8_t char_to_uint8_t(char hex) const noexcept
+		inline unsigned char char_to_uint8_t(char hex) const noexcept
 		{
 #ifndef WELP_BITS_USE_CHAR_ARITHMETIC
 			switch (hex)
 			{
-			case '0': return static_cast<std::uint8_t>(0); break;
-			case '1': return static_cast<std::uint8_t>(1); break;
-			case '2': return static_cast<std::uint8_t>(2); break;
-			case '3': return static_cast<std::uint8_t>(3); break;
-			case '4': return static_cast<std::uint8_t>(4); break;
-			case '5': return static_cast<std::uint8_t>(5); break;
-			case '6': return static_cast<std::uint8_t>(6); break;
-			case '7': return static_cast<std::uint8_t>(7); break;
-			case '8': return static_cast<std::uint8_t>(8); break;
-			case '9': return static_cast<std::uint8_t>(9); break;
+			case '0': return static_cast<unsigned char>(0); break;
+			case '1': return static_cast<unsigned char>(1); break;
+			case '2': return static_cast<unsigned char>(2); break;
+			case '3': return static_cast<unsigned char>(3); break;
+			case '4': return static_cast<unsigned char>(4); break;
+			case '5': return static_cast<unsigned char>(5); break;
+			case '6': return static_cast<unsigned char>(6); break;
+			case '7': return static_cast<unsigned char>(7); break;
+			case '8': return static_cast<unsigned char>(8); break;
+			case '9': return static_cast<unsigned char>(9); break;
 
-			case 'A': return static_cast<std::uint8_t>(10); break;
-			case 'B': return static_cast<std::uint8_t>(11); break;
-			case 'C': return static_cast<std::uint8_t>(12); break;
-			case 'D': return static_cast<std::uint8_t>(13); break;
-			case 'E': return static_cast<std::uint8_t>(14); break;
-			case 'F': return static_cast<std::uint8_t>(15); break;
+			case 'A': return static_cast<unsigned char>(10); break;
+			case 'B': return static_cast<unsigned char>(11); break;
+			case 'C': return static_cast<unsigned char>(12); break;
+			case 'D': return static_cast<unsigned char>(13); break;
+			case 'E': return static_cast<unsigned char>(14); break;
+			case 'F': return static_cast<unsigned char>(15); break;
 
-			case 'a': return static_cast<std::uint8_t>(10); break;
-			case 'b': return static_cast<std::uint8_t>(11); break;
-			case 'c': return static_cast<std::uint8_t>(12); break;
-			case 'd': return static_cast<std::uint8_t>(13); break;
-			case 'e': return static_cast<std::uint8_t>(14); break;
-			case 'f': return static_cast<std::uint8_t>(15); break;
+			case 'a': return static_cast<unsigned char>(10); break;
+			case 'b': return static_cast<unsigned char>(11); break;
+			case 'c': return static_cast<unsigned char>(12); break;
+			case 'd': return static_cast<unsigned char>(13); break;
+			case 'e': return static_cast<unsigned char>(14); break;
+			case 'f': return static_cast<unsigned char>(15); break;
 
-			default: return static_cast<std::uint8_t>(0); break;
+			default: return static_cast<unsigned char>(0); break;
 			}
 #else // WELP_BITS_USE_CHAR_ARITHMETIC
-			if (hex < ':') { return static_cast<std::uint8_t>(hex - '0'); }
-			else if (hex < 'G') { return static_cast<std::uint8_t>(hex - '7'); }
-			else { return static_cast<std::uint8_t>(hex - 'W'); }
+			if (hex < ':') { return static_cast<unsigned char>(hex - '0'); }
+			else if (hex < 'G') { return static_cast<unsigned char>(hex - '7'); }
+			else { return static_cast<unsigned char>(hex - 'W'); }
 #endif // WELP_BITS_USE_CHAR_ARITHMETIC
 		}
-		inline char uint8_t_to_char_lc(std::uint8_t number) const noexcept
+		inline char uint8_t_to_char_lc(unsigned char number) const noexcept
 		{
 #ifndef WELP_BITS_USE_CHAR_ARITHMETIC
 			switch (number)
@@ -1186,11 +1185,11 @@ namespace welp
 			default: return '?'; break;
 			}
 #else // WELP_BITS_USE_CHAR_ARITHMETIC
-			if (number < static_cast< std::uint8_t>(10)) { return reinterpret_cast<char&>(number) + '0'; }
+			if (number < static_cast<unsigned char>(10)) { return reinterpret_cast<char&>(number) + '0'; }
 			else { return reinterpret_cast<char&>(number) + 'W'; }
 #endif // WELP_BITS_USE_CHAR_ARITHMETIC
 		}
-		inline char uint8_t_to_char_uc(std::uint8_t number) const noexcept
+		inline char uint8_t_to_char_uc(unsigned char number) const noexcept
 		{
 #ifndef WELP_BITS_USE_CHAR_ARITHMETIC
 			switch (number)
@@ -1216,7 +1215,7 @@ namespace welp
 			default: return '?'; break;
 			}
 #else // WELP_BITS_USE_CHAR_ARITHMETIC
-			if (number < static_cast< std::uint8_t>(10)) { return reinterpret_cast<char&>(number) + '0'; }
+			if (number < static_cast<unsigned char>(10)) { return reinterpret_cast<char&>(number) + '0'; }
 			else { return reinterpret_cast<char&>(number) + '7'; }
 #endif // WELP_BITS_USE_CHAR_ARITHMETIC
 		}
