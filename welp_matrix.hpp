@@ -2,8 +2,8 @@
 // License <http://unlicense.org/> (statement below at the end of the file)
 
 
-#ifndef WELP_MATRIX_H
-#define WELP_MATRIX_H
+#ifndef WELP_MATRIX_HPP
+#define WELP_MATRIX_HPP
 
 ////////////////////////   I N C L U D E S   ////////////////////////
 
@@ -15954,7 +15954,7 @@ namespace welp
 #undef WELP_MATRIX_AVX_pd_trisolve_Ti
 
 
-#endif // WELP_MATRIX_H
+#endif // WELP_MATRIX_HPP
 
 
 // welp_matrix.hpp
