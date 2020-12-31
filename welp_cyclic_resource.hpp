@@ -2,8 +2,8 @@
 // License <http://unlicense.org/> (statement below at the end of the file)
 
 
-#ifndef WELP_CYCLIC_RESOURCE_H
-#define WELP_CYCLIC_RESOURCE_H
+#ifndef WELP_CYCLIC_RESOURCE_HPP
+#define WELP_CYCLIC_RESOURCE_HPP
 
 
 ////// INCLUDES //////
@@ -474,7 +474,7 @@ template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3, typename msg_Ty4
 #endif // WELP_CYCLIC_DEBUG_MODE
 
 
-#endif // WELP_CYCLIC_RESOURCE_H
+#endif // WELP_CYCLIC_RESOURCE_HPP
 
 
 // welp_cyclic_resource.hpp
