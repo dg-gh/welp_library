@@ -2,8 +2,8 @@
 // License <http://unlicense.org/> (statement below at the end of the file)
 
 
-#ifndef WELP_LINK_NODE_H
-#define WELP_LINK_NODE_H
+#ifndef WELP_LINK_NODE_HPP
+#define WELP_LINK_NODE_HPP
 
 
 ////// INCLUDES //////
@@ -503,7 +503,7 @@ inline label_Ty welp::link_node_sync<msg_Ty, label_Ty, _Allocator>::observer_nod
 #endif // WELP_LIN_NODE_INCLUDE_MUTEX
 
 
-#endif // WELP_LINK_NODE_H
+#endif // WELP_LINK_NODE_HPP
 
 
 // welp_link_node.hpp
