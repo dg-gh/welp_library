@@ -2,8 +2,8 @@
 // License <http://unlicense.org/> (statement below at the end of the file)
 
 
-#ifndef WELP_CHRONO_H
-#define WELP_CHRONO_H
+#ifndef WELP_CHRONO_HPP
+#define WELP_CHRONO_HPP
 
 
 ////// INCLUDES //////
@@ -384,7 +384,7 @@ template <typename float_Ty, typename int_Ty> inline welp::chrono_system<float_T
 	_time = static_cast<float_Ty>(0); _count = static_cast<int_Ty>(0); return *this;
 }
 
-#endif // WELP_CHRONO_H
+#endif // WELP_CHRONO_HPP
 
 
 // welp_chrono.hpp
