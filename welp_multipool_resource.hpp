@@ -2,8 +2,8 @@
 // License <http://unlicense.org/> (statement below at the end of the file)
 
 
-#ifndef WELP_MULTIPOOL_RESOURCE_H
-#define WELP_MULTIPOOL_RESOURCE_H
+#ifndef WELP_MULTIPOOL_RESOURCE_HPP
+#define WELP_MULTIPOOL_RESOURCE_HPP
 
 
 ////// INCLUDES //////
@@ -3225,7 +3225,7 @@ void welp::quadpool_resource::record_write(const char* const filename, const cha
 #undef WELP_MULTIPOOL_RECORD_INT
 
 
-#endif // WELP_MULTIPOOL_RESOURCE_H
+#endif // WELP_MULTIPOOL_RESOURCE_HPP
 
 
 // welp_multipool_resource.hpp
