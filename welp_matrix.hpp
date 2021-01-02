@@ -14395,7 +14395,7 @@ namespace welp
 		assert(A.r() == A.c());
 #endif // WELP_MATRIX_DEBUG_MODE
 		welp::matrix<Ty, _Allocator> B = A;
-		B.elim_givens();
+		B.elim_givens(A.r() - 1);
 		Ty d = static_cast<Ty>(1);
 		Ty* p = B.data();
 		std::size_t N = A.c() + 1;
