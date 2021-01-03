@@ -38,7 +38,7 @@ namespace welp
 
 		// getting notifications
 
-		virtual void on_notification_from_node(const msg_Ty& msg) {}
+		virtual void on_notification_from_node(const msg_Ty&) {}
 
 
 		// sending notifications
@@ -86,7 +86,7 @@ namespace welp
 
 		// getting notifications
 
-		virtual void on_notification_from_node(const msg_Ty& msg) {}
+		virtual void on_notification_from_node(const msg_Ty&) {}
 
 
 		// sending notifications
@@ -133,7 +133,7 @@ namespace welp
 
 		// GETTING NOTIFICATIONS
 
-		virtual void on_notification_from_node(const msg_Ty& msg) {}
+		virtual void on_notification_from_node(const msg_Ty&) {}
 
 
 		observer_node() = default;
