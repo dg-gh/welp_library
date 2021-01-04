@@ -7,7 +7,7 @@ welp_multipool_resource.hpp provides two classes :
 
 These classes aim to allocate and deallocate memory blocks of varying sizes in a deterministic O(1) timeframe.
 
-# Member functions of welp::multipool_resource R
+# Member functions of welp::multipool_resource<max_number_of_pools> R
 
 Template parameter max_number_of_pools is the maximal number of pools of R.
 
