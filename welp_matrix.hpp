@@ -1,4 +1,4 @@
-// welp_matrix.hpp - last update : 12 / 12 / 2020
+// welp_matrix.hpp - last update : 06 / 01 / 2020
 // License <http://unlicense.org/> (statement below at the end of the file)
 
 
@@ -716,6 +716,13 @@ namespace welp
 	template <typename Ty, class _Allocator> bool operator>(const welp::matrix<Ty, _Allocator>& A, const Ty& x) noexcept;
 	template <typename Ty, class _Allocator> bool operator<=(const welp::matrix<Ty, _Allocator>& A, const Ty& x) noexcept;
 	template <typename Ty, class _Allocator> bool operator>=(const welp::matrix<Ty, _Allocator>& A, const Ty& x) noexcept;
+
+	template <typename Ty, class _Allocator> bool operator==(const Ty& x, const welp::matrix<Ty, _Allocator>& A) noexcept;
+	template <typename Ty, class _Allocator> bool operator!=(const Ty& x, const welp::matrix<Ty, _Allocator>& A) noexcept;
+	template <typename Ty, class _Allocator> bool operator<(const Ty& x, const welp::matrix<Ty, _Allocator>& A) noexcept;
+	template <typename Ty, class _Allocator> bool operator>(const Ty& x, const welp::matrix<Ty, _Allocator>& A) noexcept;
+	template <typename Ty, class _Allocator> bool operator<=(const Ty& x, const welp::matrix<Ty, _Allocator>& A) noexcept;
+	template <typename Ty, class _Allocator> bool operator>=(const Ty& x, const welp::matrix<Ty, _Allocator>& A) noexcept;
 	// returns true if and only if _relation(Aij, x) is true for all i, j
 	template <typename Ty, class relation_function, class _Allocator> bool relation(relation_function _relation, const welp::matrix<Ty, _Allocator>& A, const Ty& x);
 
@@ -14283,6 +14290,49 @@ namespace welp
 		assert(A.data() != nullptr);
 #endif // WELP_MATRIX_DEBUG_MODE
 		return welp::matrix_subroutines::compare_greater_ms(A.data(), x, A.size());
+	}
+
+	template <typename Ty, class _Allocator> bool operator==(const Ty& x, const welp::matrix<Ty, _Allocator>& A) noexcept
+	{
+#ifdef WELP_MATRIX_DEBUG_MODE
+		assert(A.data() != nullptr);
+#endif // WELP_MATRIX_DEBUG_MODE
+		return welp::matrix_subroutines::compare_equal_ms(A.data(), x, A.size());
+	}
+	template <typename Ty, class _Allocator> bool operator!=(const Ty& x, const welp::matrix<Ty, _Allocator>& A) noexcept
+	{
+#ifdef WELP_MATRIX_DEBUG_MODE
+		assert(A.data() != nullptr);
+#endif // WELP_MATRIX_DEBUG_MODE
+		return !welp::matrix_subroutines::compare_equal_ms(A.data(), x, A.size());
+	}
+	template <typename Ty, class _Allocator> bool operator<(const Ty& x, const welp::matrix<Ty, _Allocator>& A) noexcept
+	{
+#ifdef WELP_MATRIX_DEBUG_MODE
+		assert(A.data() != nullptr);
+#endif // WELP_MATRIX_DEBUG_MODE
+		return welp::matrix_subroutines::compare_strictly_greater_ms(A.data(), x, A.size());
+	}
+	template <typename Ty, class _Allocator> bool operator>(const Ty& x, const welp::matrix<Ty, _Allocator>& A) noexcept
+	{
+#ifdef WELP_MATRIX_DEBUG_MODE
+		assert(A.data() != nullptr);
+#endif // WELP_MATRIX_DEBUG_MODE
+		return welp::matrix_subroutines::compare_strictly_smaller_ms(A.data(), x, A.size());
+	}
+	template <typename Ty, class _Allocator> bool operator<=(const Ty& x, const welp::matrix<Ty, _Allocator>& A) noexcept
+	{
+#ifdef WELP_MATRIX_DEBUG_MODE
+		assert(A.data() != nullptr);
+#endif // WELP_MATRIX_DEBUG_MODE
+		return welp::matrix_subroutines::compare_greater_ms(A.data(), x, A.size());
+	}
+	template <typename Ty, class _Allocator> bool operator>=(const Ty& x, const welp::matrix<Ty, _Allocator>& A) noexcept
+	{
+#ifdef WELP_MATRIX_DEBUG_MODE
+		assert(A.data() != nullptr);
+#endif // WELP_MATRIX_DEBUG_MODE
+		return welp::matrix_subroutines::compare_smaller_ms(A.data(), x, A.size());
 	}
 	template <typename Ty, class relation_function, class _Allocator> bool relation(relation_function _relation, const welp::matrix<Ty, _Allocator>& A, const Ty& x)
 	{
