@@ -3473,6 +3473,648 @@ namespace welp
 				}
 			}
 		}
+		
+		template <typename Ty> inline bool compare_equal_mm(const Ty* const pfA, const Ty* const pfB, const std::size_t n)
+		{
+			std::size_t r = n & 3;
+			const Ty* pA = pfA; const Ty* pB = pfB;
+
+			for (std::size_t k = n - r; k > 0; k -= 4)
+			{
+				if (!(((*pA) == (*pB))
+					&& ((*(pA + 1)) == (*(pB + 1)))
+					&& ((*(pA + 2)) == (*(pB + 2)))
+					&& ((*(pA + 3)) == (*(pB + 3)))))
+				{
+					return false;
+				}
+				pA += 4; pB += 4;
+			}
+
+			switch (r)
+			{
+
+			case 0:
+				break;
+
+			case 1:
+				if (!((*pA) == (*pB)))
+				{
+					return false;
+				}
+				break;
+
+			case 2:
+				if (!(((*pA) == (*pB))
+					&& ((*(pA + 1)) == (*(pB + 1)))))
+				{
+					return false;
+				}
+				break;
+
+			case 3:
+				if (!(((*pA) == (*pB))
+					&& ((*(pA + 1)) == (*(pB + 1)))
+					&& ((*(pA + 2)) == (*(pB + 2)))))
+				{
+					return false;
+				}
+				break;
+			}
+			return true;
+		}
+		template <typename Ty> inline bool compare_strictly_smaller_mm(const Ty* const pfA, const Ty* const pfB, const std::size_t n)
+		{
+			std::size_t r = n & 3;
+			const Ty* pA = pfA; const Ty* pB = pfB;
+
+			for (std::size_t k = n - r; k > 0; k -= 4)
+			{
+				if (!(((*pA) < (*pB))
+					&& ((*(pA + 1)) < (*(pB + 1)))
+					&& ((*(pA + 2)) < (*(pB + 2)))
+					&& ((*(pA + 3)) < (*(pB + 3)))))
+				{
+					return false;
+				}
+				pA += 4; pB += 4;
+			}
+
+			switch (r)
+			{
+
+			case 0:
+				break;
+
+			case 1:
+				if (!((*pA) < (*pB)))
+				{
+					return false;
+				}
+				break;
+
+			case 2:
+				if (!(((*pA) < (*pB))
+					&& ((*(pA + 1)) < (*(pB + 1)))))
+				{
+					return false;
+				}
+				break;
+
+			case 3:
+				if (!(((*pA) < (*pB))
+					&& ((*(pA + 1)) < (*(pB + 1)))
+					&& ((*(pA + 2)) < (*(pB + 2)))))
+				{
+					return false;
+				}
+				break;
+			}
+			return true;
+		}
+		template <typename Ty> inline bool compare_strictly_greater_mm(const Ty* const pfA, const Ty* const pfB, const std::size_t n)
+		{
+			std::size_t r = n & 3;
+			const Ty* pA = pfA; const Ty* pB = pfB;
+
+			for (std::size_t k = n - r; k > 0; k -= 4)
+			{
+				if (!(((*pA) > (*pB))
+					&& ((*(pA + 1)) > (*(pB + 1)))
+					&& ((*(pA + 2)) > (*(pB + 2)))
+					&& ((*(pA + 3)) > (*(pB + 3)))))
+				{
+					return false;
+				}
+				pA += 4; pB += 4;
+			}
+
+			switch (r)
+			{
+
+			case 0:
+				break;
+
+			case 1:
+				if (!((*pA) > (*pB)))
+				{
+					return false;
+				}
+				break;
+
+			case 2:
+				if (!(((*pA) > (*pB))
+					&& ((*(pA + 1)) > (*(pB + 1)))))
+				{
+					return false;
+				}
+				break;
+
+			case 3:
+				if (!(((*pA) > (*pB))
+					&& ((*(pA + 1)) > (*(pB + 1)))
+					&& ((*(pA + 2)) > (*(pB + 2)))))
+				{
+					return false;
+				}
+				break;
+			}
+			return true;
+		}
+		template <typename Ty> inline bool compare_smaller_mm(const Ty* const pfA, const Ty* const pfB, const std::size_t n)
+		{
+			std::size_t r = n & 3;
+			const Ty* pA = pfA; const Ty* pB = pfB;
+
+			for (std::size_t k = n - r; k > 0; k -= 4)
+			{
+				if (!(((*pA) <= (*pB))
+					&& ((*(pA + 1)) <= (*(pB + 1)))
+					&& ((*(pA + 2)) <= (*(pB + 2)))
+					&& ((*(pA + 3)) <= (*(pB + 3)))))
+				{
+					return false;
+				}
+				pA += 4; pB += 4;
+			}
+
+			switch (r)
+			{
+
+			case 0:
+				break;
+
+			case 1:
+				if (!((*pA) <= (*pB)))
+				{
+					return false;
+				}
+				break;
+
+			case 2:
+				if (!(((*pA) <= (*pB))
+					&& ((*(pA + 1)) <= (*(pB + 1)))))
+				{
+					return false;
+				}
+				break;
+
+			case 3:
+				if (!(((*pA) <= (*pB))
+					&& ((*(pA + 1)) <= (*(pB + 1)))
+					&& ((*(pA + 2)) <= (*(pB + 2)))))
+				{
+					return false;
+				}
+				break;
+			}
+			return true;
+		}
+		template <typename Ty> inline bool compare_greater_mm(const Ty* const pfA, const Ty* const pfB, const std::size_t n)
+		{
+			std::size_t r = n & 3;
+			const Ty* pA = pfA; const Ty* pB = pfB;
+
+			for (std::size_t k = n - r; k > 0; k -= 4)
+			{
+				if (!(((*pA) >= (*pB))
+					&& ((*(pA + 1)) >= (*(pB + 1)))
+					&& ((*(pA + 2)) >= (*(pB + 2)))
+					&& ((*(pA + 3)) >= (*(pB + 3)))))
+				{
+					return false;
+				}
+				pA += 4; pB += 4;
+			}
+
+			switch (r)
+			{
+
+			case 0:
+				break;
+
+			case 1:
+				if (!((*pA) >= (*pB)))
+				{
+					return false;
+				}
+				break;
+
+			case 2:
+				if (!(((*pA) >= (*pB))
+					&& ((*(pA + 1)) >= (*(pB + 1)))))
+				{
+					return false;
+				}
+				break;
+
+			case 3:
+				if (!(((*pA) >= (*pB))
+					&& ((*(pA + 1)) >= (*(pB + 1)))
+					&& ((*(pA + 2)) >= (*(pB + 2)))))
+				{
+					return false;
+				}
+				break;
+			}
+			return true;
+		}
+		template <typename Ty1, typename Ty2, class Predicate> inline bool compare_mm(const Ty1* const pfA, const Ty2* const pfB,
+			const std::size_t n, Predicate Pr)
+		{
+			std::size_t r = n & 3;
+			const Ty1* pA = pfA; const Ty2* pB = pfB;
+
+			for (std::size_t k = n - r; k > 0; k -= 4)
+			{
+				if (!(Pr(*pA, *pB)
+					&& Pr(*(pA + 1), *(pB + 1))
+					&& Pr(*(pA + 2), *(pB + 2))
+					&& Pr(*(pA + 3), *(pB + 3))))
+				{
+					return false;
+				}
+				pA += 4; pB += 4;
+			}
+
+			switch (r)
+			{
+
+			case 0:
+				break;
+
+			case 1:
+				if (!Pr(*pA, *pB))
+				{
+					return false;
+				}
+				break;
+
+			case 2:
+				if (!(Pr(*pA, *pB)
+					&& Pr(*(pA + 1), *(pB + 1))))
+				{
+					return false;
+				}
+				break;
+
+			case 3:
+				if (!(Pr(*pA, *pB)
+					&& Pr(*(pA + 1), *(pB + 1))
+					&& Pr(*(pA + 2), *(pB + 2))))
+				{
+					return false;
+				}
+				break;
+			}
+			return true;
+		}
+
+		template <typename Ty> inline bool compare_equal_ms(const Ty* const pfA, const Ty x, const std::size_t n)
+		{
+			std::size_t r = n & 3;
+			const Ty* pA = pfA; const Ty* pB = pfB;
+
+			for (std::size_t k = n - r; k > 0; k -= 4)
+			{
+				if (!(((*pA) == x)
+					&& ((*(pA + 1)) == x)
+					&& ((*(pA + 2)) == x)
+					&& ((*(pA + 3)) == x)))
+				{
+					return false;
+				}
+				pA += 4; pB += 4;
+			}
+
+			switch (r)
+			{
+
+			case 0:
+				break;
+
+			case 1:
+				if (!((*pA) == x))
+				{
+					return false;
+				}
+				break;
+
+			case 2:
+				if (!(((*pA) == x)
+					&& ((*(pA + 1)) == x)))
+				{
+					return false;
+				}
+				break;
+
+			case 3:
+				if (!(((*pA) == x)
+					&& ((*(pA + 1)) == x)
+					&& ((*(pA + 2)) == x)))
+				{
+					return false;
+				}
+				break;
+			}
+			return true;
+		}
+		template <typename Ty> inline bool compare_strictly_smaller_ms(const Ty* const pfA, const Ty x, const std::size_t n)
+		{
+			std::size_t r = n & 3;
+			const Ty* pA = pfA; const Ty* pB = pfB;
+
+			for (std::size_t k = n - r; k > 0; k -= 4)
+			{
+				if (!(((*pA) < x)
+					&& ((*(pA + 1)) < x)
+					&& ((*(pA + 2)) < x)
+					&& ((*(pA + 3)) < x)))
+				{
+					return false;
+				}
+				pA += 4; pB += 4;
+			}
+
+			switch (r)
+			{
+
+			case 0:
+				break;
+
+			case 1:
+				if (!((*pA) < x))
+				{
+					return false;
+				}
+				break;
+
+			case 2:
+				if (!(((*pA) < x)
+					&& ((*(pA + 1)) < x)))
+				{
+					return false;
+				}
+				break;
+
+			case 3:
+				if (!(((*pA) < x)
+					&& ((*(pA + 1)) < x)
+					&& ((*(pA + 2)) < x)))
+				{
+					return false;
+				}
+				break;
+			}
+			return true;
+		}
+		template <typename Ty> inline bool compare_strictly_greater_ms(const Ty* const pfA, const Ty x, const std::size_t n)
+		{
+			std::size_t r = n & 3;
+			const Ty* pA = pfA; const Ty* pB = pfB;
+
+			for (std::size_t k = n - r; k > 0; k -= 4)
+			{
+				if (!(((*pA) > x)
+					&& ((*(pA + 1)) > x)
+					&& ((*(pA + 2)) > x)
+					&& ((*(pA + 3)) > x)))
+				{
+					return false;
+				}
+				pA += 4; pB += 4;
+			}
+
+			switch (r)
+			{
+
+			case 0:
+				break;
+
+			case 1:
+				if (!((*pA) > x))
+				{
+					return false;
+				}
+				break;
+
+			case 2:
+				if (!(((*pA) > x)
+					&& ((*(pA + 1)) > x)))
+				{
+					return false;
+				}
+				break;
+
+			case 3:
+				if (!(((*pA) > x)
+					&& ((*(pA + 1)) > x)
+					&& ((*(pA + 2)) > x)))
+				{
+					return false;
+				}
+				break;
+			}
+			return true;
+		}
+		template <typename Ty> inline bool compare_smaller_ms(const Ty* const pfA, const Ty x, const std::size_t n)
+		{
+			std::size_t r = n & 3;
+			const Ty* pA = pfA; const Ty* pB = pfB;
+
+			for (std::size_t k = n - r; k > 0; k -= 4)
+			{
+				if (!(((*pA) <= x)
+					&& ((*(pA + 1)) <= x)
+					&& ((*(pA + 2)) <= x)
+					&& ((*(pA + 3)) <= x)))
+				{
+					return false;
+				}
+				pA += 4; pB += 4;
+			}
+
+			switch (r)
+			{
+
+			case 0:
+				break;
+
+			case 1:
+				if (!((*pA) <= x))
+				{
+					return false;
+				}
+				break;
+
+			case 2:
+				if (!(((*pA) <= x)
+					&& ((*(pA + 1)) <= x)))
+				{
+					return false;
+				}
+				break;
+
+			case 3:
+				if (!(((*pA) <= x)
+					&& ((*(pA + 1)) <= x)
+					&& ((*(pA + 2)) <= x)))
+				{
+					return false;
+				}
+				break;
+			}
+			return true;
+		}
+		template <typename Ty> inline bool compare_greater_ms(const Ty* const pfA, const Ty x, const std::size_t n)
+		{
+			std::size_t r = n & 3;
+			const Ty* pA = pfA; const Ty* pB = pfB;
+
+			for (std::size_t k = n - r; k > 0; k -= 4)
+			{
+				if (!(((*pA) >= x)
+					&& ((*(pA + 1)) >= x)
+					&& ((*(pA + 2)) >= x)
+					&& ((*(pA + 3)) >= x)))
+				{
+					return false;
+				}
+				pA += 4; pB += 4;
+			}
+
+			switch (r)
+			{
+
+			case 0:
+				break;
+
+			case 1:
+				if (!((*pA) >= x))
+				{
+					return false;
+				}
+				break;
+
+			case 2:
+				if (!(((*pA) >= x)
+					&& ((*(pA + 1)) >= x)))
+				{
+					return false;
+				}
+				break;
+
+			case 3:
+				if (!(((*pA) >= x)
+					&& ((*(pA + 1)) >= x)
+					&& ((*(pA + 2)) >= x)))
+				{
+					return false;
+				}
+				break;
+			}
+			return true;
+		}
+		template <typename Ty1, typename Ty2, class Predicate> inline bool compare_compare_ms(const Ty1* const pfA,
+			const Ty2 x, const std::size_t n, Predicate Pr)
+		{
+			std::size_t r = n & 3;
+			const Ty1* pA = pfA;
+
+			for (std::size_t k = n - r; k > 0; k -= 4)
+			{
+				if (!(Pr(*pA, x)
+					&& Pr(*(pA + 1), x)
+					&& Pr(*(pA + 2), x)
+					&& Pr(*(pA + 3), x)))
+				{
+					return false;
+				}
+				pA += 4; pB += 4;
+			}
+
+			switch (r)
+			{
+
+			case 0:
+				break;
+
+			case 1:
+				if (!Pr(*pA, x))
+				{
+					return false;
+				}
+				break;
+
+			case 2:
+				if (!(Pr(*pA, x)
+					&& Pr(*(pA + 1), x)))
+				{
+					return false;
+				}
+				break;
+
+			case 3:
+				if (!(Pr(*pA, x)
+					&& Pr(*(pA + 1), x)
+					&& Pr(*(pA + 2), x)))
+				{
+					return false;
+				}
+				break;
+			}
+			return true;
+		}
+
+		template <typename Ty, class Predicate> inline bool verify_all(const Ty* const pfA, const std::size_t n, Predicate Pr)
+		{
+			std::size_t r = n & 3;
+			const Ty* pA = pfA;
+
+			for (std::size_t k = n - r; k > 0; k -= 4)
+			{
+				if (!(Pr(*pA)
+					&& Pr(*(pA + 1))
+					&& Pr(*(pA + 2))
+					&& Pr(*(pA + 3))))
+				{
+					return false;
+				}
+				pA += 4; pB += 4;
+			}
+
+			switch (r)
+			{
+
+			case 0:
+				break;
+
+			case 1:
+				if (!Pr(*pA))
+				{
+					return false;
+				}
+				break;
+
+			case 2:
+				if (!(Pr(*pA)
+					&& Pr(*(pA + 1))))
+				{
+					return false;
+				}
+				break;
+
+			case 3:
+				if (!(Pr(*pA)
+					&& Pr(*(pA + 1))
+					&& Pr(*(pA + 2))))
+				{
+					return false;
+				}
+				break;
+			}
+			return true;
+		}
 	}
 
 
