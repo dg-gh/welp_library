@@ -268,6 +268,44 @@ namespace welp
 		// DEPENDENCIES : calls the function welp::matrix_subroutines::pmxm
 		template <typename Ty, typename Tn> void pow(Ty* const pfC, const Ty* const pfA, const Tn n,
 			const std::size_t Ac, Ty* const pfpool0, Ty* const pfpool1) noexcept;
+
+		// returns true if A(i, j) == B(i, j) for all i, j
+		template <typename Ty> inline bool compare_equal_mm(const Ty* const pfA, const Ty* const pfB, const std::size_t n);
+
+		// returns false if A(i, j) < B(i, j) for all i, j
+		template <typename Ty> inline bool compare_strictly_smaller_mm(const Ty* const pfA, const Ty* const pfB, const std::size_t n);
+
+		// returns true if A(i, j) > B(i, j) for all i, j
+		template <typename Ty> inline bool compare_strictly_greater_mm(const Ty* const pfA, const Ty* const pfB, const std::size_t n);
+
+		// returns true if A(i, j) <= B(i, j) for all i, j
+		template <typename Ty> inline bool compare_smaller_mm(const Ty* const pfA, const Ty* const pfB, const std::size_t n);
+
+		// returns true if A(i, j) >= B(i, j) for all i, j
+		template <typename Ty> inline bool compare_greater_mm(const Ty* const pfA, const Ty* const pfB, const std::size_t n);
+
+		// returns true if Pr(A(i, j), B(i, j)) is true for all i, j
+		template <typename Ty1, typename Ty2, class Predicate> inline bool compare_mm(const Ty1* const pfA, const Ty2* const pfB,
+			const std::size_t n, Predicate Pr);
+
+		// returns true if A(i, j) == x for all i, j
+		template <typename Ty> inline bool compare_equal_ms(const Ty* const pfA, const Ty x, const std::size_t n);
+
+		// returns false if A(i, j) < x for all i, j
+		template <typename Ty> inline bool compare_strictly_smaller_ms(const Ty* const pfA, const Ty x, const std::size_t n);
+
+		// returns true if A(i, j) > x for all i, j
+		template <typename Ty> inline bool compare_strictly_greater_ms(const Ty* const pfA, const Ty x, const std::size_t n);
+
+		// returns true if A(i, j) <= x for all i, j
+		template <typename Ty> inline bool compare_smaller_ms(const Ty* const pfA, const Ty x, const std::size_t n);
+
+		// returns true if A(i, j) >= x for all i, j
+		template <typename Ty> inline bool compare_greater_ms(const Ty* const pfA, const Ty x, const std::size_t n);
+
+		// returns true if Pr(A(i, j), x) is true for all i, j
+		template <typename Ty1, typename Ty2, class Predicate> inline bool compare_compare_ms(const Ty1* const pfA,
+			const Ty2 x, const std::size_t n, Predicate Pr);
 	}
 
 #ifdef WELP_MATRIX_AVX_EXT
@@ -672,12 +710,12 @@ namespace welp
 	template <typename Ty, class relation_function, class _Allocator_A, class _Allocator_B> bool relation(
 		relation_function _relation, const welp::matrix<Ty, _Allocator_A>& A, const welp::matrix<Ty, _Allocator_B>& B);
 
-	template <typename Ty, class _Allocator> bool operator==(const welp::matrix<Ty, _Allocator>& A, Ty x) noexcept;
-	template <typename Ty, class _Allocator> bool operator!=(const welp::matrix<Ty, _Allocator>& A, Ty x) noexcept;
-	template <typename Ty, class _Allocator> bool operator<(const welp::matrix<Ty, _Allocator>& A, Ty x) noexcept;
-	template <typename Ty, class _Allocator> bool operator>(const welp::matrix<Ty, _Allocator>& A, Ty x) noexcept;
-	template <typename Ty, class _Allocator> bool operator<=(const welp::matrix<Ty, _Allocator>& A, Ty x) noexcept;
-	template <typename Ty, class _Allocator> bool operator>=(const welp::matrix<Ty, _Allocator>& A, Ty x) noexcept;
+	template <typename Ty, class _Allocator> bool operator==(const welp::matrix<Ty, _Allocator>& A, const Ty& x) noexcept;
+	template <typename Ty, class _Allocator> bool operator!=(const welp::matrix<Ty, _Allocator>& A, const Ty& x) noexcept;
+	template <typename Ty, class _Allocator> bool operator<(const welp::matrix<Ty, _Allocator>& A, const Ty& x) noexcept;
+	template <typename Ty, class _Allocator> bool operator>(const welp::matrix<Ty, _Allocator>& A, const Ty& x) noexcept;
+	template <typename Ty, class _Allocator> bool operator<=(const welp::matrix<Ty, _Allocator>& A, const Ty& x) noexcept;
+	template <typename Ty, class _Allocator> bool operator>=(const welp::matrix<Ty, _Allocator>& A, const Ty& x) noexcept;
 	// returns true if and only if _relation(Aij, x) is true for all i, j
 	template <typename Ty, class relation_function, class _Allocator> bool relation(relation_function _relation, const welp::matrix<Ty, _Allocator>& A, Ty x);
 
@@ -3473,7 +3511,7 @@ namespace welp
 				}
 			}
 		}
-		
+
 		template <typename Ty> inline bool compare_equal_mm(const Ty* const pfA, const Ty* const pfB, const std::size_t n)
 		{
 			std::size_t r = n & 3;
@@ -3773,7 +3811,7 @@ namespace welp
 		template <typename Ty> inline bool compare_equal_ms(const Ty* const pfA, const Ty x, const std::size_t n)
 		{
 			std::size_t r = n & 3;
-			const Ty* pA = pfA; const Ty* pB = pfB;
+			const Ty* pA = pfA;
 
 			for (std::size_t k = n - r; k > 0; k -= 4)
 			{
@@ -3784,7 +3822,7 @@ namespace welp
 				{
 					return false;
 				}
-				pA += 4; pB += 4;
+				pA += 4;
 			}
 
 			switch (r)
@@ -3822,7 +3860,7 @@ namespace welp
 		template <typename Ty> inline bool compare_strictly_smaller_ms(const Ty* const pfA, const Ty x, const std::size_t n)
 		{
 			std::size_t r = n & 3;
-			const Ty* pA = pfA; const Ty* pB = pfB;
+			const Ty* pA = pfA;
 
 			for (std::size_t k = n - r; k > 0; k -= 4)
 			{
@@ -3833,7 +3871,7 @@ namespace welp
 				{
 					return false;
 				}
-				pA += 4; pB += 4;
+				pA += 4;
 			}
 
 			switch (r)
@@ -3871,7 +3909,7 @@ namespace welp
 		template <typename Ty> inline bool compare_strictly_greater_ms(const Ty* const pfA, const Ty x, const std::size_t n)
 		{
 			std::size_t r = n & 3;
-			const Ty* pA = pfA; const Ty* pB = pfB;
+			const Ty* pA = pfA;
 
 			for (std::size_t k = n - r; k > 0; k -= 4)
 			{
@@ -3882,7 +3920,7 @@ namespace welp
 				{
 					return false;
 				}
-				pA += 4; pB += 4;
+				pA += 4;
 			}
 
 			switch (r)
@@ -3920,7 +3958,7 @@ namespace welp
 		template <typename Ty> inline bool compare_smaller_ms(const Ty* const pfA, const Ty x, const std::size_t n)
 		{
 			std::size_t r = n & 3;
-			const Ty* pA = pfA; const Ty* pB = pfB;
+			const Ty* pA = pfA;
 
 			for (std::size_t k = n - r; k > 0; k -= 4)
 			{
@@ -3931,7 +3969,7 @@ namespace welp
 				{
 					return false;
 				}
-				pA += 4; pB += 4;
+				pA += 4;
 			}
 
 			switch (r)
@@ -3969,7 +4007,7 @@ namespace welp
 		template <typename Ty> inline bool compare_greater_ms(const Ty* const pfA, const Ty x, const std::size_t n)
 		{
 			std::size_t r = n & 3;
-			const Ty* pA = pfA; const Ty* pB = pfB;
+			const Ty* pA = pfA;
 
 			for (std::size_t k = n - r; k > 0; k -= 4)
 			{
@@ -3980,7 +4018,7 @@ namespace welp
 				{
 					return false;
 				}
-				pA += 4; pB += 4;
+				pA += 4;
 			}
 
 			switch (r)
@@ -4030,7 +4068,7 @@ namespace welp
 				{
 					return false;
 				}
-				pA += 4; pB += 4;
+				pA += 4;
 			}
 
 			switch (r)
@@ -4080,7 +4118,7 @@ namespace welp
 				{
 					return false;
 				}
-				pA += 4; pB += 4;
+				pA += 4;
 			}
 
 			switch (r)
@@ -14258,77 +14296,47 @@ namespace welp
 		}
 	}
 
-	template <typename Ty, class _Allocator> bool operator==(const welp::matrix<Ty, _Allocator>& A, Ty x) noexcept
+	template <typename Ty, class _Allocator> bool operator==(const welp::matrix<Ty, _Allocator>& A, const Ty& x) noexcept
 	{
 #ifdef WELP_MATRIX_DEBUG_MODE
 		assert(A.data() != nullptr);
 #endif // WELP_MATRIX_DEBUG_MODE
-		const Ty* pA = A.data();
-		for (std::size_t k = A.size(); k > 0; k--)
-		{
-			if (*pA++ != x) { return false; }
-		}
-		return true;
+		return welp::matrix_subroutines::compare_equal_ms(A.data(), x, A.size());
 	}
-	template <typename Ty, class _Allocator> bool operator!=(const welp::matrix<Ty, _Allocator>& A, Ty x) noexcept
+	template <typename Ty, class _Allocator> bool operator!=(const welp::matrix<Ty, _Allocator>& A, const Ty& x) noexcept
 	{
 #ifdef WELP_MATRIX_DEBUG_MODE
 		assert(A.data() != nullptr);
 #endif // WELP_MATRIX_DEBUG_MODE
-		const Ty* pA = A.data();
-		for (std::size_t k = A.size(); k > 0; k--)
-		{
-			if (*pA++ != x) { return true; }
-		}
-		return false;
+		return !welp::matrix_subroutines::compare_equal_ms(A.data(), x, A.size());
 	}
-	template <typename Ty, class _Allocator> bool operator<(const welp::matrix<Ty, _Allocator>& A, Ty x) noexcept
+	template <typename Ty, class _Allocator> bool operator<(const welp::matrix<Ty, _Allocator>& A, const Ty& x) noexcept
 	{
 #ifdef WELP_MATRIX_DEBUG_MODE
 		assert(A.data() != nullptr);
 #endif // WELP_MATRIX_DEBUG_MODE
-		const Ty* pA = A.data();
-		for (std::size_t k = A.size(); k > 0; k--)
-		{
-			if (*pA++ >= x) { return false; }
-		}
-		return true;
+		return welp::matrix_subroutines::compare_strictly_smaller_ms(A.data(), x, A.size());
 	}
-	template <typename Ty, class _Allocator> bool operator>(const welp::matrix<Ty, _Allocator>& A, Ty x) noexcept
+	template <typename Ty, class _Allocator> bool operator>(const welp::matrix<Ty, _Allocator>& A, const Ty& x) noexcept
 	{
 #ifdef WELP_MATRIX_DEBUG_MODE
 		assert(A.data() != nullptr);
 #endif // WELP_MATRIX_DEBUG_MODE
-		const Ty* pA = A.data();
-		for (std::size_t k = A.size(); k > 0; k--)
-		{
-			if (*pA++ <= x) { return false; }
-		}
-		return true;
+		return welp::matrix_subroutines::compare_strictly_greater_ms(A.data(), x, A.size());
 	}
-	template <typename Ty, class _Allocator> bool operator<=(const welp::matrix<Ty, _Allocator>& A, Ty x) noexcept
+	template <typename Ty, class _Allocator> bool operator<=(const welp::matrix<Ty, _Allocator>& A, const Ty& x) noexcept
 	{
 #ifdef WELP_MATRIX_DEBUG_MODE
 		assert(A.data() != nullptr);
 #endif // WELP_MATRIX_DEBUG_MODE
-		const Ty* pA = A.data();
-		for (std::size_t k = A.size(); k > 0; k--)
-		{
-			if (*pA++ > x) { return false; }
-		}
-		return true;
+		return welp::matrix_subroutines::compare_smaller_ms(A.data(), x, A.size());
 	}
-	template <typename Ty, class _Allocator> bool operator>=(const welp::matrix<Ty, _Allocator>& A, Ty x) noexcept
+	template <typename Ty, class _Allocator> bool operator>=(const welp::matrix<Ty, _Allocator>& A, const Ty& x) noexcept
 	{
 #ifdef WELP_MATRIX_DEBUG_MODE
 		assert(A.data() != nullptr);
 #endif // WELP_MATRIX_DEBUG_MODE
-		const Ty* pA = A.data();
-		for (std::size_t k = A.size(); k > 0; k--)
-		{
-			if (*pA++ < x) { return false; }
-		}
-		return true;
+		return welp::matrix_subroutines::compare_greater_ms(A.data(), x, A.size());
 	}
 	template <typename Ty, class relation_function, class _Allocator> bool relation(relation_function _relation, const welp::matrix<Ty, _Allocator>& A, Ty x)
 	{
@@ -14382,7 +14390,7 @@ namespace welp
 ////// display //////
 
 #ifdef WELP_MATRIX_INCLUDE_IOSTREAM
-template <typename Ty, class _Allocator> std::ostream& operator<<(std::ostream & out, const welp::matrix<Ty, _Allocator>& A)
+template <typename Ty, class _Allocator> std::ostream& operator<<(std::ostream & out, const welp::matrix<Ty, _Allocator> & A)
 {
 	A.say(); return out;
 }
