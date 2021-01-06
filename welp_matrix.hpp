@@ -14177,12 +14177,7 @@ namespace welp
 		if (A.r() != B.r() || A.c() != B.c()) { return false; }
 		else
 		{
-			const Ty* pA = A.data(); const Ty* pB = B.data();
-			for (std::size_t k = A.size(); k > 0; k--)
-			{
-				if (*pA++ != *pB++) { return false; }
-			}
-			return true;
+			return welp::matrix_subroutines::compare_equal_mm(A.data(), B.data(), A.size());
 		}
 	}
 	template <typename Ty, class _Allocator_A, class _Allocator_B> bool operator!=(const welp::matrix<Ty, _Allocator_A>& A, const welp::matrix<Ty, _Allocator_B>& B) noexcept
@@ -14194,12 +14189,7 @@ namespace welp
 		if (A.r() != B.r() || A.c() != B.c()) { return false; }
 		else
 		{
-			const Ty* pA = A.data(); const Ty* pB = B.data();
-			for (std::size_t k = A.size(); k > 0; k--)
-			{
-				if (*pA++ != *pB++) { return true; }
-			}
-			return false;
+			return !welp::matrix_subroutines::compare_equal_mm(A.data(), B.data(), A.size());
 		}
 	}
 	template <typename Ty, class _Allocator_A, class _Allocator_B> bool operator<(const welp::matrix<Ty, _Allocator_A>& A, const welp::matrix<Ty, _Allocator_B>& B) noexcept
@@ -14211,12 +14201,7 @@ namespace welp
 		if (A.r() != B.r() || A.c() != B.c()) { return false; }
 		else
 		{
-			const Ty* pA = A.data(); const Ty* pB = B.data();
-			for (std::size_t k = A.size(); k > 0; k--)
-			{
-				if (*pA++ >= *pB++) { return false; }
-			}
-			return true;
+			return welp::matrix_subroutines::compare_strictly_smaller_mm(A.data(), B.data(), A.size());
 		}
 	}
 	template <typename Ty, class _Allocator_A, class _Allocator_B> bool operator>(const welp::matrix<Ty, _Allocator_A>& A, const welp::matrix<Ty, _Allocator_B>& B) noexcept
@@ -14228,12 +14213,7 @@ namespace welp
 		if (A.r() != B.r() || A.c() != B.c()) { return false; }
 		else
 		{
-			const Ty* pA = A.data(); const Ty* pB = B.data();
-			for (std::size_t k = A.size(); k > 0; k--)
-			{
-				if (*pA++ <= *pB++) { return false; }
-			}
-			return true;
+			return welp::matrix_subroutines::compare_strictly_greater_mm(A.data(), B.data(), A.size());
 		}
 	}
 	template <typename Ty, class _Allocator_A, class _Allocator_B> bool operator<=(const welp::matrix<Ty, _Allocator_A>& A, const welp::matrix<Ty, _Allocator_B>& B) noexcept
@@ -14245,12 +14225,7 @@ namespace welp
 		if (A.r() != B.r() || A.c() != B.c()) { return false; }
 		else
 		{
-			const Ty* pA = A.data(); const Ty* pB = B.data();
-			for (std::size_t k = A.size(); k > 0; k--)
-			{
-				if (*pA++ > * pB++) { return false; }
-			}
-			return true;
+			return welp::matrix_subroutines::compare_smaller_mm(A.data(), B.data(), A.size());
 		}
 	}
 	template <typename Ty, class _Allocator_A, class _Allocator_B> bool operator>=(const welp::matrix<Ty, _Allocator_A>& A, const welp::matrix<Ty, _Allocator_B>& B) noexcept
@@ -14261,12 +14236,7 @@ namespace welp
 #endif // WELP_MATRIX_DEBUG_MODE
 		if (A.r() != B.r() || A.c() != B.c()) { return false; }
 		{
-			const Ty* pA = A.data(); const Ty* pB = B.data();
-			for (std::size_t k = A.size(); k > 0; k--)
-			{
-				if (*pA++ < *pB++) { return false; }
-			}
-			return true;
+			return welp::matrix_subroutines::compare_greater_mm(A.data(), B.data(), A.size());
 		}
 	}
 	template <typename Ty, class relation_function, class _Allocator_A, class _Allocator_B> bool relation(
