@@ -81,11 +81,12 @@ namespace welp
 template <typename float_Ty, std::size_t set_number> template <std::size_t offset>
 inline void welp::timer_steady<float_Ty, set_number>::set_timeframe(float_Ty timeframe) noexcept
 {
-	constexpr float_Ty factor_s_to_tick = static_cast<float_Ty>(
-		std::chrono::steady_clock::duration::period::den / std::chrono::steady_clock::duration::period::num);
-	clock_sleep_time[offset] =
-		static_cast<std::chrono::time_point<std::chrono::steady_clock>::rep>(
-			factor_s_to_tick * timeframe);
+	constexpr float_Ty factor_tick_per_s = static_cast<float_Ty>(
+		std::chrono::steady_clock::duration::period::den
+		/ std::chrono::steady_clock::duration::period::num);
+
+	clock_sleep_time[offset] = static_cast<std::chrono::time_point<std::chrono::steady_clock>::rep>(
+			factor_tick_per_s * timeframe);
 }
 
 template <typename float_Ty, std::size_t set_number>
@@ -103,10 +104,13 @@ inline void welp::timer_steady<float_Ty, set_number>::finish_timeframe() noexcep
 template <typename float_Ty, std::size_t set_number>
 inline void welp::timer_steady<float_Ty, set_number>::finish_timeframe(float_Ty timeframe) noexcept
 {
-	constexpr float_Ty factor_s_to_tick = static_cast<float_Ty>(
-		std::chrono::steady_clock::duration::period::den / std::chrono::steady_clock::duration::period::num);
+	constexpr float_Ty factor_tick_per_s = static_cast<float_Ty>(
+		std::chrono::steady_clock::duration::period::den
+		/ std::chrono::steady_clock::duration::period::num);
+
 	std::chrono::time_point<std::chrono::steady_clock>::rep unique_clock_sleep_time =
-		static_cast<std::chrono::time_point<std::chrono::steady_clock>::rep>(factor_s_to_tick * timeframe);
+		static_cast<std::chrono::time_point<std::chrono::steady_clock>::rep>(factor_tick_per_s * timeframe);
+
 	while ((std::chrono::steady_clock::now() - _fstart).count() < unique_clock_sleep_time) {}
 }
 
@@ -120,11 +124,14 @@ inline void welp::timer_steady<float_Ty, set_number>::finish_timeframe_restart_t
 template <typename float_Ty, std::size_t set_number>
 inline void welp::timer_steady<float_Ty, set_number>::finish_timeframe_restart_timer(float_Ty timeframe) noexcept
 {
-	constexpr float_Ty factor_s_to_tick = static_cast<float_Ty>(
-		std::chrono::steady_clock::duration::period::den / std::chrono::steady_clock::duration::period::num);
+	constexpr float_Ty factor_tick_per_s = static_cast<float_Ty>(
+		std::chrono::steady_clock::duration::period::den
+		/ std::chrono::steady_clock::duration::period::num);
+
 	std::chrono::time_point<std::chrono::steady_clock>::rep unique_clock_sleep_time =
 		static_cast<std::chrono::time_point<std::chrono::steady_clock>::rep>(
-			factor_s_to_tick * timeframe);
+			factor_tick_per_s * timeframe);
+
 	while ((std::chrono::steady_clock::now() - _fstart).count() < unique_clock_sleep_time) {}
 	_fstart = std::chrono::steady_clock::now();
 }
@@ -133,11 +140,12 @@ inline void welp::timer_steady<float_Ty, set_number>::finish_timeframe_restart_t
 template <typename float_Ty, std::size_t set_number> template <std::size_t offset>
 inline void welp::timer_system<float_Ty, set_number>::set_timeframe(float_Ty timeframe) noexcept
 {
-	constexpr float_Ty factor_s_to_tick = static_cast<float_Ty>(
-		std::chrono::system_clock::duration::period::den / std::chrono::system_clock::duration::period::num);
-	clock_sleep_time[offset] =
-		static_cast<std::chrono::time_point<std::chrono::system_clock>::rep>(
-			factor_s_to_tick * timeframe);
+	constexpr float_Ty factor_tick_per_s = static_cast<float_Ty>(
+		std::chrono::system_clock::duration::period::den
+		/ std::chrono::system_clock::duration::period::num);
+
+	clock_sleep_time[offset] = static_cast<std::chrono::time_point<std::chrono::system_clock>::rep>(
+			factor_tick_per_s * timeframe);
 }
 
 template <typename float_Ty, std::size_t set_number>
@@ -155,10 +163,13 @@ inline void welp::timer_system<float_Ty, set_number>::finish_timeframe() noexcep
 template <typename float_Ty, std::size_t set_number>
 inline void welp::timer_system<float_Ty, set_number>::finish_timeframe(float_Ty timeframe) noexcept
 {
-	constexpr float_Ty factor_s_to_tick = static_cast<float_Ty>(
-		std::chrono::system_clock::duration::period::den / std::chrono::system_clock::duration::period::num);
+	constexpr float_Ty factor_tick_per_s = static_cast<float_Ty>(
+		std::chrono::system_clock::duration::period::den
+		/ std::chrono::system_clock::duration::period::num);
+
 	std::chrono::time_point<std::chrono::system_clock>::rep unique_clock_sleep_time =
-		static_cast<std::chrono::time_point<std::chrono::system_clock>::rep>(factor_s_to_tick * timeframe);
+		static_cast<std::chrono::time_point<std::chrono::system_clock>::rep>(factor_tick_per_s * timeframe);
+
 	while ((std::chrono::system_clock::now() - _fstart).count() < unique_clock_sleep_time) {}
 }
 
@@ -172,11 +183,14 @@ inline void welp::timer_system<float_Ty, set_number>::finish_timeframe_restart_t
 template <typename float_Ty, std::size_t set_number>
 inline void welp::timer_system<float_Ty, set_number>::finish_timeframe_restart_timer(float_Ty timeframe) noexcept
 {
-	constexpr float_Ty factor_s_to_tick = static_cast<float_Ty>(
-		std::chrono::system_clock::duration::period::den / std::chrono::system_clock::duration::period::num);
+	constexpr float_Ty factor_tick_per_s = static_cast<float_Ty>(
+		std::chrono::system_clock::duration::period::den
+		/ std::chrono::system_clock::duration::period::num);
+
 	std::chrono::time_point<std::chrono::system_clock>::rep unique_clock_sleep_time =
 		static_cast<std::chrono::time_point<std::chrono::system_clock>::rep>(
-			factor_s_to_tick * timeframe);
+			factor_tick_per_s * timeframe);
+
 	while ((std::chrono::system_clock::now() - _fstart).count() < unique_clock_sleep_time) {}
 	_fstart = std::chrono::system_clock::now();
 }
