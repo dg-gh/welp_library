@@ -28,11 +28,6 @@ namespace welp
 	template <std::size_t max_number_of_strings, class string_Ty = std::string> class string_cat
 	{
 
-	private:
-
-		const string_Ty* string_array[max_number_of_strings] = { nullptr };
-		std::size_t number_of_strings = 0;
-
 	public:
 
 		string_cat<max_number_of_strings, string_Ty>& operator<<(const string_Ty& str);
@@ -42,6 +37,18 @@ namespace welp
 		inline std::size_t size() const noexcept;
 		constexpr std::size_t capacity() const noexcept;
 		std::size_t concatenated_string_size() const noexcept;
+
+		string_cat() = default;
+		string_cat(const welp::string_cat<max_number_of_strings, string_Ty>&) = default;
+		welp::string_cat<max_number_of_strings, string_Ty>& operator=(const welp::string_cat<max_number_of_strings, string_Ty>&) = default;
+		string_cat(welp::string_cat<max_number_of_strings, string_Ty>&&) = default;
+		welp::string_cat<max_number_of_strings, string_Ty>& operator=(welp::string_cat<max_number_of_strings, string_Ty>&&) = default;
+		~string_cat() = default;
+
+	private:
+
+		const string_Ty* string_array[max_number_of_strings] = { nullptr };
+		std::size_t number_of_strings = 0;
 	};
 }
 
