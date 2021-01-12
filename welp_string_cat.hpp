@@ -12,6 +12,15 @@
 #include <cstring>
 
 
+#if defined(WELP_ALWAYS_DEBUG_MODE) && !defined(WELP_STRING_CAT_DEBUG_MODE)
+#define WELP_STRING_CAT_DEBUG_MODE
+#endif // WELP_ALWAYS_DEBUG_MODE
+
+#ifdef WELP_STRING_CAT_DEBUG_MODE
+#include <cassert>
+#endif // WELP_STRING_CAT_DEBUG_MODE
+
+
 ////// DESCRIPTIONS //////
 
 namespace welp
@@ -42,6 +51,9 @@ namespace welp
 template <std::size_t max_number_of_strings, class string_Ty>
 welp::string_cat<max_number_of_strings, string_Ty>& welp::string_cat<max_number_of_strings, string_Ty>::operator<<(const string_Ty& str)
 {
+#ifdef WELP_STRING_CAT_DEBUG_MODE
+	assert(number_of_strings < max_number_of_strings);
+#endif // WELP_STRING_CAT_DEBUG_MODE
 	string_array[number_of_strings] = &str;
 	number_of_strings++;
 	return *this;
