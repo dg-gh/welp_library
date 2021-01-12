@@ -57,13 +57,14 @@ template <class return_string_Ty> return_string_Ty welp::string_cat<max_number_o
 		string_size += (*string_ptr++)->size();
 	}
 	string_ptr = static_cast<const string_Ty* const*>(string_array);
-	return_string_Ty str_cat(string_size, static_cast<char>(0));
-	char* string_cat_ptr = str_cat.data();
+	return_string_Ty str_cat(string_size, '0');
+	auto string_cat_ptr = str_cat.data();
+	std::size_t size_of_char_type = sizeof(*string_cat_ptr);
 	std::size_t temp;
 	for (std::size_t k = number_of_strings; k > 0; k--)
 	{
 		temp = (*string_ptr)->size();
-		std::memcpy(string_cat_ptr, (*string_ptr++)->data(), temp);
+		std::memcpy(string_cat_ptr, (*string_ptr++)->data(), temp * size_of_char_type);
 		string_cat_ptr += temp;
 	}
 	return str_cat;
