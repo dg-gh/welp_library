@@ -29,7 +29,7 @@ namespace welp
 		string_cat<max_number_of_strings, string_Ty>& operator<<(const string_Ty& str);
 		template <class return_string_Ty = string_Ty> return_string_Ty concatenate() const;
 
-		inline void reset() noexcept;
+		inline void clear() noexcept;
 		inline std::size_t size() const noexcept;
 		constexpr std::size_t capacity() const noexcept;
 		std::size_t concatenated_string_size() const noexcept;
@@ -71,7 +71,7 @@ template <class return_string_Ty> return_string_Ty welp::string_cat<max_number_o
 }
 
 template <std::size_t max_number_of_strings, class string_Ty>
-inline void welp::string_cat<max_number_of_strings, string_Ty>::reset() noexcept
+inline void welp::string_cat<max_number_of_strings, string_Ty>::clear() noexcept
 {
 	number_of_strings = 0;
 }
