@@ -203,7 +203,7 @@ namespace welp
 				if (string_ptr != nullptr)
 				{
 					_temp_string_cat temp(instances);
-					std::memcpy(temp.temp_string_ptr, string_ptr, instances * sizeof(const string_Ty*));
+					std::memcpy(temp.temp_string_ptr, string_ptr, max_number_of_strings * sizeof(const string_Ty*));
 					this->deallocate(string_ptr, max_number_of_strings);
 					string_ptr = temp.temp_string_ptr;
 					temp.temp_string_ptr = nullptr;
