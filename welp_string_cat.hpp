@@ -79,13 +79,13 @@ inline welp::string_cat<max_number_of_strings, string_Ty, _Allocator>& welp::str
 template <std::size_t max_number_of_strings, class string_Ty, class _Allocator>
 template <class return_string_Ty> return_string_Ty welp::string_cat<max_number_of_strings, string_Ty, _Allocator>::concatenate() const
 {
-	const string_Ty** _string_ptr = static_cast<const string_Ty**>(string_array);
+	const string_Ty* const* _string_ptr = static_cast<const string_Ty* const*>(string_array);
 	std::size_t string_size = 0;
 	for (std::size_t k = number_of_strings; k > 0; k--)
 	{
 		string_size += (*_string_ptr++)->size();
 	}
-	_string_ptr = static_cast<const string_Ty**>(string_array);
+	_string_ptr = static_cast<const string_Ty* const*>(string_array);
 	return_string_Ty str_cat(string_size, '0');
 	char* string_cat_ptr = const_cast<char*>(static_cast<const char*>(
 		static_cast<const void*>(str_cat.data())));
@@ -133,7 +133,7 @@ inline void welp::string_cat<max_number_of_strings, string_Ty, _Allocator>::pop_
 template <std::size_t max_number_of_strings, class string_Ty, class _Allocator>
 std::size_t welp::string_cat<max_number_of_strings, string_Ty, _Allocator>::concatenated_string_size() const noexcept
 {
-	const string_Ty** _string_ptr = static_cast<const string_Ty**>(string_array);
+	const string_Ty* const* _string_ptr = static_cast<const string_Ty* const*>(string_array);
 	std::size_t string_size = 0;
 	for (std::size_t k = number_of_strings; k > 0; k--)
 	{
