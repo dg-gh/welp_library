@@ -160,7 +160,7 @@ namespace welp
 			}
 			else if (max_number_of_strings != 0)
 			{
-				reserve(number_of_strings + max_number_of_strings);
+				reserve(max_number_of_strings + max_number_of_strings);
 				*(string_ptr + number_of_strings) = &str;
 				number_of_strings++;
 				return *this;
@@ -206,8 +206,8 @@ namespace welp
 					std::memcpy(temp.temp_string_ptr, string_ptr, instances * sizeof(const string_Ty*));
 					this->deallocate(string_ptr, max_number_of_strings);
 					string_ptr = temp.temp_string_ptr;
-					max_number_of_strings = temp.temp_number_of_strings;
 					temp.temp_string_ptr = nullptr;
+					max_number_of_strings = temp.temp_number_of_strings;
 					return;
 				}
 				else
