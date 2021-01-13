@@ -47,8 +47,11 @@ namespace welp
 		welp::string_cat<max_number_of_strings, string_Ty, _Allocator>& operator=(welp::string_cat<max_number_of_strings, string_Ty, _Allocator>&&) = default;
 		~string_cat() = default;
 
-		// if max_number_of_strings = 0
+		// member functions in comments below are available when template parameter max_number_of_strings == 0
+		
 		// void reserve(std::size_t instances);
+		// void reset() noexcept;
+		// void clear() noexcept;
 		// std::size_t size();
 		// std::size_t capacity();
 
