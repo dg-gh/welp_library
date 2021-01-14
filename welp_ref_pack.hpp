@@ -46,6 +46,12 @@ namespace welp
 		}
 
 		class const_iterator;
+		inline welp::ref_pack<Ty, max_number_of_refs>::const_iterator begin() const noexcept {
+			return welp::ref_pack<Ty, max_number_of_refs>::const_iterator(static_cast<const Ty* const*>(ptr_array));
+		}
+		inline welp::ref_pack<Ty, max_number_of_refs>::const_iterator end() const noexcept {
+			return welp::ref_pack<Ty, max_number_of_refs>::const_iterator(static_cast<const Ty* const*>(current_ptr));
+		}
 		inline welp::ref_pack<Ty, max_number_of_refs>::const_iterator cbegin() const noexcept {
 			return welp::ref_pack<Ty, max_number_of_refs>::const_iterator(static_cast<const Ty* const*>(ptr_array));
 		}
@@ -207,6 +213,12 @@ namespace welp
 		inline void pop_back(std::size_t instances) noexcept;
 
 		class const_iterator;
+		inline welp::const_ref_pack<Ty, max_number_of_refs>::const_iterator begin() const noexcept {
+			return welp::const_ref_pack<Ty, max_number_of_refs>::const_iterator(static_cast<const Ty* const*>(ptr_array));
+		}
+		inline welp::const_ref_pack<Ty, max_number_of_refs>::const_iterator end() const noexcept {
+			return welp::const_ref_pack<Ty, max_number_of_refs>::const_iterator(static_cast<const Ty* const*>(current_ptr));
+		}
 		inline welp::const_ref_pack<Ty, max_number_of_refs>::const_iterator cbegin() const noexcept {
 			return welp::const_ref_pack<Ty, max_number_of_refs>::const_iterator(static_cast<const Ty* const*>(ptr_array));
 		}
