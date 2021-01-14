@@ -250,7 +250,14 @@ namespace welp
 		}
 		inline void pop_back(std::size_t instances)
 		{
-			if (number_of_strings >= instances) { number_of_strings -= instances; }
+			if (number_of_strings > instances)
+			{
+				number_of_strings -= instances;
+			}
+			else
+			{
+				number_of_strings = 0;
+			}
 		}
 		std::size_t concatenated_string_size() const noexcept
 		{
