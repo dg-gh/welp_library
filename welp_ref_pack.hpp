@@ -1,9 +1,9 @@
-// welp_ref_pack.hpp - last update : 14 / 01 / 2021
+// welp_pack.hpp - last update : 14 / 01 / 2021
 // License <http://unlicense.org/> (statement below at the end of the file)
 
 
-#ifndef WELP_REF_PACK_HPP
-#define WELP_REF_PACK_HPP
+#ifndef WELP_PACK_HPP
+#define WELP_PACK_HPP
 
 
 ////// INCLUDES //////
@@ -11,25 +11,59 @@
 #include <cstddef>
 
 
-#if defined(WELP_ALWAYS_DEBUG_MODE) && !defined(WELP_REF_PACK_DEBUG_MODE)
-#define WELP_REF_PACK_DEBUG_MODE
+#if defined(WELP_ALWAYS_DEBUG_MODE) && !defined(WELP_PACK_DEBUG_MODE)
+#define WELP_PACK_DEBUG_MODE
 #endif // WELP_ALWAYS_DEBUG_MODE
 
-#ifdef WELP_REF_PACK_DEBUG_MODE
+#ifdef WELP_PACK_DEBUG_MODE
 #include <cassert>
-#endif // WELP_REF_PACK_DEBUG_MODE
+#endif // WELP_PACK_DEBUG_MODE
 
 
 ////// DESCRIPTIONS //////
 
 namespace welp
 {
+	template <class Ty, std::size_t max_number_of_obj> class pack
+	{
+
+	public:
+
+		inline pack<Ty, max_number_of_obj>& operator<<(const Ty& obj);
+		inline pack<Ty, max_number_of_obj>& operator<<(Ty&& obj) noexcept;
+
+		inline void clear() noexcept;
+		inline std::size_t size() const noexcept;
+		constexpr std::size_t capacity() const noexcept;
+		inline void pop_back() noexcept;
+		inline void pop_back(std::size_t instances) noexcept;
+
+		inline Ty* begin() noexcept { return static_cast<Ty*>(obj_array); }
+		inline Ty* end() noexcept { return current_ptr; }
+		inline const Ty* begin() const noexcept { return static_cast<const Ty*>(obj_array); }
+		inline const Ty* end() const noexcept { return current_ptr; }
+		inline const Ty* cbegin() const noexcept { return static_cast<const Ty*>(obj_array); }
+		inline const Ty* cend() const noexcept { return current_ptr; }
+
+		pack() = default;
+		pack(const welp::pack<Ty, max_number_of_obj>&) = default;
+		welp::pack<Ty, max_number_of_obj>& operator=(const welp::pack<Ty, max_number_of_obj>&) = default;
+		pack(welp::pack<Ty, max_number_of_obj>&&) = default;
+		welp::pack<Ty, max_number_of_obj>& operator=(welp::pack<Ty, max_number_of_obj>&&) = default;
+		~pack() = default;
+
+	private:
+
+		Ty obj_array[max_number_of_obj] = { Ty() };
+		Ty* current_ptr = static_cast<Ty*>(obj_array);
+	};
+
 	template <class Ty, std::size_t max_number_of_refs> class ref_pack
 	{
 
 	public:
 
-		inline ref_pack<Ty, max_number_of_refs>& operator<<(Ty& str);
+		inline ref_pack<Ty, max_number_of_refs>& operator<<(Ty& ref);
 
 		inline void clear() noexcept;
 		inline std::size_t size() const noexcept;
@@ -204,7 +238,7 @@ namespace welp
 
 	public:
 
-		inline const_ref_pack<Ty, max_number_of_refs>& operator<<(const Ty& str);
+		inline const_ref_pack<Ty, max_number_of_refs>& operator<<(const Ty& ref);
 
 		inline void clear() noexcept;
 		inline std::size_t size() const noexcept;
@@ -306,15 +340,73 @@ namespace welp
 
 ////// IMPLEMENTATIONS //////
 
-template <class Ty, std::size_t max_number_of_refs>
-inline welp::ref_pack<Ty, max_number_of_refs>& welp::ref_pack<Ty, max_number_of_refs>::operator<<(Ty& rhs)
+template <class Ty, std::size_t max_number_of_obj>
+inline welp::pack<Ty, max_number_of_obj>& welp::pack<Ty, max_number_of_obj>::operator<<(const Ty& obj)
 {
-#ifdef WELP_REF_PACK_DEBUG_MODE
-	assert(static_cast<std::size_t>(current_ptr - static_cast<Ty**>(ptr_array)) < max_number_of_refs);
-#endif // WELP_REF_PACK_DEBUG_MODE
-	*current_ptr++ = &rhs;
+#ifdef WELP_PACK_DEBUG_MODE
+	assert(static_cast<std::size_t>(current_ptr - static_cast<Ty*>(obj_array)) < max_number_of_obj);
+#endif // WELP_PACK_DEBUG_MODE
+	*current_ptr++ = obj;
 	return *this;
 }
+
+template <class Ty, std::size_t max_number_of_obj>
+inline welp::pack<Ty, max_number_of_obj>& welp::pack<Ty, max_number_of_obj>::operator<<(Ty&& obj) noexcept
+{
+#ifdef WELP_PACK_DEBUG_MODE
+	assert(static_cast<std::size_t>(current_ptr - static_cast<Ty*>(obj_array)) < max_number_of_obj);
+#endif // WELP_PACK_DEBUG_MODE
+	*current_ptr++ = std::move(obj);
+	return *this;
+}
+
+template <class Ty, std::size_t max_number_of_refs>
+inline welp::ref_pack<Ty, max_number_of_refs>& welp::ref_pack<Ty, max_number_of_refs>::operator<<(Ty& ref)
+{
+#ifdef WELP_PACK_DEBUG_MODE
+	assert(static_cast<std::size_t>(current_ptr - static_cast<Ty**>(ptr_array)) < max_number_of_refs);
+#endif // WELP_PACK_DEBUG_MODE
+	*current_ptr++ = &ref;
+	return *this;
+}
+
+template <class Ty, std::size_t max_number_of_obj>
+inline void welp::pack<Ty, max_number_of_obj>::clear() noexcept
+{
+	current_ptr = static_cast<Ty*>(obj_array);
+}
+
+template <class Ty, std::size_t max_number_of_obj>
+inline std::size_t welp::pack<Ty, max_number_of_obj>::size() const noexcept
+{
+	return static_cast<std::size_t>(current_ptr - static_cast<Ty* const>(obj_array));
+}
+
+template <class Ty, std::size_t max_number_of_obj>
+constexpr std::size_t welp::pack<Ty, max_number_of_obj>::capacity() const noexcept
+{
+	return max_number_of_obj;
+}
+
+template <class Ty, std::size_t max_number_of_obj>
+inline void welp::pack<Ty, max_number_of_obj>::pop_back() noexcept
+{
+	if (current_ptr != static_cast<Ty*>(obj_array)) { current_ptr--; }
+}
+
+template <class Ty, std::size_t max_number_of_obj>
+inline void welp::pack<Ty, max_number_of_obj>::pop_back(std::size_t instances) noexcept
+{
+	if ((current_ptr - static_cast<Ty*>(obj_array)) > instances)
+	{
+		current_ptr -= instances;
+	}
+	else
+	{
+		current_ptr = static_cast<Ty*>(obj_array);
+	}
+}
+
 
 template <class Ty, std::size_t max_number_of_refs>
 inline void welp::ref_pack<Ty, max_number_of_refs>::clear() noexcept
@@ -355,12 +447,12 @@ inline void welp::ref_pack<Ty, max_number_of_refs>::pop_back(std::size_t instanc
 
 
 template <class Ty, std::size_t max_number_of_refs>
-inline welp::const_ref_pack<Ty, max_number_of_refs>& welp::const_ref_pack<Ty, max_number_of_refs>::operator<<(const Ty& rhs)
+inline welp::const_ref_pack<Ty, max_number_of_refs>& welp::const_ref_pack<Ty, max_number_of_refs>::operator<<(const Ty& ref)
 {
-#ifdef WELP_REF_PACK_DEBUG_MODE
+#ifdef WELP_PACK_DEBUG_MODE
 	assert(static_cast<std::size_t>(current_ptr - static_cast<const Ty**>(ptr_array)) < max_number_of_refs);
-#endif // WELP_REF_PACK_DEBUG_MODE
-	*current_ptr++ = &rhs;
+#endif // WELP_PACK_DEBUG_MODE
+	*current_ptr++ = &ref;
 	return *this;
 }
 
@@ -402,10 +494,10 @@ inline void welp::const_ref_pack<Ty, max_number_of_refs>::pop_back(std::size_t i
 }
 
 
-#endif // WELP_REF_PACK_HPP
+#endif // WELP_PACK_HPP
 
 
-// welp_ref_pack.hpp
+// welp_pack.hpp
 // 
 // This is free software released into the public domain.
 // 
