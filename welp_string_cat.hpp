@@ -127,7 +127,14 @@ inline void welp::string_cat<max_number_of_strings, string_Ty, _Allocator>::pop_
 template <std::size_t max_number_of_strings, class string_Ty, class _Allocator>
 inline void welp::string_cat<max_number_of_strings, string_Ty, _Allocator>::pop_back(std::size_t instances) noexcept
 {
-	if (number_of_strings >= instances) { number_of_strings -= instances; }
+	if (number_of_strings > instances)
+	{
+		number_of_strings -= instances;
+	}
+	else
+	{
+		number_of_strings = 0;
+	}
 }
 
 template <std::size_t max_number_of_strings, class string_Ty, class _Allocator>
