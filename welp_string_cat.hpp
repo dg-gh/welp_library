@@ -1,4 +1,4 @@
-// welp_string_cat.hpp - last update : 13 / 01 / 2021
+// welp_string_cat.hpp - last update : 14 / 01 / 2021
 // License <http://unlicense.org/> (statement below at the end of the file)
 
 
