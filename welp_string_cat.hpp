@@ -25,35 +25,27 @@
 
 namespace welp
 {
-	template <std::size_t max_number_of_strings, class string_Ty = std::string, class _Allocator = std::allocator<const string_Ty*>> class string_cat
+	template <std::size_t max_number_of_strings, class string_Ty = std::string> class string_cat
 	{
 
 	public:
 
-		inline string_cat<max_number_of_strings, string_Ty, _Allocator>& operator<<(const string_Ty& str);
+		inline string_cat<max_number_of_strings, string_Ty>& operator<<(const string_Ty& str);
 		template <class return_string_Ty = string_Ty> return_string_Ty concatenate() const;
+		std::size_t concatenated_string_size() const noexcept;
 
-		inline void reset() noexcept;
+		inline void clear() noexcept;
 		inline std::size_t size() const noexcept;
 		constexpr std::size_t capacity() const noexcept;
 		inline void pop_back() noexcept;
 		inline void pop_back(std::size_t instances) noexcept;
-		std::size_t concatenated_string_size() const noexcept;
 
 		string_cat() = default;
-		string_cat(const welp::string_cat<max_number_of_strings, string_Ty, _Allocator>&) = default;
-		welp::string_cat<max_number_of_strings, string_Ty, _Allocator>& operator=(const welp::string_cat<max_number_of_strings, string_Ty, _Allocator>&) = default;
-		string_cat(welp::string_cat<max_number_of_strings, string_Ty, _Allocator>&&) = default;
-		welp::string_cat<max_number_of_strings, string_Ty, _Allocator>& operator=(welp::string_cat<max_number_of_strings, string_Ty, _Allocator>&&) = default;
+		string_cat(const welp::string_cat<max_number_of_strings, string_Ty>&) = default;
+		welp::string_cat<max_number_of_strings, string_Ty>& operator=(const welp::string_cat<max_number_of_strings, string_Ty>&) = default;
+		string_cat(welp::string_cat<max_number_of_strings, string_Ty>&&) = default;
+		welp::string_cat<max_number_of_strings, string_Ty>& operator=(welp::string_cat<max_number_of_strings, string_Ty>&&) = default;
 		~string_cat() = default;
-
-		// member functions in comments below are available when template parameter max_number_of_strings == 0
-
-		// void reserve(std::size_t instances);
-		// void reset() noexcept;
-		// void clear() noexcept;
-		// std::size_t size();
-		// std::size_t capacity();
 
 	private:
 
@@ -65,8 +57,8 @@ namespace welp
 
 ////// IMPLEMENTATIONS //////
 
-template <std::size_t max_number_of_strings, class string_Ty, class _Allocator>
-inline welp::string_cat<max_number_of_strings, string_Ty, _Allocator>& welp::string_cat<max_number_of_strings, string_Ty, _Allocator>::operator<<(const string_Ty& str)
+template <std::size_t max_number_of_strings, class string_Ty>
+inline welp::string_cat<max_number_of_strings, string_Ty>& welp::string_cat<max_number_of_strings, string_Ty>::operator<<(const string_Ty& str)
 {
 #ifdef WELP_STRING_CAT_DEBUG_MODE
 	assert(number_of_strings < max_number_of_strings);
@@ -76,8 +68,8 @@ inline welp::string_cat<max_number_of_strings, string_Ty, _Allocator>& welp::str
 	return *this;
 }
 
-template <std::size_t max_number_of_strings, class string_Ty, class _Allocator>
-template <class return_string_Ty> return_string_Ty welp::string_cat<max_number_of_strings, string_Ty, _Allocator>::concatenate() const
+template <std::size_t max_number_of_strings, class string_Ty>
+template <class return_string_Ty> return_string_Ty welp::string_cat<max_number_of_strings, string_Ty>::concatenate() const
 {
 	const string_Ty* const* _string_ptr = static_cast<const string_Ty* const*>(string_array);
 	std::size_t string_size = 0;
@@ -100,45 +92,8 @@ template <class return_string_Ty> return_string_Ty welp::string_cat<max_number_o
 	return str_cat;
 }
 
-template <std::size_t max_number_of_strings, class string_Ty, class _Allocator>
-inline void welp::string_cat<max_number_of_strings, string_Ty, _Allocator>::reset() noexcept
-{
-	number_of_strings = 0;
-}
-
-template <std::size_t max_number_of_strings, class string_Ty, class _Allocator>
-inline std::size_t welp::string_cat<max_number_of_strings, string_Ty, _Allocator>::size() const noexcept
-{
-	return number_of_strings;
-}
-
-template <std::size_t max_number_of_strings, class string_Ty, class _Allocator>
-constexpr std::size_t welp::string_cat<max_number_of_strings, string_Ty, _Allocator>::capacity() const noexcept
-{
-	return max_number_of_strings;
-}
-
-template <std::size_t max_number_of_strings, class string_Ty, class _Allocator>
-inline void welp::string_cat<max_number_of_strings, string_Ty, _Allocator>::pop_back() noexcept
-{
-	if (number_of_strings != 0) { number_of_strings--; }
-}
-
-template <std::size_t max_number_of_strings, class string_Ty, class _Allocator>
-inline void welp::string_cat<max_number_of_strings, string_Ty, _Allocator>::pop_back(std::size_t instances) noexcept
-{
-	if (number_of_strings > instances)
-	{
-		number_of_strings -= instances;
-	}
-	else
-	{
-		number_of_strings = 0;
-	}
-}
-
-template <std::size_t max_number_of_strings, class string_Ty, class _Allocator>
-std::size_t welp::string_cat<max_number_of_strings, string_Ty, _Allocator>::concatenated_string_size() const noexcept
+template <std::size_t max_number_of_strings, class string_Ty>
+std::size_t welp::string_cat<max_number_of_strings, string_Ty>::concatenated_string_size() const noexcept
 {
 	const string_Ty* const* _string_ptr = static_cast<const string_Ty* const*>(string_array);
 	std::size_t string_size = 0;
@@ -149,199 +104,41 @@ std::size_t welp::string_cat<max_number_of_strings, string_Ty, _Allocator>::conc
 	return string_size;
 }
 
-
-namespace welp
+template <std::size_t max_number_of_strings, class string_Ty>
+inline void welp::string_cat<max_number_of_strings, string_Ty>::clear() noexcept
 {
-	template <class string_Ty, class _Allocator> class string_cat<0, string_Ty, _Allocator> : private _Allocator
+	number_of_strings = 0;
+}
+
+template <std::size_t max_number_of_strings, class string_Ty>
+inline std::size_t welp::string_cat<max_number_of_strings, string_Ty>::size() const noexcept
+{
+	return number_of_strings;
+}
+
+template <std::size_t max_number_of_strings, class string_Ty>
+constexpr std::size_t welp::string_cat<max_number_of_strings, string_Ty>::capacity() const noexcept
+{
+	return max_number_of_strings;
+}
+
+template <std::size_t max_number_of_strings, class string_Ty>
+inline void welp::string_cat<max_number_of_strings, string_Ty>::pop_back() noexcept
+{
+	if (number_of_strings != 0) { number_of_strings--; }
+}
+
+template <std::size_t max_number_of_strings, class string_Ty>
+inline void welp::string_cat<max_number_of_strings, string_Ty>::pop_back(std::size_t instances) noexcept
+{
+	if (number_of_strings > instances)
 	{
-
-	public:
-
-		inline welp::string_cat<0, string_Ty, _Allocator>& operator<<(const string_Ty& str)
-		{
-			if (number_of_strings < max_number_of_strings)
-			{
-				*(string_ptr + number_of_strings) = &str;
-				number_of_strings++;
-				return *this;
-			}
-			else if (max_number_of_strings != 0)
-			{
-				reserve(max_number_of_strings + max_number_of_strings);
-				*(string_ptr + number_of_strings) = &str;
-				number_of_strings++;
-				return *this;
-			}
-			else
-			{
-				reserve(2);
-				*(string_ptr + number_of_strings) = &str;
-				number_of_strings++;
-				return *this;
-			}
-		}
-		template <class return_string_Ty = string_Ty> return_string_Ty concatenate() const
-		{
-			const string_Ty** _string_ptr = string_ptr;
-			std::size_t string_size = 0;
-			for (std::size_t k = number_of_strings; k > 0; k--)
-			{
-				string_size += (*_string_ptr++)->size();
-			}
-			_string_ptr = string_ptr;
-			return_string_Ty str_cat(string_size, '0');
-			char* string_cat_ptr = const_cast<char*>(static_cast<const char*>(
-				static_cast<const void*>(str_cat.data())));
-			std::size_t size_of_char_type = sizeof(*str_cat.data());
-			std::size_t temp;
-			for (std::size_t k = number_of_strings; k > 0; k--)
-			{
-				temp = (*_string_ptr)->size() * size_of_char_type;
-				std::memcpy(string_cat_ptr, (*_string_ptr++)->data(), temp);
-				string_cat_ptr += temp;
-			}
-			return str_cat;
-		}
-
-		void reserve(std::size_t instances)
-		{
-			if (instances > max_number_of_strings)
-			{
-				if (string_ptr != nullptr)
-				{
-					_temp_string_cat temp(instances);
-					std::memcpy(temp.temp_string_ptr, string_ptr, max_number_of_strings * sizeof(const string_Ty*));
-					this->deallocate(string_ptr, max_number_of_strings);
-					string_ptr = temp.temp_string_ptr;
-					temp.temp_string_ptr = nullptr;
-					max_number_of_strings = temp.temp_number_of_strings;
-					return;
-				}
-				else
-				{
-					string_ptr = this->allocate(instances);
-					max_number_of_strings = instances;
-					return;
-				}
-			}
-			else
-			{
-				return;
-			}
-		}
-		void reset() noexcept
-		{
-			number_of_strings = 0;
-		}
-		void clear() noexcept
-		{
-			if (string_ptr != nullptr)
-			{
-				this->deallocate(string_ptr, max_number_of_strings);
-			}
-			number_of_strings = 0;
-			max_number_of_strings = 0;
-		}
-		inline std::size_t size() const noexcept { return number_of_strings; }
-		inline std::size_t capacity() const noexcept { return max_number_of_strings; }
-		inline void pop_back()
-		{
-			if (number_of_strings != 0) { number_of_strings--; }
-		}
-		inline void pop_back(std::size_t instances)
-		{
-			if (number_of_strings > instances)
-			{
-				number_of_strings -= instances;
-			}
-			else
-			{
-				number_of_strings = 0;
-			}
-		}
-		std::size_t concatenated_string_size() const noexcept
-		{
-			const string_Ty** _string_ptr = string_ptr;
-			std::size_t string_size = 0;
-			for (std::size_t k = number_of_strings; k > 0; k--)
-			{
-				string_size += (*_string_ptr++)->size();
-			}
-			return string_size;
-		}
-
-		string_cat() = default;
-		string_cat(std::size_t instances) : string_ptr(this->allocate(instances)), max_number_of_strings(instances) {}
-		string_cat(const welp::string_cat<0, string_Ty, _Allocator>& rhs)
-			: string_ptr(this->allocate(rhs.max_number_of_strings)),
-			number_of_strings(rhs.number_of_strings),
-			max_number_of_strings(rhs.max_number_of_strings)
-		{
-			std::memcpy(string_ptr, rhs.string_ptr, number_of_strings * sizeof(const string_Ty*));
-		}
-		welp::string_cat<0, string_Ty, _Allocator>& operator=(const welp::string_cat<0, string_Ty, _Allocator>& rhs)
-		{
-			string_ptr = this->allocate(rhs.max_number_of_strings);
-			number_of_strings = rhs.number_of_strings;
-			max_number_of_strings = rhs.max_number_of_strings;
-			std::memcpy(string_ptr, rhs.string_ptr, number_of_strings * sizeof(const string_Ty*));
-		}
-		string_cat(welp::string_cat<0, string_Ty, _Allocator>&& rhs)
-			: string_ptr(rhs.string_ptr),
-			number_of_strings(rhs.number_of_strings),
-			max_number_of_strings(rhs.number_of_strings)
-		{
-			rhs.string_ptr = nullptr;
-			rhs.number_of_strings = 0;
-			rhs.max_number_of_strings = 0;
-		}
-		welp::string_cat<0, string_Ty, _Allocator>& operator=(welp::string_cat<0, string_Ty, _Allocator>&& rhs)
-		{
-			string_ptr = rhs.string_ptr;
-			number_of_strings = rhs.number_of_strings;
-			max_number_of_strings = rhs.number_of_strings;
-
-			rhs.string_ptr = nullptr;
-			rhs.number_of_strings = 0;
-			rhs.max_number_of_strings = 0;
-		}
-		~string_cat()
-		{
-			if (string_ptr != nullptr)
-			{
-				this->deallocate(string_ptr, max_number_of_strings);
-			}
-		}
-
-	private:
-
-		const string_Ty** string_ptr = nullptr;
-		std::size_t number_of_strings = 0;
-		std::size_t max_number_of_strings = 0;
-
-		class _temp_string_cat : private _Allocator
-		{
-
-		public:
-
-			const string_Ty** temp_string_ptr = nullptr;
-			std::size_t temp_number_of_strings = 0;
-
-			_temp_string_cat() = delete;
-			_temp_string_cat(std::size_t instances) : temp_string_ptr(this->allocate(instances)), temp_number_of_strings(instances) {}
-			_temp_string_cat(const _temp_string_cat&) = delete;
-			_temp_string_cat& operator=(const _temp_string_cat&) = delete;
-			_temp_string_cat(_temp_string_cat&&) = delete;
-			_temp_string_cat& operator=(_temp_string_cat&&) = delete;
-			~_temp_string_cat()
-			{
-				if (temp_string_ptr != nullptr)
-				{
-					this->deallocate(temp_string_ptr, temp_number_of_strings);
-				}
-			}
-		};
-	};
+		number_of_strings -= instances;
+	}
+	else
+	{
+		number_of_strings = 0;
+	}
 }
 
 
