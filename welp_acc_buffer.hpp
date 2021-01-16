@@ -48,7 +48,7 @@ namespace welp
 		constexpr std::size_t capacity() const noexcept;
 		inline void pop_back();
 		inline void pop_back(std::size_t instances);
-		inline void clear();
+		inline void reset();
 
 		inline welp::acc_buffer<Ty, _Allocator>::iterator begin() noexcept { return welp::acc_buffer<Ty, _Allocator>::iterator(data_ptr); }
 		inline welp::acc_buffer<Ty, _Allocator>::iterator end() noexcept { return welp::acc_buffer<Ty, _Allocator>::iterator(current_ptr); }
@@ -183,7 +183,7 @@ namespace welp
 		constexpr std::size_t capacity() const noexcept;
 		inline void pop_back();
 		inline void pop_back(std::size_t instances);
-		inline void clear();
+		inline void reset();
 
 		bool new_buffer(std::size_t instances);
 		void delete_buffer();
@@ -417,7 +417,7 @@ inline void welp::acc_buffer<Ty, _Allocator>::pop_back(std::size_t instances)
 }
 
 template <class Ty, class _Allocator>
-inline void welp::acc_buffer<Ty, _Allocator>::clear()
+inline void welp::acc_buffer<Ty, _Allocator>::reset()
 {
 	for (std::size_t n = static_cast<std::size_t>(current_ptr - data_ptr);
 		n > 0; n--)
@@ -617,7 +617,7 @@ inline void welp::acc_const_buffer<Ty, _Allocator>::pop_back(std::size_t instanc
 }
 
 template <class Ty, class _Allocator>
-inline void welp::acc_const_buffer<Ty, _Allocator>::clear()
+inline void welp::acc_const_buffer<Ty, _Allocator>::reset()
 {
 	for (std::size_t n = static_cast<std::size_t>(current_ptr - data_ptr);
 		n > 0; n--)
