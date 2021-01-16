@@ -90,6 +90,7 @@ namespace welp
 		inline welp::cyclic_const_buffer<Ty, _Allocator>& operator<<(const Ty& obj);
 		inline welp::cyclic_const_buffer<Ty, _Allocator>& operator<<(const Ty* obj_ptr) noexcept;
 		inline welp::cyclic_const_buffer<Ty, _Allocator>& operator<(const Ty& obj);
+		inline welp::cyclic_const_buffer<Ty, _Allocator>& operator<(const Ty* obj_ptr) noexcept;
 
 		inline welp::cyclic_const_buffer<Ty, _Allocator>& operator>>(Ty& obj) noexcept;
 		inline welp::cyclic_const_buffer<Ty, _Allocator>& operator>(Ty& obj);
@@ -464,6 +465,23 @@ inline welp::cyclic_const_buffer<Ty, _Allocator>& welp::cyclic_const_buffer<Ty, 
 	if ((next_cell_ptr != cells_data_ptr) || (last_cell_ptr + 1 != cells_end_ptr))
 	{
 		last_cell_ptr->storage = obj;
+		last_cell_ptr++;
+		if (last_cell_ptr == cells_end_ptr) { last_cell_ptr = cells_data_ptr; }
+		return *this;
+	}
+	else
+	{
+		_bad_store = true;
+		return *this;
+	}
+}
+
+template <class Ty, class _Allocator>
+inline welp::cyclic_const_buffer<Ty, _Allocator>& welp::cyclic_const_buffer<Ty, _Allocator>::operator<(const Ty* obj_ptr) noexcept
+{
+	if ((next_cell_ptr != cells_data_ptr) || (last_cell_ptr + 1 != cells_end_ptr))
+	{
+		last_cell_ptr->storage_ptr = obj_ptr;
 		last_cell_ptr++;
 		if (last_cell_ptr == cells_end_ptr) { last_cell_ptr = cells_data_ptr; }
 		return *this;
