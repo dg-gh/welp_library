@@ -935,8 +935,7 @@ void welp::threads<_Allocator>::delete_threads() noexcept
 		{
 			(task_buffer_data_ptr + k)->~function();
 		}
-		this->deallocate(static_cast<char*>(static_cast<void*>(task_buffer_data_ptr)),
-			static_cast<std::size_t>(task_buffer_end_ptr - task_buffer_data_ptr) * sizeof(std::function<void()>));
+		this->deallocate(static_cast<char*>(static_cast<void*>(task_buffer_data_ptr)), task_buffer_size * sizeof(std::function<void()>));
 	}
 
 	threads_data_ptr = nullptr;
