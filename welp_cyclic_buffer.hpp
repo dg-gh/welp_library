@@ -128,7 +128,7 @@ namespace welp
 		public:
 
 			Ty storage = Ty();
-			Ty* storage_ptr = nullptr;
+			const Ty* storage_ptr = nullptr;
 
 			storage_cell() = default;
 			storage_cell(const welp::cyclic_const_buffer<Ty, _Allocator>::storage_cell&) = default;
