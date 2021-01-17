@@ -10,7 +10,6 @@ Depedency free single-header files all under the Unlicense license that could be
 - **welp_matrix.hpp** : Row-major layout. Provides linear algebra subroutines (70% efficiency on theoretical maximum in matrix multiplication if compiled with Clang with AVX&FMA), a resizable matrix class, some solvers, some data manipulation/selection helpers and some functions to crunch, parse and write flat files.
 - **welp_multipool_resource.hpp** : Provide a multipool memory resource (with and without thread sync) backing an allocator.
 - **welp_pack.hpp** : Append objects references to a pack and submit an operation to all the objects at once using iterators.
-- **welp_string_cat.hpp** : Concatenate strings.
 - **welp_threads.hpp** : Provides a thread pool that avoids std::future, std::result_of, std::invoke_result, and can avoid dynamic allocations if the functions launched as asynchronous tasks don't take too many arguments by using a fixed buffer for tasks. It can queue tasks at the end or the beginning of the waiting line depending on the desired level of priority.
 - **welp_timer.hpp** : Provides classes for scheduling timings.
 
