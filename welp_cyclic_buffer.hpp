@@ -21,6 +21,9 @@
 
 #ifdef WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
 #include <mutex>
+#include <condition_variable>
+#include <functional>
+#include <atomic>
 #endif // WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
 
 
@@ -48,14 +51,6 @@ namespace welp
 		const Ty& pop();
 		const Ty& get();
 
-#ifdef WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
-		class lock;
-		welp::cyclic_buffer<Ty, _Allocator>::lock exclusive()
-		{
-			return welp::cyclic_buffer<Ty, _Allocator>::lock(&mu);
-		}
-#endif // WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
-
 		inline bool not_full() const noexcept;
 		inline bool not_empty() const noexcept;
 		inline bool bad_store() noexcept;
@@ -70,6 +65,19 @@ namespace welp
 
 		void set_bad_object(const Ty& bad_obj);
 		void set_bad_object(Ty&& bad_obj) noexcept;
+
+#ifdef WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
+		class lock;
+		welp::cyclic_buffer<Ty, _Allocator>::lock exclusive()
+		{
+			return welp::cyclic_buffer<Ty, _Allocator>::lock(&buffer_mutex);
+		}
+
+		void wait_for_capacity(std::size_t requested_capacity);
+		void notify_one_for_capacity();
+		void wait_for_size(std::size_t requested_size);
+		void notify_one_for_size();
+#endif // WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
 
 		cyclic_buffer() = default;
 		cyclic_buffer(const welp::cyclic_buffer<Ty, _Allocator>&) = delete;
@@ -112,7 +120,12 @@ namespace welp
 		Ty bad_object = Ty();
 
 #ifdef WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
-		std::mutex mu;
+		std::mutex buffer_mutex;
+		std::mutex waiting_mutex;
+		std::condition_variable size_condition_variable;
+		std::condition_variable capacity_condition_variable;
+
+		bool terminate_buffer = false;
 #endif // WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
 
 		bool _bad_store = false;
@@ -412,6 +425,14 @@ void welp::cyclic_buffer<Ty, _Allocator>::delete_buffer() noexcept
 {
 	if (cells_data_ptr != nullptr)
 	{
+#ifdef WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
+		{
+			std::lock_guard<std::mutex> _lock(buffer_mutex);
+			terminate_buffer = true;
+			size_condition_variable.notify_all();
+			capacity_condition_variable.notify_all();
+		}
+#endif // WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
 		std::size_t buffer_size = static_cast<std::size_t>(cells_end_ptr - cells_data_ptr);
 		cells_end_ptr--;
 		for (std::size_t n = buffer_size; n > 0; n--)
@@ -424,6 +445,9 @@ void welp::cyclic_buffer<Ty, _Allocator>::delete_buffer() noexcept
 		next_cell_ptr = nullptr;
 		cells_end_ptr = nullptr;
 		_capacity = 0;
+#ifdef WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
+		terminate_buffer = false;
+#endif // WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
 		_bad_store = false;
 		_bad_load = false;
 	}
@@ -440,6 +464,36 @@ void welp::cyclic_buffer<Ty, _Allocator>::set_bad_object(Ty&& bad_obj) noexcept
 {
 	bad_object = std::move(bad_obj);
 }
+
+#ifdef WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
+template <class Ty, class _Allocator>
+void welp::cyclic_buffer<Ty, _Allocator>::wait_for_capacity(std::size_t requested_capacity)
+{
+	if (requested_capacity > _capacity) { requested_capacity = _capacity; }
+	std::unique_lock<std::mutex> waiting_lock(waiting_mutex);
+	capacity_condition_variable.wait(waiting_lock, [=]() { return (_capacity - _size >= requested_capacity) || terminate_buffer; });
+}
+
+template <class Ty, class _Allocator>
+void welp::cyclic_buffer<Ty, _Allocator>::notify_one_for_capacity()
+{
+	size_condition_variable.notify_one();
+}
+
+template <class Ty, class _Allocator>
+void welp::cyclic_buffer<Ty, _Allocator>::wait_for_size(std::size_t requested_size)
+{
+	if (requested_size > _capacity) { requested_size = _capacity; }
+	std::unique_lock<std::mutex> waiting_lock(waiting_mutex);
+	size_condition_variable.wait(waiting_lock, [=]() { return (_size >= requested_size) || terminate_buffer; });
+}
+
+template <class Ty, class _Allocator>
+void welp::cyclic_buffer<Ty, _Allocator>::notify_one_for_size()
+{
+	size_condition_variable.notify_one();
+}
+#endif // WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
 
 
 #endif // WELP_CYCLIC_BUFFER_HPP
