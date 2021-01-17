@@ -32,7 +32,7 @@ namespace welp
 
 		inline welp::cyclic_buffer<Ty, _Allocator>& operator>>(Ty& obj) noexcept;
 		inline welp::cyclic_buffer<Ty, _Allocator>& operator>(Ty& obj);
-		
+
 		const Ty& pop();
 		const Ty& get();
 
@@ -47,7 +47,7 @@ namespace welp
 
 		void set_bad_object(const Ty& bad_obj);
 		void set_bad_object(Ty&& bad_obj) noexcept;
-		
+
 		cyclic_buffer() = default;
 		cyclic_buffer(const welp::cyclic_buffer<Ty, _Allocator>&) = delete;
 		welp::cyclic_buffer<Ty, _Allocator>& operator=(const welp::cyclic_buffer<Ty, _Allocator>&) = delete;
@@ -64,7 +64,7 @@ namespace welp
 		storage_cell* next_cell_ptr = nullptr;
 
 		Ty bad_object = Ty();
-		
+
 		bool _bad_store = false;
 		bool _bad_load = false;
 
@@ -116,7 +116,7 @@ namespace welp
 
 		void set_bad_object(const Ty& bad_obj);
 		void set_bad_object(Ty&& bad_obj) noexcept;
-		
+
 		cyclic_const_buffer() = default;
 		cyclic_const_buffer(const welp::cyclic_const_buffer<Ty, _Allocator>&) = delete;
 		welp::cyclic_const_buffer<Ty, _Allocator>& operator=(const welp::cyclic_const_buffer<Ty, _Allocator>&) = delete;
@@ -241,11 +241,11 @@ inline welp::cyclic_buffer<Ty, _Allocator>& welp::cyclic_buffer<Ty, _Allocator>:
 		{
 			obj = std::move(next_cell_ptr->storage);
 		}
+		next_cell_ptr++;
 		if (next_cell_ptr == cells_end_ptr)
 		{
 			next_cell_ptr = cells_data_ptr;
 		}
-		next_cell_ptr++;
 		return *this;
 	}
 	else
@@ -270,11 +270,11 @@ inline welp::cyclic_buffer<Ty, _Allocator>& welp::cyclic_buffer<Ty, _Allocator>:
 		{
 			obj = std::move(next_cell_ptr->storage);
 		}
+		next_cell_ptr++;
 		if (next_cell_ptr == cells_end_ptr)
 		{
 			next_cell_ptr = cells_data_ptr;
 		}
-		next_cell_ptr++;
 		return *this;
 	}
 	else
@@ -291,11 +291,11 @@ const Ty& welp::cyclic_buffer<Ty, _Allocator>::pop()
 	{
 		storage_cell* temp_cell_ptr = next_cell_ptr;
 
+		next_cell_ptr++;
 		if (next_cell_ptr == cells_end_ptr)
 		{
 			next_cell_ptr = cells_data_ptr;
 		}
-		next_cell_ptr++;
 
 		if (temp_cell_ptr->storage_ptr != nullptr)
 		{
@@ -521,11 +521,11 @@ inline welp::cyclic_const_buffer<Ty, _Allocator>& welp::cyclic_const_buffer<Ty, 
 		{
 			obj = std::move(next_cell_ptr->storage);
 		}
+		next_cell_ptr++;
 		if (next_cell_ptr == cells_end_ptr)
 		{
 			next_cell_ptr = cells_data_ptr;
 		}
-		next_cell_ptr++;
 		return *this;
 	}
 	else
@@ -550,11 +550,11 @@ inline welp::cyclic_const_buffer<Ty, _Allocator>& welp::cyclic_const_buffer<Ty, 
 		{
 			obj = std::move(next_cell_ptr->storage);
 		}
+		next_cell_ptr++;
 		if (next_cell_ptr == cells_end_ptr)
 		{
 			next_cell_ptr = cells_data_ptr;
 		}
-		next_cell_ptr++;
 		return *this;
 	}
 	else
@@ -571,11 +571,11 @@ const Ty& welp::cyclic_const_buffer<Ty, _Allocator>::pop()
 	{
 		storage_cell* temp_cell_ptr = next_cell_ptr;
 
+		next_cell_ptr++;
 		if (next_cell_ptr == cells_end_ptr)
 		{
 			next_cell_ptr = cells_data_ptr;
 		}
-		next_cell_ptr++;
 
 		if (temp_cell_ptr->storage_ptr != nullptr)
 		{
