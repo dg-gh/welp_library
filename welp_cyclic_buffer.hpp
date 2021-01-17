@@ -47,6 +47,13 @@ namespace welp
 
 		void set_bad_object(const Ty& bad_obj);
 		void set_bad_object(Ty&& bad_obj) noexcept;
+		
+		cyclic_buffer() = default;
+		cyclic_buffer(const welp::cyclic_buffer<Ty, _Allocator>&) = delete;
+		welp::cyclic_buffer<Ty, _Allocator>& operator=(const welp::cyclic_buffer<Ty, _Allocator>&) = delete;
+		cyclic_buffer(welp::cyclic_buffer<Ty, _Allocator>&&) = delete;
+		welp::cyclic_buffer<Ty, _Allocator>& operator=(welp::cyclic_buffer<Ty, _Allocator>&&) = delete;
+		~cyclic_buffer() { delete_buffer(); }
 
 	private:
 
@@ -109,6 +116,13 @@ namespace welp
 
 		void set_bad_object(const Ty& bad_obj);
 		void set_bad_object(Ty&& bad_obj) noexcept;
+		
+		cyclic_const_buffer() = default;
+		cyclic_const_buffer(const welp::cyclic_const_buffer<Ty, _Allocator>&) = delete;
+		welp::cyclic_const_buffer<Ty, _Allocator>& operator=(const welp::cyclic_const_buffer<Ty, _Allocator>&) = delete;
+		cyclic_const_buffer(welp::cyclic_const_buffer<Ty, _Allocator>&&) = delete;
+		welp::cyclic_const_buffer<Ty, _Allocator>& operator=(welp::cyclic_const_buffer<Ty, _Allocator>&&) = delete;
+		~cyclic_const_buffer() { delete_buffer(); }
 
 	private:
 
@@ -376,13 +390,12 @@ bool welp::cyclic_buffer<Ty, _Allocator>::new_buffer(std::size_t instances)
 		this->allocate((instances + 1) * sizeof(storage_cell))));
 	if (cells_data_ptr != nullptr)
 	{
-		cells_end_ptr = cells_data_ptr + (instances + 1);
+		cells_end_ptr = cells_data_ptr;
 		next_cell_ptr = cells_data_ptr;
 		last_cell_ptr = cells_data_ptr;
-		storage_cell* ptr = cells_data_ptr;
-		for (std::size_t n = instances; n > 0; n--)
+		for (std::size_t n = instances + 1; n > 0; n--)
 		{
-			new (ptr) storage_cell(); ptr++;
+			new (cells_end_ptr) storage_cell(); cells_end_ptr++;
 		}
 		return true;
 	}
@@ -398,10 +411,10 @@ void welp::cyclic_buffer<Ty, _Allocator>::delete_buffer() noexcept
 	if (cells_data_ptr != nullptr)
 	{
 		std::size_t buffer_size = static_cast<std::size_t>(cells_end_ptr - cells_data_ptr);
-		storage_cell* ptr = cells_end_ptr - 1;
+		cells_end_ptr--;
 		for (std::size_t n = buffer_size; n > 0; n--)
 		{
-			ptr->~storage_cell(); ptr--;
+			cells_end_ptr->~storage_cell(); cells_end_ptr--;
 		}
 		this->deallocate(static_cast<char*>(static_cast<void*>(cells_data_ptr)), buffer_size * sizeof(storage_cell));
 		cells_data_ptr = nullptr;
@@ -657,13 +670,12 @@ bool welp::cyclic_const_buffer<Ty, _Allocator>::new_buffer(std::size_t instances
 		this->allocate((instances + 1) * sizeof(storage_cell))));
 	if (cells_data_ptr != nullptr)
 	{
-		cells_end_ptr = cells_data_ptr + (instances + 1);
+		cells_end_ptr = cells_data_ptr;
 		next_cell_ptr = cells_data_ptr;
 		last_cell_ptr = cells_data_ptr;
-		storage_cell* ptr = cells_data_ptr;
-		for (std::size_t n = instances; n > 0; n--)
+		for (std::size_t n = instances + 1; n > 0; n--)
 		{
-			new (ptr) storage_cell(); ptr++;
+			new (cells_end_ptr) storage_cell(); cells_end_ptr++;
 		}
 		return true;
 	}
@@ -679,10 +691,10 @@ void welp::cyclic_const_buffer<Ty, _Allocator>::delete_buffer() noexcept
 	if (cells_data_ptr != nullptr)
 	{
 		std::size_t buffer_size = static_cast<std::size_t>(cells_end_ptr - cells_data_ptr);
-		storage_cell* ptr = cells_end_ptr - 1;
+		cells_end_ptr--;
 		for (std::size_t n = buffer_size; n > 0; n--)
 		{
-			ptr->~storage_cell(); ptr--;
+			cells_end_ptr->~storage_cell(); cells_end_ptr--;
 		}
 		this->deallocate(static_cast<char*>(static_cast<void*>(cells_data_ptr)), buffer_size * sizeof(storage_cell));
 		cells_data_ptr = nullptr;
