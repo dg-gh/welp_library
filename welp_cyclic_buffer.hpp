@@ -68,7 +68,7 @@ namespace welp
 
 #ifdef WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
 		class lock;
-		welp::cyclic_buffer<Ty, _Allocator>::lock make_exclusive()
+		welp::cyclic_buffer<Ty, _Allocator>::lock acquire_exclusivity()
 		{
 			return welp::cyclic_buffer<Ty, _Allocator>::lock(&buffer_mutex);
 		}
