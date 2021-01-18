@@ -73,9 +73,9 @@ namespace welp
 			return welp::cyclic_buffer<Ty, _Allocator>::lock(&buffer_mutex);
 		}
 
-		void wait_for_capacity(std::size_t requested_capacity);
+		welp::cyclic_buffer<Ty, _Allocator>& wait_for_capacity(std::size_t requested_capacity);
 		void notify_one_for_capacity();
-		void wait_for_size(std::size_t requested_size);
+		welp::cyclic_buffer<Ty, _Allocator>& wait_for_size(std::size_t requested_size);
 		void notify_one_for_size();
 #endif // WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
 
@@ -467,11 +467,12 @@ void welp::cyclic_buffer<Ty, _Allocator>::set_bad_object(Ty&& bad_obj) noexcept
 
 #ifdef WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
 template <class Ty, class _Allocator>
-void welp::cyclic_buffer<Ty, _Allocator>::wait_for_capacity(std::size_t requested_capacity)
+welp::cyclic_buffer<Ty, _Allocator>& welp::cyclic_buffer<Ty, _Allocator>::wait_for_capacity(std::size_t requested_capacity)
 {
 	if (requested_capacity > _capacity) { requested_capacity = _capacity; }
 	std::unique_lock<std::mutex> waiting_lock(waiting_mutex);
 	capacity_condition_variable.wait(waiting_lock, [=]() { return (_capacity - _size >= requested_capacity) || terminate_buffer; });
+	return *this;
 }
 
 template <class Ty, class _Allocator>
@@ -481,11 +482,12 @@ void welp::cyclic_buffer<Ty, _Allocator>::notify_one_for_capacity()
 }
 
 template <class Ty, class _Allocator>
-void welp::cyclic_buffer<Ty, _Allocator>::wait_for_size(std::size_t requested_size)
+welp::cyclic_buffer<Ty, _Allocator>& welp::cyclic_buffer<Ty, _Allocator>::wait_for_size(std::size_t requested_size)
 {
 	if (requested_size > _capacity) { requested_size = _capacity; }
 	std::unique_lock<std::mutex> waiting_lock(waiting_mutex);
 	size_condition_variable.wait(waiting_lock, [=]() { return (_size >= requested_size) || terminate_buffer; });
+	return *this;
 }
 
 template <class Ty, class _Allocator>
