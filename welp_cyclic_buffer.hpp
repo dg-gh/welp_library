@@ -72,11 +72,32 @@ namespace welp
 		{
 			return welp::cyclic_buffer<Ty, _Allocator>::lock(&buffer_mutex);
 		}
-
 		welp::cyclic_buffer<Ty, _Allocator>& wait_for_capacity(std::size_t requested_capacity);
 		void notify_one_for_capacity();
 		welp::cyclic_buffer<Ty, _Allocator>& wait_for_size(std::size_t requested_size);
 		void notify_one_for_size();
+
+		class lock_with_size;
+		welp::cyclic_buffer<Ty, _Allocator>::lock_with_size wait_for_size_and_acquire_exclusivity(std::size_t requested_size)
+		{
+			if (requested_size > _capacity) { requested_size = _capacity; }
+			{
+				std::unique_lock<std::mutex> waiting_lock(buffer_mutex);
+				size_condition_variable.wait(waiting_lock, [=]() { return (_size >= requested_size) || terminate_buffer; });
+			}
+			return welp::cyclic_buffer<Ty, _Allocator>::lock_with_size(this, requested_size);
+		}
+
+		class lock_with_capacity;
+		welp::cyclic_buffer<Ty, _Allocator>::lock_with_capacity wait_for_capacity_and_acquire_exclusivity(std::size_t requested_capacity)
+		{
+			if (requested_capacity > _capacity) { requested_capacity = _capacity; }
+			{
+				std::unique_lock<std::mutex> waiting_lock(buffer_mutex);
+				capacity_condition_variable.wait(waiting_lock, [=]() { return (_capacity - _size >= requested_capacity) || terminate_buffer; });
+			}
+			return welp::cyclic_buffer<Ty, _Allocator>::lock_with_capacity(this, requested_capacity);
+		}
 #endif // WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
 
 		cyclic_buffer() = default;
@@ -103,6 +124,54 @@ namespace welp
 		private:
 
 			std::mutex* mutex_ptr;
+		};
+		class lock_with_size
+		{
+
+		public:
+
+			inline bool good() const noexcept { return cyclic_buffer_ptr->_size >= test_size; }
+
+			lock_with_size() = delete;
+			lock_with_size(welp::cyclic_buffer<Ty, _Allocator>* _cyclic_buffer_ptr, std::size_t _test_size)
+				: cyclic_buffer_ptr(_cyclic_buffer_ptr), test_size(_test_size)
+			{
+				cyclic_buffer_ptr->buffer_mutex.lock();
+			}
+			lock_with_size(const welp::cyclic_buffer<Ty, _Allocator>::lock_with_size&) = delete;
+			welp::cyclic_buffer<Ty, _Allocator>::lock_with_size& operator=(const welp::cyclic_buffer<Ty, _Allocator>::lock_with_size&) = delete;
+			lock_with_size(welp::cyclic_buffer<Ty, _Allocator>::lock_with_size&&) = default;
+			welp::cyclic_buffer<Ty, _Allocator>::lock_with_size& operator=(welp::cyclic_buffer<Ty, _Allocator>::lock_with_size&&) = delete;
+			~lock_with_size() { cyclic_buffer_ptr->buffer_mutex.unlock(); }
+
+		private:
+
+			welp::cyclic_buffer<Ty, _Allocator>* cyclic_buffer_ptr;
+			std::size_t test_size;
+		};
+		class lock_with_capacity
+		{
+
+		public:
+
+			inline bool good() const noexcept { return cyclic_buffer_ptr->_capacity - cyclic_buffer_ptr->_size >= test_capacity; }
+
+			lock_with_capacity() = delete;
+			lock_with_capacity(welp::cyclic_buffer<Ty, _Allocator>* _cyclic_buffer_ptr, std::size_t _test_capacity)
+				: cyclic_buffer_ptr(_cyclic_buffer_ptr), test_capacity(_test_capacity)
+			{
+				cyclic_buffer_ptr->buffer_mutex.lock();
+			}
+			lock_with_capacity(const welp::cyclic_buffer<Ty, _Allocator>::lock_with_capacity&) = delete;
+			welp::cyclic_buffer<Ty, _Allocator>::lock_with_capacity& operator=(const welp::cyclic_buffer<Ty, _Allocator>::lock_with_capacity&) = delete;
+			lock_with_capacity(welp::cyclic_buffer<Ty, _Allocator>::lock_with_capacity&&) = default;
+			welp::cyclic_buffer<Ty, _Allocator>::lock_with_capacity& operator=(welp::cyclic_buffer<Ty, _Allocator>::lock_with_capacity&&) = delete;
+			~lock_with_capacity() { cyclic_buffer_ptr->buffer_mutex.unlock(); }
+
+		private:
+
+			welp::cyclic_buffer<Ty, _Allocator>* cyclic_buffer_ptr;
+			std::size_t test_capacity;
 		};
 #endif // WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
 
