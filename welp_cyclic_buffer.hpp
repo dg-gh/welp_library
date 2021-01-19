@@ -223,7 +223,7 @@ namespace welp
 template <class Ty, class _Allocator>
 inline welp::cyclic_buffer<Ty, _Allocator>& welp::cyclic_buffer<Ty, _Allocator>::operator<<(const Ty& obj)
 {
-	if ((next_cell_ptr != cells_data_ptr) || (last_cell_ptr + 1 != cells_end_ptr))
+	if ((last_cell_ptr + 1 != next_cell_ptr) && ((next_cell_ptr != cells_data_ptr) || (last_cell_ptr + 1 != cells_end_ptr)))
 	{
 		last_cell_ptr->storage = obj;
 		last_cell_ptr++;
@@ -241,7 +241,7 @@ inline welp::cyclic_buffer<Ty, _Allocator>& welp::cyclic_buffer<Ty, _Allocator>:
 template <class Ty, class _Allocator>
 inline welp::cyclic_buffer<Ty, _Allocator>& welp::cyclic_buffer<Ty, _Allocator>::operator<<(Ty&& obj) noexcept
 {
-	if ((next_cell_ptr != cells_data_ptr) || (last_cell_ptr + 1 != cells_end_ptr))
+	if ((last_cell_ptr + 1 != next_cell_ptr) && ((next_cell_ptr != cells_data_ptr) || (last_cell_ptr + 1 != cells_end_ptr)))
 	{
 		last_cell_ptr->storage = std::move(obj);
 		last_cell_ptr++;
@@ -259,7 +259,7 @@ inline welp::cyclic_buffer<Ty, _Allocator>& welp::cyclic_buffer<Ty, _Allocator>:
 template <class Ty, class _Allocator>
 inline welp::cyclic_buffer<Ty, _Allocator>& welp::cyclic_buffer<Ty, _Allocator>::operator<<(Ty* obj_ptr) noexcept
 {
-	if ((next_cell_ptr != cells_data_ptr) || (last_cell_ptr + 1 != cells_end_ptr))
+	if ((last_cell_ptr + 1 != next_cell_ptr) && ((next_cell_ptr != cells_data_ptr) || (last_cell_ptr + 1 != cells_end_ptr)))
 	{
 		last_cell_ptr->storage_ptr = obj_ptr;
 		last_cell_ptr++;
@@ -277,7 +277,7 @@ inline welp::cyclic_buffer<Ty, _Allocator>& welp::cyclic_buffer<Ty, _Allocator>:
 template <class Ty, class _Allocator>
 inline welp::cyclic_buffer<Ty, _Allocator>& welp::cyclic_buffer<Ty, _Allocator>::operator<(const Ty& obj)
 {
-	if ((next_cell_ptr != cells_data_ptr) || (last_cell_ptr + 1 != cells_end_ptr))
+	if ((last_cell_ptr + 1 != next_cell_ptr) && ((next_cell_ptr != cells_data_ptr) || (last_cell_ptr + 1 != cells_end_ptr)))
 	{
 		last_cell_ptr->storage = obj;
 		last_cell_ptr++;
