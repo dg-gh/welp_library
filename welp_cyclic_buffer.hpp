@@ -1,4 +1,4 @@
-// welp_cyclic_buffer.hpp - last update : 17 / 01 / 2021
+// welp_cyclic_buffer.hpp - last update : 20 / 01 / 2021
 // License <http://unlicense.org/> (statement below at the end of the file)
 
 
@@ -78,6 +78,12 @@ namespace welp
 		void notify_one_for_size();
 
 		class lock_with_size;
+		welp::cyclic_buffer<Ty, _Allocator>::lock_with_size spin_for_size_and_acquire_exclusivity(std::size_t requested_size)
+		{
+			if (requested_size > _capacity) { requested_size = _capacity; }
+			while (_size < requested_size) {}
+			return welp::cyclic_buffer<Ty, _Allocator>::lock_with_size(this);
+		}
 		welp::cyclic_buffer<Ty, _Allocator>::lock_with_size wait_for_size_and_acquire_exclusivity(std::size_t requested_size)
 		{
 			if (requested_size > _capacity) { requested_size = _capacity; }
@@ -85,10 +91,16 @@ namespace welp
 				std::unique_lock<std::mutex> waiting_lock(buffer_mutex);
 				size_condition_variable.wait(waiting_lock, [=]() { return (_size >= requested_size) || terminate_buffer; });
 			}
-			return welp::cyclic_buffer<Ty, _Allocator>::lock_with_size(this, requested_size);
+			return welp::cyclic_buffer<Ty, _Allocator>::lock_with_size(this);
 		}
 
 		class lock_with_capacity;
+		welp::cyclic_buffer<Ty, _Allocator>::lock_with_capacity spin_for_capacity_and_acquire_exclusivity(std::size_t requested_capacity)
+		{
+			if (requested_capacity > _capacity) { requested_capacity = _capacity; }
+			while (_capacity - _size < requested_capacity) {}
+			return welp::cyclic_buffer<Ty, _Allocator>::lock_with_capacity(this);
+		}
 		welp::cyclic_buffer<Ty, _Allocator>::lock_with_capacity wait_for_capacity_and_acquire_exclusivity(std::size_t requested_capacity)
 		{
 			if (requested_capacity > _capacity) { requested_capacity = _capacity; }
@@ -96,7 +108,7 @@ namespace welp
 				std::unique_lock<std::mutex> waiting_lock(buffer_mutex);
 				capacity_condition_variable.wait(waiting_lock, [=]() { return (_capacity - _size >= requested_capacity) || terminate_buffer; });
 			}
-			return welp::cyclic_buffer<Ty, _Allocator>::lock_with_capacity(this, requested_capacity);
+			return welp::cyclic_buffer<Ty, _Allocator>::lock_with_capacity(this);
 		}
 #endif // WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
 
@@ -130,11 +142,11 @@ namespace welp
 
 		public:
 
-			inline bool good() const noexcept { return cyclic_buffer_ptr->_size >= test_size; }
+			inline bool good(std::size_t test_size) const noexcept { return cyclic_buffer_ptr->_size >= test_size; }
 
 			lock_with_size() = delete;
-			lock_with_size(welp::cyclic_buffer<Ty, _Allocator>* _cyclic_buffer_ptr, std::size_t _test_size)
-				: cyclic_buffer_ptr(_cyclic_buffer_ptr), test_size(_test_size)
+			lock_with_size(welp::cyclic_buffer<Ty, _Allocator>* _cyclic_buffer_ptr)
+				: cyclic_buffer_ptr(_cyclic_buffer_ptr)
 			{
 				cyclic_buffer_ptr->buffer_mutex.lock();
 			}
@@ -147,18 +159,18 @@ namespace welp
 		private:
 
 			welp::cyclic_buffer<Ty, _Allocator>* cyclic_buffer_ptr;
-			std::size_t test_size;
+
 		};
 		class lock_with_capacity
 		{
 
 		public:
 
-			inline bool good() const noexcept { return cyclic_buffer_ptr->_capacity - cyclic_buffer_ptr->_size >= test_capacity; }
+			inline bool good(std::size_t test_capacity) const noexcept { return cyclic_buffer_ptr->_capacity - cyclic_buffer_ptr->_size >= test_capacity; }
 
 			lock_with_capacity() = delete;
-			lock_with_capacity(welp::cyclic_buffer<Ty, _Allocator>* _cyclic_buffer_ptr, std::size_t _test_capacity)
-				: cyclic_buffer_ptr(_cyclic_buffer_ptr), test_capacity(_test_capacity)
+			lock_with_capacity(welp::cyclic_buffer<Ty, _Allocator>* _cyclic_buffer_ptr)
+				: cyclic_buffer_ptr(_cyclic_buffer_ptr)
 			{
 				cyclic_buffer_ptr->buffer_mutex.lock();
 			}
@@ -171,7 +183,6 @@ namespace welp
 		private:
 
 			welp::cyclic_buffer<Ty, _Allocator>* cyclic_buffer_ptr;
-			std::size_t test_capacity;
 		};
 #endif // WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
 
@@ -183,8 +194,13 @@ namespace welp
 		storage_cell* last_cell_ptr = nullptr;
 		storage_cell* next_cell_ptr = nullptr;
 
+#ifdef WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
+		std::atomic<std::size_t> _size{ 0 };
+		std::atomic<std::size_t> _capacity{ 0 };
+#else // WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
 		std::size_t _size = 0;
 		std::size_t _capacity = 0;
+#endif // WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
 
 		Ty bad_object = Ty();
 
