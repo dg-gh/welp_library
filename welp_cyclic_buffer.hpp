@@ -81,7 +81,7 @@ namespace welp
 		welp::cyclic_buffer<Ty, _Allocator>::lock_with_size spin_for_size_and_acquire_exclusivity(std::size_t requested_size)
 		{
 			if (requested_size > _capacity) { requested_size = _capacity; }
-			while (_size < requested_size) {}
+			while (reinterpret_cast<std::atomic<std::size_t>&>(_size).load() < requested_size) {}
 			return welp::cyclic_buffer<Ty, _Allocator>::lock_with_size(this);
 		}
 		welp::cyclic_buffer<Ty, _Allocator>::lock_with_size wait_for_size_and_acquire_exclusivity(std::size_t requested_size)
@@ -89,7 +89,8 @@ namespace welp
 			if (requested_size > _capacity) { requested_size = _capacity; }
 			{
 				std::unique_lock<std::mutex> waiting_lock(buffer_mutex);
-				size_condition_variable.wait(waiting_lock, [=]() { return (_size >= requested_size) || terminate_buffer; });
+				size_condition_variable.wait(waiting_lock, [=]() {
+					return (reinterpret_cast<std::atomic<std::size_t>&>(_size).load() >= requested_size) || terminate_buffer; });
 			}
 			return welp::cyclic_buffer<Ty, _Allocator>::lock_with_size(this);
 		}
@@ -98,7 +99,7 @@ namespace welp
 		welp::cyclic_buffer<Ty, _Allocator>::lock_with_capacity spin_for_capacity_and_acquire_exclusivity(std::size_t requested_capacity)
 		{
 			if (requested_capacity > _capacity) { requested_capacity = _capacity; }
-			while (_capacity - _size < requested_capacity) {}
+			while (_capacity - reinterpret_cast<std::atomic<std::size_t>&>(_size).load() < requested_capacity) {}
 			return welp::cyclic_buffer<Ty, _Allocator>::lock_with_capacity(this);
 		}
 		welp::cyclic_buffer<Ty, _Allocator>::lock_with_capacity wait_for_capacity_and_acquire_exclusivity(std::size_t requested_capacity)
@@ -106,7 +107,8 @@ namespace welp
 			if (requested_capacity > _capacity) { requested_capacity = _capacity; }
 			{
 				std::unique_lock<std::mutex> waiting_lock(buffer_mutex);
-				capacity_condition_variable.wait(waiting_lock, [=]() { return (_capacity - _size >= requested_capacity) || terminate_buffer; });
+				capacity_condition_variable.wait(waiting_lock, [=]() {
+					return (_capacity - reinterpret_cast<std::atomic<std::size_t>&>(_size).load() >= requested_capacity) || terminate_buffer; });
 			}
 			return welp::cyclic_buffer<Ty, _Allocator>::lock_with_capacity(this);
 		}
@@ -194,20 +196,13 @@ namespace welp
 		storage_cell* last_cell_ptr = nullptr;
 		storage_cell* next_cell_ptr = nullptr;
 
-#ifdef WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
-		std::atomic<std::size_t> _size{ 0 };
-		std::atomic<std::size_t> _capacity{ 0 };
-#else // WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
 		std::size_t _size = 0;
 		std::size_t _capacity = 0;
-#endif // WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
 
 		Ty bad_object = Ty();
 
 #ifdef WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
 		std::mutex buffer_mutex;
-		std::condition_variable size_condition_variable;
-		std::condition_variable capacity_condition_variable;
 
 		bool terminate_buffer = true;
 #endif // WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
@@ -517,8 +512,6 @@ void welp::cyclic_buffer<Ty, _Allocator>::delete_buffer() noexcept
 			std::lock_guard<std::mutex> _lock(buffer_mutex);
 			terminate_buffer = true;
 		}
-		size_condition_variable.notify_all();
-		capacity_condition_variable.notify_all();
 		std::lock_guard<std::mutex> _lock(buffer_mutex);
 #endif // WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
 		std::size_t buffer_size = static_cast<std::size_t>(cells_end_ptr - cells_data_ptr);
@@ -556,7 +549,8 @@ welp::cyclic_buffer<Ty, _Allocator>& welp::cyclic_buffer<Ty, _Allocator>::wait_f
 {
 	if (requested_capacity > _capacity) { requested_capacity = _capacity; }
 	std::unique_lock<std::mutex> waiting_lock(buffer_mutex);
-	capacity_condition_variable.wait(waiting_lock, [=]() { return (_capacity - _size >= requested_capacity) || terminate_buffer; });
+	capacity_condition_variable.wait(waiting_lock, [=]() {
+		return (_capacity - reinterpret_cast<std::atomic<std::size_t>&>(_size).load() >= requested_capacity) || terminate_buffer; });
 	return *this;
 }
 
@@ -571,7 +565,8 @@ welp::cyclic_buffer<Ty, _Allocator>& welp::cyclic_buffer<Ty, _Allocator>::wait_f
 {
 	if (requested_size > _capacity) { requested_size = _capacity; }
 	std::unique_lock<std::mutex> waiting_lock(buffer_mutex);
-	size_condition_variable.wait(waiting_lock, [=]() { return (_size >= requested_size) || terminate_buffer; });
+	size_condition_variable.wait(waiting_lock, [=]() {
+		return (reinterpret_cast<std::atomic<std::size_t>&>(_size).load() >= requested_size) || terminate_buffer; });
 	return *this;
 }
 
