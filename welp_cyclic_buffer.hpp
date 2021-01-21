@@ -75,8 +75,8 @@ namespace welp
 
 		inline bool not_full() const noexcept;
 		inline bool not_empty() const noexcept;
-		inline bool store_stream_completed() noexcept;
-		inline bool load_stream_completed() noexcept;
+		inline bool stream_store_completed() noexcept;
+		inline bool stream_load_completed() noexcept;
 
 		inline std::size_t size() const noexcept;
 		inline std::size_t capacity() const noexcept;
@@ -229,8 +229,8 @@ namespace welp
 		bool terminate_buffer = true;
 #endif // WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
 
-		bool _store_stream_completed = true;
-		bool _load_stream_completed = true;
+		bool _stream_store_completed = true;
+		bool _stream_load_completed = true;
 
 		class storage_cell
 		{
@@ -376,7 +376,7 @@ inline welp::cyclic_buffer<Ty, _Allocator>& welp::cyclic_buffer<Ty, _Allocator>:
 	}
 	else
 	{
-		_store_stream_completed = false;
+		_stream_store_completed = false;
 		return *this;
 	}
 }
@@ -394,7 +394,7 @@ inline welp::cyclic_buffer<Ty, _Allocator>& welp::cyclic_buffer<Ty, _Allocator>:
 	}
 	else
 	{
-		_store_stream_completed = false;
+		_stream_store_completed = false;
 		return *this;
 	}
 }
@@ -412,7 +412,7 @@ inline welp::cyclic_buffer<Ty, _Allocator>& welp::cyclic_buffer<Ty, _Allocator>:
 	}
 	else
 	{
-		_store_stream_completed = false;
+		_stream_store_completed = false;
 		return *this;
 	}
 }
@@ -430,7 +430,7 @@ inline welp::cyclic_buffer<Ty, _Allocator>& welp::cyclic_buffer<Ty, _Allocator>:
 	}
 	else
 	{
-		_store_stream_completed = false;
+		_stream_store_completed = false;
 		return *this;
 	}
 }
@@ -460,7 +460,7 @@ inline bool welp::cyclic_buffer<Ty, _Allocator>::load_cpy(Ty& obj)
 	}
 	else
 	{
-		_load_stream_completed = false;
+		_stream_load_completed = false;
 		return *this;
 	}
 }
@@ -522,7 +522,7 @@ const Ty& welp::cyclic_buffer<Ty, _Allocator>::pop()
 	}
 	else
 	{
-		_load_stream_completed = false;
+		_stream_load_completed = false;
 		return bad_object;
 	}
 }
@@ -547,7 +547,7 @@ const Ty& welp::cyclic_buffer<Ty, _Allocator>::get()
 	}
 	else
 	{
-		_load_stream_completed = false;
+		_stream_load_completed = false;
 		return bad_object;
 	}
 }
@@ -645,7 +645,7 @@ const Ty& welp::cyclic_buffer<Ty, _Allocator>::pop_sync()
 	}
 	else
 	{
-		_load_stream_completed = false;
+		_stream_load_completed = false;
 		return bad_object;
 	}
 }
@@ -672,7 +672,7 @@ const Ty& welp::cyclic_buffer<Ty, _Allocator>::get_sync()
 	}
 	else
 	{
-		_load_stream_completed = false;
+		_stream_load_completed = false;
 		return bad_object;
 	}
 }
@@ -703,7 +703,7 @@ inline welp::cyclic_buffer<Ty, _Allocator>& welp::cyclic_buffer<Ty, _Allocator>:
 	}
 	else
 	{
-		_load_stream_completed = false;
+		_stream_load_completed = false;
 		return *this;
 	}
 }
@@ -733,7 +733,7 @@ inline welp::cyclic_buffer<Ty, _Allocator>& welp::cyclic_buffer<Ty, _Allocator>:
 	}
 	else
 	{
-		_load_stream_completed = false;
+		_stream_load_completed = false;
 		return *this;
 	}
 }
@@ -751,18 +751,18 @@ inline bool welp::cyclic_buffer<Ty, _Allocator>::not_empty() const noexcept
 }
 
 template <class Ty, class _Allocator>
-inline bool welp::cyclic_buffer<Ty, _Allocator>::store_stream_completed() noexcept
+inline bool welp::cyclic_buffer<Ty, _Allocator>::stream_store_completed() noexcept
 {
-	bool temp = _store_stream_completed;
-	_store_stream_completed = true;
+	bool temp = _stream_store_completed;
+	_stream_store_completed = true;
 	return temp;
 }
 
 template <class Ty, class _Allocator>
-inline bool welp::cyclic_buffer<Ty, _Allocator>::load_stream_completed() noexcept
+inline bool welp::cyclic_buffer<Ty, _Allocator>::stream_load_completed() noexcept
 {
-	bool temp = _load_stream_completed;
-	_load_stream_completed = true;
+	bool temp = _stream_load_completed;
+	_stream_load_completed = true;
 	return temp;
 }
 
@@ -851,8 +851,8 @@ void welp::cyclic_buffer<Ty, _Allocator>::delete_buffer() noexcept
 		next_cell_ptr = nullptr;
 		cells_end_ptr = nullptr;
 		_capacity = 0;
-		_store_stream_completed = true;
-		_load_stream_completed = true;
+		_stream_store_completed = true;
+		_stream_load_completed = true;
 	}
 }
 
