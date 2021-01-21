@@ -1,4 +1,4 @@
-// welp_cyclic_buffer.hpp - last update : 20 / 01 / 2021
+// welp_cyclic_buffer.hpp - last update : 21 / 01 / 2021
 // License <http://unlicense.org/> (statement below at the end of the file)
 
 
@@ -40,21 +40,43 @@ namespace welp
 
 	public:
 
+		inline bool store_cpy(const Ty& obj);
+		inline bool store_move(Ty&& obj) noexcept;
+		inline bool store_ptr(Ty* obj_ptr) noexcept;
+
+#ifdef WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
+		inline bool store_cpy_sync(const Ty& obj);
+		inline bool store_move_sync(Ty&& obj) noexcept;
+		inline bool store_ptr_sync(Ty* obj_ptr) noexcept;
+#endif // WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
+
 		inline welp::cyclic_buffer<Ty, _Allocator>& operator<<(const Ty& obj);
 		inline welp::cyclic_buffer<Ty, _Allocator>& operator<<(Ty&& obj) noexcept;
 		inline welp::cyclic_buffer<Ty, _Allocator>& operator<<(Ty* obj_ptr) noexcept;
 		inline welp::cyclic_buffer<Ty, _Allocator>& operator<(const Ty& obj);
 
-		inline welp::cyclic_buffer<Ty, _Allocator>& operator>>(Ty& obj) noexcept;
-		inline welp::cyclic_buffer<Ty, _Allocator>& operator>(Ty& obj);
+		inline bool load_cpy(Ty& obj);
+		inline bool load(Ty& obj) noexcept;
 
 		const Ty& pop();
 		const Ty& get();
 
+#ifdef WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
+		inline bool load_cpy_sync(Ty& obj);
+		inline bool load_sync(Ty& obj) noexcept;
+
+		const Ty& pop_sync();
+		const Ty& get_sync();
+#endif // WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
+
+		inline welp::cyclic_buffer<Ty, _Allocator>& operator>(Ty& obj);
+		inline welp::cyclic_buffer<Ty, _Allocator>& operator>>(Ty& obj) noexcept;
+
+
 		inline bool not_full() const noexcept;
 		inline bool not_empty() const noexcept;
-		inline bool bad_store() noexcept;
-		inline bool bad_load() noexcept;
+		inline bool store_stream_completed() noexcept;
+		inline bool load_stream_completed() noexcept;
 
 		inline std::size_t size() const noexcept;
 		inline std::size_t capacity() const noexcept;
@@ -207,8 +229,8 @@ namespace welp
 		bool terminate_buffer = true;
 #endif // WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
 
-		bool _bad_store = false;
-		bool _bad_load = false;
+		bool _store_stream_completed = true;
+		bool _load_stream_completed = true;
 
 		class storage_cell
 		{
@@ -232,6 +254,116 @@ namespace welp
 ////// IMPLEMENTATIONS //////
 
 template <class Ty, class _Allocator>
+inline bool welp::cyclic_buffer<Ty, _Allocator>::store_cpy(const Ty& obj)
+{
+	if ((last_cell_ptr + 1 != next_cell_ptr) && ((next_cell_ptr != cells_data_ptr) || (last_cell_ptr + 1 != cells_end_ptr)))
+	{
+		last_cell_ptr->storage = obj;
+		last_cell_ptr++;
+		if (last_cell_ptr == cells_end_ptr) { last_cell_ptr = cells_data_ptr; }
+		_size++;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+template <class Ty, class _Allocator>
+inline bool welp::cyclic_buffer<Ty, _Allocator>::store_move(Ty&& obj) noexcept
+{
+	if ((last_cell_ptr + 1 != next_cell_ptr) && ((next_cell_ptr != cells_data_ptr) || (last_cell_ptr + 1 != cells_end_ptr)))
+	{
+		last_cell_ptr->storage = std::move(obj);
+		last_cell_ptr++;
+		if (last_cell_ptr == cells_end_ptr) { last_cell_ptr = cells_data_ptr; }
+		_size++;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+template <class Ty, class _Allocator>
+inline bool welp::cyclic_buffer<Ty, _Allocator>::store_ptr(Ty* obj_ptr) noexcept
+{
+	if ((last_cell_ptr + 1 != next_cell_ptr) && ((next_cell_ptr != cells_data_ptr) || (last_cell_ptr + 1 != cells_end_ptr)))
+	{
+		last_cell_ptr->storage_ptr = obj_ptr;
+		last_cell_ptr++;
+		if (last_cell_ptr == cells_end_ptr) { last_cell_ptr = cells_data_ptr; }
+		_size++;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+#ifdef WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
+template <class Ty, class _Allocator>
+inline bool welp::cyclic_buffer<Ty, _Allocator>::store_cpy_sync(const Ty& obj)
+{
+	std::lock_guard<std::mutex> _lock(buffer_mutex);
+
+	if ((last_cell_ptr + 1 != next_cell_ptr) && ((next_cell_ptr != cells_data_ptr) || (last_cell_ptr + 1 != cells_end_ptr)))
+	{
+		last_cell_ptr->storage = obj;
+		last_cell_ptr++;
+		if (last_cell_ptr == cells_end_ptr) { last_cell_ptr = cells_data_ptr; }
+		_size++;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+template <class Ty, class _Allocator>
+inline bool welp::cyclic_buffer<Ty, _Allocator>::store_move_sync(Ty&& obj) noexcept
+{
+	std::lock_guard<std::mutex> _lock(buffer_mutex);
+
+	if ((last_cell_ptr + 1 != next_cell_ptr) && ((next_cell_ptr != cells_data_ptr) || (last_cell_ptr + 1 != cells_end_ptr)))
+	{
+		last_cell_ptr->storage = std::move(obj);
+		last_cell_ptr++;
+		if (last_cell_ptr == cells_end_ptr) { last_cell_ptr = cells_data_ptr; }
+		_size++;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+template <class Ty, class _Allocator>
+inline bool welp::cyclic_buffer<Ty, _Allocator>::store_ptr_sync(Ty* obj_ptr) noexcept
+{
+	std::lock_guard<std::mutex> _lock(buffer_mutex);
+
+	if ((last_cell_ptr + 1 != next_cell_ptr) && ((next_cell_ptr != cells_data_ptr) || (last_cell_ptr + 1 != cells_end_ptr)))
+	{
+		last_cell_ptr->storage_ptr = obj_ptr;
+		last_cell_ptr++;
+		if (last_cell_ptr == cells_end_ptr) { last_cell_ptr = cells_data_ptr; }
+		_size++;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+#endif // WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
+
+template <class Ty, class _Allocator>
 inline welp::cyclic_buffer<Ty, _Allocator>& welp::cyclic_buffer<Ty, _Allocator>::operator<<(const Ty& obj)
 {
 	if ((last_cell_ptr + 1 != next_cell_ptr) && ((next_cell_ptr != cells_data_ptr) || (last_cell_ptr + 1 != cells_end_ptr)))
@@ -244,7 +376,7 @@ inline welp::cyclic_buffer<Ty, _Allocator>& welp::cyclic_buffer<Ty, _Allocator>:
 	}
 	else
 	{
-		_bad_store = true;
+		_store_stream_completed = false;
 		return *this;
 	}
 }
@@ -262,7 +394,7 @@ inline welp::cyclic_buffer<Ty, _Allocator>& welp::cyclic_buffer<Ty, _Allocator>:
 	}
 	else
 	{
-		_bad_store = true;
+		_store_stream_completed = false;
 		return *this;
 	}
 }
@@ -280,7 +412,7 @@ inline welp::cyclic_buffer<Ty, _Allocator>& welp::cyclic_buffer<Ty, _Allocator>:
 	}
 	else
 	{
-		_bad_store = true;
+		_store_stream_completed = false;
 		return *this;
 	}
 }
@@ -298,43 +430,13 @@ inline welp::cyclic_buffer<Ty, _Allocator>& welp::cyclic_buffer<Ty, _Allocator>:
 	}
 	else
 	{
-		_bad_store = true;
+		_store_stream_completed = false;
 		return *this;
 	}
 }
 
 template <class Ty, class _Allocator>
-inline welp::cyclic_buffer<Ty, _Allocator>& welp::cyclic_buffer<Ty, _Allocator>::operator>>(Ty& obj) noexcept
-{
-	if (last_cell_ptr != next_cell_ptr)
-	{
-		if (next_cell_ptr->storage_ptr != nullptr)
-		{
-			const Ty* temp_storage_ptr = next_cell_ptr->storage_ptr;
-			next_cell_ptr->storage_ptr = nullptr;
-			obj = std::move(*temp_storage_ptr);
-		}
-		else
-		{
-			obj = std::move(next_cell_ptr->storage);
-		}
-		next_cell_ptr++;
-		if (next_cell_ptr == cells_end_ptr)
-		{
-			next_cell_ptr = cells_data_ptr;
-		}
-		_size--;
-		return *this;
-	}
-	else
-	{
-		_bad_load = true;
-		return *this;
-	}
-}
-
-template <class Ty, class _Allocator>
-inline welp::cyclic_buffer<Ty, _Allocator>& welp::cyclic_buffer<Ty, _Allocator>::operator>(Ty& obj)
+inline bool welp::cyclic_buffer<Ty, _Allocator>::load_cpy(Ty& obj)
 {
 	if (last_cell_ptr != next_cell_ptr)
 	{
@@ -358,8 +460,37 @@ inline welp::cyclic_buffer<Ty, _Allocator>& welp::cyclic_buffer<Ty, _Allocator>:
 	}
 	else
 	{
-		_bad_load = true;
+		_load_stream_completed = false;
 		return *this;
+	}
+}
+
+template <class Ty, class _Allocator>
+inline bool welp::cyclic_buffer<Ty, _Allocator>::load(Ty& obj) noexcept
+{
+	if (last_cell_ptr != next_cell_ptr)
+	{
+		if (next_cell_ptr->storage_ptr != nullptr)
+		{
+			const Ty* temp_storage_ptr = next_cell_ptr->storage_ptr;
+			next_cell_ptr->storage_ptr = nullptr;
+			obj = std::move(*temp_storage_ptr);
+		}
+		else
+		{
+			obj = std::move(next_cell_ptr->storage);
+		}
+		next_cell_ptr++;
+		if (next_cell_ptr == cells_end_ptr)
+		{
+			next_cell_ptr = cells_data_ptr;
+		}
+		_size--;
+		return true;
+	}
+	else
+	{
+		return false;
 	}
 }
 
@@ -391,7 +522,7 @@ const Ty& welp::cyclic_buffer<Ty, _Allocator>::pop()
 	}
 	else
 	{
-		_bad_load = true;
+		_load_stream_completed = false;
 		return bad_object;
 	}
 }
@@ -416,8 +547,194 @@ const Ty& welp::cyclic_buffer<Ty, _Allocator>::get()
 	}
 	else
 	{
-		_bad_load = true;
+		_load_stream_completed = false;
 		return bad_object;
+	}
+}
+
+#ifdef WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
+template <class Ty, class _Allocator>
+inline bool welp::cyclic_buffer<Ty, _Allocator>::load_cpy_sync(Ty& obj)
+{
+	std::lock_guard<std::mutex> _lock(buffer_mutex);
+
+	if (last_cell_ptr != next_cell_ptr)
+	{
+		if (next_cell_ptr->storage_ptr != nullptr)
+		{
+			const Ty* temp_storage_ptr = next_cell_ptr->storage_ptr;
+			next_cell_ptr->storage_ptr = nullptr;
+			obj = *temp_storage_ptr;
+		}
+		else
+		{
+			obj = std::move(next_cell_ptr->storage);
+		}
+		next_cell_ptr++;
+		if (next_cell_ptr == cells_end_ptr)
+		{
+			next_cell_ptr = cells_data_ptr;
+		}
+		_size--;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+template <class Ty, class _Allocator>
+inline bool welp::cyclic_buffer<Ty, _Allocator>::load_sync(Ty& obj) noexcept
+{
+	std::lock_guard<std::mutex> _lock(buffer_mutex);
+
+	if (last_cell_ptr != next_cell_ptr)
+	{
+		if (next_cell_ptr->storage_ptr != nullptr)
+		{
+			const Ty* temp_storage_ptr = next_cell_ptr->storage_ptr;
+			next_cell_ptr->storage_ptr = nullptr;
+			obj = std::move(*temp_storage_ptr);
+		}
+		else
+		{
+			obj = std::move(next_cell_ptr->storage);
+		}
+		next_cell_ptr++;
+		if (next_cell_ptr == cells_end_ptr)
+		{
+			next_cell_ptr = cells_data_ptr;
+		}
+		_size--;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+template <class Ty, class _Allocator>
+const Ty& welp::cyclic_buffer<Ty, _Allocator>::pop_sync()
+{
+	std::lock_guard<std::mutex> _lock(buffer_mutex);
+
+	if (last_cell_ptr != next_cell_ptr)
+	{
+		storage_cell* temp_cell_ptr = next_cell_ptr;
+
+		next_cell_ptr++;
+		if (next_cell_ptr == cells_end_ptr)
+		{
+			next_cell_ptr = cells_data_ptr;
+		}
+
+		if (temp_cell_ptr->storage_ptr != nullptr)
+		{
+			const Ty* temp_storage_ptr = temp_cell_ptr->storage_ptr;
+			temp_cell_ptr->storage_ptr = nullptr;
+			_size--;
+			return *temp_storage_ptr;
+		}
+		else
+		{
+			_size--;
+			return temp_cell_ptr->storage;
+		}
+	}
+	else
+	{
+		_load_stream_completed = false;
+		return bad_object;
+	}
+}
+
+template <class Ty, class _Allocator>
+const Ty& welp::cyclic_buffer<Ty, _Allocator>::get_sync()
+{
+	std::lock_guard<std::mutex> _lock(buffer_mutex);
+
+	if (last_cell_ptr != next_cell_ptr)
+	{
+		storage_cell* temp_cell_ptr = next_cell_ptr;
+
+		if (next_cell_ptr->storage_ptr != nullptr)
+		{
+			const Ty* temp_storage_ptr = next_cell_ptr->storage_ptr;
+			next_cell_ptr->storage_ptr = nullptr;
+			return *next_cell_ptr;
+		}
+		else
+		{
+			return next_cell_ptr->storage;
+		}
+	}
+	else
+	{
+		_load_stream_completed = false;
+		return bad_object;
+	}
+}
+#endif // WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
+
+template <class Ty, class _Allocator>
+inline welp::cyclic_buffer<Ty, _Allocator>& welp::cyclic_buffer<Ty, _Allocator>::operator>>(Ty& obj) noexcept
+{
+	if (last_cell_ptr != next_cell_ptr)
+	{
+		if (next_cell_ptr->storage_ptr != nullptr)
+		{
+			const Ty* temp_storage_ptr = next_cell_ptr->storage_ptr;
+			next_cell_ptr->storage_ptr = nullptr;
+			obj = std::move(*temp_storage_ptr);
+		}
+		else
+		{
+			obj = std::move(next_cell_ptr->storage);
+		}
+		next_cell_ptr++;
+		if (next_cell_ptr == cells_end_ptr)
+		{
+			next_cell_ptr = cells_data_ptr;
+		}
+		_size--;
+		return *this;
+	}
+	else
+	{
+		_load_stream_completed = false;
+		return *this;
+	}
+}
+
+template <class Ty, class _Allocator>
+inline welp::cyclic_buffer<Ty, _Allocator>& welp::cyclic_buffer<Ty, _Allocator>::operator>(Ty& obj)
+{
+	if (last_cell_ptr != next_cell_ptr)
+	{
+		if (next_cell_ptr->storage_ptr != nullptr)
+		{
+			const Ty* temp_storage_ptr = next_cell_ptr->storage_ptr;
+			next_cell_ptr->storage_ptr = nullptr;
+			obj = *temp_storage_ptr;
+		}
+		else
+		{
+			obj = std::move(next_cell_ptr->storage);
+		}
+		next_cell_ptr++;
+		if (next_cell_ptr == cells_end_ptr)
+		{
+			next_cell_ptr = cells_data_ptr;
+		}
+		_size--;
+		return *this;
+	}
+	else
+	{
+		_load_stream_completed = false;
+		return *this;
 	}
 }
 
@@ -434,25 +751,29 @@ inline bool welp::cyclic_buffer<Ty, _Allocator>::not_empty() const noexcept
 }
 
 template <class Ty, class _Allocator>
-inline bool welp::cyclic_buffer<Ty, _Allocator>::bad_store() noexcept
+inline bool welp::cyclic_buffer<Ty, _Allocator>::store_stream_completed() noexcept
 {
-	bool temp = _bad_store;
-	_bad_store = false;
+	bool temp = _store_stream_completed;
+	_store_stream_completed = true;
 	return temp;
 }
 
 template <class Ty, class _Allocator>
-inline bool welp::cyclic_buffer<Ty, _Allocator>::bad_load() noexcept
+inline bool welp::cyclic_buffer<Ty, _Allocator>::load_stream_completed() noexcept
 {
-	bool temp = _bad_load;
-	_bad_load = false;
+	bool temp = _load_stream_completed;
+	_load_stream_completed = true;
 	return temp;
 }
 
 template <class Ty, class _Allocator>
 inline std::size_t welp::cyclic_buffer<Ty, _Allocator>::size() const noexcept
 {
+#ifdef WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
+	return reinterpret_cast<std::atomic<std::size_t>&>(_size).load();
+#else // WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
 	return _size;
+#endif // WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
 }
 
 template <class Ty, class _Allocator>
@@ -471,7 +792,11 @@ inline std::size_t welp::cyclic_buffer<Ty, _Allocator>::capacity() const noexcep
 template <class Ty, class _Allocator>
 inline std::size_t welp::cyclic_buffer<Ty, _Allocator>::capacity_remaining() const noexcept
 {
+#ifdef WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
+	return _capacity - reinterpret_cast<std::atomic<std::size_t>&>(_size).load();
+#else // WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
 	return _capacity - _size;
+#endif // WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
 }
 
 template <class Ty, class _Allocator>
@@ -526,8 +851,8 @@ void welp::cyclic_buffer<Ty, _Allocator>::delete_buffer() noexcept
 		next_cell_ptr = nullptr;
 		cells_end_ptr = nullptr;
 		_capacity = 0;
-		_bad_store = false;
-		_bad_load = false;
+		_store_stream_completed = true;
+		_load_stream_completed = true;
 	}
 }
 
