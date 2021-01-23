@@ -539,13 +539,11 @@ const Ty& welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::get()
 {
 	if (last_cell_ptr != next_cell_ptr)
 	{
-		storage_cell* temp_cell_ptr = next_cell_ptr;
-
 		if (next_cell_ptr->storage_ptr != nullptr)
 		{
 			const Ty* temp_storage_ptr = next_cell_ptr->storage_ptr;
 			next_cell_ptr->storage_ptr = nullptr;
-			return *next_cell_ptr;
+			return *temp_storage_ptr;
 		}
 		else
 		{
@@ -664,13 +662,11 @@ const Ty& welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::get_sync()
 
 	if (last_cell_ptr != next_cell_ptr)
 	{
-		storage_cell* temp_cell_ptr = next_cell_ptr;
-
 		if (next_cell_ptr->storage_ptr != nullptr)
 		{
 			const Ty* temp_storage_ptr = next_cell_ptr->storage_ptr;
 			next_cell_ptr->storage_ptr = nullptr;
-			return *next_cell_ptr;
+			return *temp_storage_ptr;
 		}
 		else
 		{
