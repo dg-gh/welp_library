@@ -1,4 +1,4 @@
-// welp_global_type.hpp - last update : 24 / 12 / 2020
+// welp_global_type.hpp - last update : 23 / 01 / 2021
 // License <http://unlicense.org/> (statement below at the end of the file)
 
 
@@ -10,19 +10,6 @@
 
 #include <utility>
 #include <memory>
-
-
-// include all in one line with #define WELP_GLOBAL_TYPE_INCLUDE_ALL
-#if defined(WELP_GLOBAL_TYPE_INCLUDE_ALL) || defined(WELP_ALWAYS_INCLUDE_ALL)
-#ifndef WELP_GLOBAL_TYPE_INCLUDE_MUTEX
-#define WELP_GLOBAL_TYPE_INCLUDE_MUTEX
-#endif
-#endif // WELP_GLOBAL_TYPE_INCLUDE_ALL
-
-
-#ifdef WELP_GLOBAL_TYPE_INCLUDE_MUTEX
-#include <mutex>
-#endif // WELP_GLOBAL_TYPE_INCLUDE_MUTEX
 
 
 ////// DESCRIPTIONS //////
@@ -37,11 +24,6 @@ namespace welp
 
 	template <class base_type, unsigned int id_number = static_cast<unsigned int>(-1), class _Allocator = std::allocator<base_type>, class ... _Args>
 	inline _global_instance<base_type, id_number, _Allocator>& make_global_type(_Args&& ... args);
-
-#ifdef WELP_GLOBAL_TYPE_INCLUDE_MUTEX
-	template <class base_type, unsigned int id_number = static_cast<unsigned int>(-1), class _Allocator = std::allocator<base_type>, class ... _Args>
-	inline _global_instance<base_type, id_number, _Allocator>& make_global_type_sync(std::mutex& mu, _Args&& ... args);
-#endif // WELP_GLOBAL_TYPE_INCLUDE_MUTEX
 
 	template <class base_type, unsigned int id_number = static_cast<unsigned int>(-1), class _Allocator = std::allocator<base_type>>
 	inline bool is_global_type_created() noexcept;
@@ -77,11 +59,6 @@ namespace welp
 		template <class base_type2, unsigned int id_number2, class _Allocator2, class ... _Args>
 		friend inline _global_instance<base_type2, id_number2, _Allocator2>& make_global_type(_Args&& ... args);
 
-#ifdef WELP_GLOBAL_TYPE_INCLUDE_MUTEX
-		template <class base_type2, unsigned int id_number2, class _Allocator2, class ... _Args>
-		friend inline _global_instance<base_type2, id_number2, _Allocator2>& make_global_type_sync(std::mutex&, _Args&& ... args);
-#endif // WELP_GLOBAL_TYPE_INCLUDE_MUTEX
-
 		template <class base_type2, unsigned int id_number2, class _Allocator2> friend inline bool is_global_type_created() noexcept;
 	};
 
@@ -95,11 +72,6 @@ namespace welp
 
 		template <class base_type2, unsigned int id_number2, class _Allocator2, class ... _Args>
 		friend inline _global_instance<base_type2, id_number2, _Allocator2>& make_global_type(_Args&& ... args);
-
-#ifdef WELP_GLOBAL_TYPE_INCLUDE_MUTEX
-		template <class base_type2, unsigned int id_number2, class _Allocator2, class ... _Args>
-		friend inline _global_instance<base_type2, id_number2, _Allocator2>& make_global_type_sync(std::mutex&, _Args&& ... args);
-#endif // WELP_GLOBAL_TYPE_INCLUDE_MUTEX
 
 		template <class base_type2, unsigned int id_number2, class _Allocator2> friend inline bool is_global_type_created() noexcept;
 
@@ -155,49 +127,6 @@ inline welp::_global_instance<base_type, id_number, _Allocator>& welp::make_glob
 			welp::_global_instance<base_type, id_number, _Allocator>::_global_instance_ptr.raw_ptr));
 	}
 }
-
-#ifdef WELP_GLOBAL_TYPE_INCLUDE_MUTEX
-template <class base_type, unsigned int id_number, class _Allocator, class ... _Args>
-inline welp::_global_instance<base_type, id_number, _Allocator>& welp::make_global_type_sync(std::mutex& mu, _Args&& ... args)
-{
-	if (welp::_global_instance<base_type, id_number, _Allocator>::_global_instance_ptr.raw_ptr != nullptr)
-	{
-		return *static_cast<welp::_global_instance<base_type, id_number, _Allocator>*>(static_cast<void*>(
-			welp::_global_instance<base_type, id_number, _Allocator>::_global_instance_ptr.raw_ptr));
-	}
-	else
-	{
-		std::lock_guard<std::mutex> lock(mu);
-		if (welp::_global_instance<base_type, id_number, _Allocator>::_global_instance_ptr.raw_ptr != nullptr)
-		{
-			return *static_cast<welp::_global_instance<base_type, id_number, _Allocator>*>(static_cast<void*>(
-				welp::_global_instance<base_type, id_number, _Allocator>::_global_instance_ptr.raw_ptr));
-		}
-		else
-		{
-			try
-			{
-				welp::_global_instance<base_type, id_number, _Allocator>::_global_instance_ptr.raw_ptr
-					= static_cast<_global_instance<base_type, id_number, _Allocator>*>(static_cast<void*>(
-						welp::_global_instance<base_type, id_number, _Allocator>::_global_instance_ptr.allocate(1)));
-
-				if (welp::_global_instance<base_type, id_number, _Allocator>::_global_instance_ptr.raw_ptr != nullptr)
-				{
-					new (welp::_global_instance<base_type, id_number, _Allocator>::_global_instance_ptr.raw_ptr)
-						base_type(std::forward<_Args>(args)...);
-				}
-			}
-			catch (...)
-			{
-				welp::_global_instance<base_type, id_number, _Allocator>::_global_instance_ptr.raw_ptr = nullptr;
-			}
-
-			return *static_cast<welp::_global_instance<base_type, id_number, _Allocator>*>(static_cast<void*>(
-				welp::_global_instance<base_type, id_number, _Allocator>::_global_instance_ptr.raw_ptr));
-		}
-	}
-}
-#endif // WELP_GLOBAL_TYPE_INCLUDE_MUTEX
 
 template <class base_type, unsigned int id_number, class _Allocator>
 inline bool welp::is_global_type_created() noexcept
