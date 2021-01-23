@@ -1,4 +1,4 @@
-// welp_cyclic_buffer.hpp - last update : 21 / 01 / 2021
+// welp_cyclic_buffer.hpp - last update : 24 / 01 / 2021
 // License <http://unlicense.org/> (statement below at the end of the file)
 
 
@@ -24,6 +24,13 @@
 #include <condition_variable>
 #include <functional>
 #include <atomic>
+#ifndef WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
+#define WELP_CYCLIC_BUFFER_DEFAULT_MUTEX std::mutex
+#endif
+#else // WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
+#ifndef WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
+#define WELP_CYCLIC_BUFFER_DEFAULT_MUTEX int
+#endif
 #endif // WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
 
 
@@ -31,7 +38,7 @@
 
 namespace welp
 {
-	template <class Ty, class _Allocator = std::allocator<char>> class cyclic_buffer : private _Allocator
+	template <class Ty, class _Allocator = std::allocator<char>, class mutex_Ty = WELP_CYCLIC_BUFFER_DEFAULT_MUTEX> class cyclic_buffer : private _Allocator
 	{
 
 	private:
@@ -50,10 +57,10 @@ namespace welp
 		inline bool store_ptr_sync(Ty* obj_ptr) noexcept;
 #endif // WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
 
-		inline welp::cyclic_buffer<Ty, _Allocator>& operator<<(const Ty& obj);
-		inline welp::cyclic_buffer<Ty, _Allocator>& operator<<(Ty&& obj) noexcept;
-		inline welp::cyclic_buffer<Ty, _Allocator>& operator<<(Ty* obj_ptr) noexcept;
-		inline welp::cyclic_buffer<Ty, _Allocator>& operator<(const Ty& obj);
+		inline welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>& operator<<(const Ty& obj);
+		inline welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>& operator<<(Ty&& obj) noexcept;
+		inline welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>& operator<<(Ty* obj_ptr) noexcept;
+		inline welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>& operator<(const Ty& obj);
 
 		inline bool load_cpy(Ty& obj);
 		inline bool load(Ty& obj) noexcept;
@@ -69,8 +76,8 @@ namespace welp
 		const Ty& get_sync();
 #endif // WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
 
-		inline welp::cyclic_buffer<Ty, _Allocator>& operator>(Ty& obj);
-		inline welp::cyclic_buffer<Ty, _Allocator>& operator>>(Ty& obj) noexcept;
+		inline welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>& operator>(Ty& obj);
+		inline welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>& operator>>(Ty& obj) noexcept;
 
 
 		inline bool not_full() const noexcept;
@@ -90,57 +97,57 @@ namespace welp
 
 #ifdef WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
 		class lock;
-		welp::cyclic_buffer<Ty, _Allocator>::lock acquire_exclusivity()
+		welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::lock acquire_exclusivity()
 		{
-			return welp::cyclic_buffer<Ty, _Allocator>::lock(&buffer_mutex);
+			return welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::lock(&buffer_mutex);
 		}
-		welp::cyclic_buffer<Ty, _Allocator>& wait_for_capacity(std::size_t requested_capacity);
+		welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>& wait_for_capacity(std::size_t requested_capacity);
 		void notify_one_for_capacity();
-		welp::cyclic_buffer<Ty, _Allocator>& wait_for_size(std::size_t requested_size);
+		welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>& wait_for_size(std::size_t requested_size);
 		void notify_one_for_size();
 
 		class lock_with_size;
-		welp::cyclic_buffer<Ty, _Allocator>::lock_with_size spin_for_size_and_acquire_exclusivity(std::size_t requested_size)
+		welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::lock_with_size spin_for_size_and_acquire_exclusivity(std::size_t requested_size)
 		{
 			if (requested_size > _capacity) { requested_size = _capacity; }
 			while (reinterpret_cast<std::atomic<std::size_t>&>(_size).load() < requested_size) {}
-			return welp::cyclic_buffer<Ty, _Allocator>::lock_with_size(this);
+			return welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::lock_with_size(this);
 		}
-		welp::cyclic_buffer<Ty, _Allocator>::lock_with_size wait_for_size_and_acquire_exclusivity(std::size_t requested_size)
+		welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::lock_with_size wait_for_size_and_acquire_exclusivity(std::size_t requested_size)
 		{
 			if (requested_size > _capacity) { requested_size = _capacity; }
 			{
-				std::unique_lock<std::mutex> waiting_lock(buffer_mutex);
+				std::unique_lock<mutex_Ty> waiting_lock(buffer_mutex);
 				size_condition_variable.wait(waiting_lock, [=]() {
 					return (reinterpret_cast<std::atomic<std::size_t>&>(_size).load() >= requested_size) || terminate_buffer; });
 			}
-			return welp::cyclic_buffer<Ty, _Allocator>::lock_with_size(this);
+			return welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::lock_with_size(this);
 		}
 
 		class lock_with_capacity;
-		welp::cyclic_buffer<Ty, _Allocator>::lock_with_capacity spin_for_capacity_and_acquire_exclusivity(std::size_t requested_capacity)
+		welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::lock_with_capacity spin_for_capacity_and_acquire_exclusivity(std::size_t requested_capacity)
 		{
 			if (requested_capacity > _capacity) { requested_capacity = _capacity; }
 			while (_capacity - reinterpret_cast<std::atomic<std::size_t>&>(_size).load() < requested_capacity) {}
-			return welp::cyclic_buffer<Ty, _Allocator>::lock_with_capacity(this);
+			return welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::lock_with_capacity(this);
 		}
-		welp::cyclic_buffer<Ty, _Allocator>::lock_with_capacity wait_for_capacity_and_acquire_exclusivity(std::size_t requested_capacity)
+		welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::lock_with_capacity wait_for_capacity_and_acquire_exclusivity(std::size_t requested_capacity)
 		{
 			if (requested_capacity > _capacity) { requested_capacity = _capacity; }
 			{
-				std::unique_lock<std::mutex> waiting_lock(buffer_mutex);
+				std::unique_lock<mutex_Ty> waiting_lock(buffer_mutex);
 				capacity_condition_variable.wait(waiting_lock, [=]() {
 					return (_capacity - reinterpret_cast<std::atomic<std::size_t>&>(_size).load() >= requested_capacity) || terminate_buffer; });
 			}
-			return welp::cyclic_buffer<Ty, _Allocator>::lock_with_capacity(this);
+			return welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::lock_with_capacity(this);
 		}
 #endif // WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
 
 		cyclic_buffer() = default;
-		cyclic_buffer(const welp::cyclic_buffer<Ty, _Allocator>&) = delete;
-		welp::cyclic_buffer<Ty, _Allocator>& operator=(const welp::cyclic_buffer<Ty, _Allocator>&) = delete;
-		cyclic_buffer(welp::cyclic_buffer<Ty, _Allocator>&&) = delete;
-		welp::cyclic_buffer<Ty, _Allocator>& operator=(welp::cyclic_buffer<Ty, _Allocator>&&) = delete;
+		cyclic_buffer(const welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>&) = delete;
+		welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>& operator=(const welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>&) = delete;
+		cyclic_buffer(welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>&&) = delete;
+		welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>& operator=(welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>&&) = delete;
 		~cyclic_buffer() { delete_buffer(); }
 
 #ifdef WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
@@ -150,16 +157,16 @@ namespace welp
 		public:
 
 			lock() = delete;
-			lock(std::mutex* _mutex_ptr) : mutex_ptr(_mutex_ptr) { mutex_ptr->lock(); }
-			lock(const welp::cyclic_buffer<Ty, _Allocator>::lock&) = delete;
-			welp::cyclic_buffer<Ty, _Allocator>::lock& operator=(const welp::cyclic_buffer<Ty, _Allocator>::lock&) = delete;
-			lock(welp::cyclic_buffer<Ty, _Allocator>::lock&&) = default;
-			welp::cyclic_buffer<Ty, _Allocator>::lock& operator=(welp::cyclic_buffer<Ty, _Allocator>::lock&&) = delete;
+			lock(mutex_Ty* _mutex_ptr) : mutex_ptr(_mutex_ptr) { mutex_ptr->lock(); }
+			lock(const welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::lock&) = delete;
+			welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::lock& operator=(const welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::lock&) = delete;
+			lock(welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::lock&&) = default;
+			welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::lock& operator=(welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::lock&&) = delete;
 			~lock() { mutex_ptr->unlock(); }
 
 		private:
 
-			std::mutex* mutex_ptr;
+			mutex_Ty* mutex_ptr;
 		};
 		class lock_with_size
 		{
@@ -169,20 +176,20 @@ namespace welp
 			inline bool good(std::size_t test_size) const noexcept { return cyclic_buffer_ptr->_size >= test_size; }
 
 			lock_with_size() = delete;
-			lock_with_size(welp::cyclic_buffer<Ty, _Allocator>* _cyclic_buffer_ptr)
+			lock_with_size(welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>* _cyclic_buffer_ptr)
 				: cyclic_buffer_ptr(_cyclic_buffer_ptr)
 			{
 				cyclic_buffer_ptr->buffer_mutex.lock();
 			}
-			lock_with_size(const welp::cyclic_buffer<Ty, _Allocator>::lock_with_size&) = delete;
-			welp::cyclic_buffer<Ty, _Allocator>::lock_with_size& operator=(const welp::cyclic_buffer<Ty, _Allocator>::lock_with_size&) = delete;
-			lock_with_size(welp::cyclic_buffer<Ty, _Allocator>::lock_with_size&&) = default;
-			welp::cyclic_buffer<Ty, _Allocator>::lock_with_size& operator=(welp::cyclic_buffer<Ty, _Allocator>::lock_with_size&&) = delete;
+			lock_with_size(const welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::lock_with_size&) = delete;
+			welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::lock_with_size& operator=(const welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::lock_with_size&) = delete;
+			lock_with_size(welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::lock_with_size&&) = default;
+			welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::lock_with_size& operator=(welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::lock_with_size&&) = delete;
 			~lock_with_size() { cyclic_buffer_ptr->buffer_mutex.unlock(); }
 
 		private:
 
-			welp::cyclic_buffer<Ty, _Allocator>* cyclic_buffer_ptr;
+			welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>* cyclic_buffer_ptr;
 
 		};
 		class lock_with_capacity
@@ -193,20 +200,20 @@ namespace welp
 			inline bool good(std::size_t test_capacity) const noexcept { return cyclic_buffer_ptr->_capacity - cyclic_buffer_ptr->_size >= test_capacity; }
 
 			lock_with_capacity() = delete;
-			lock_with_capacity(welp::cyclic_buffer<Ty, _Allocator>* _cyclic_buffer_ptr)
+			lock_with_capacity(welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>* _cyclic_buffer_ptr)
 				: cyclic_buffer_ptr(_cyclic_buffer_ptr)
 			{
 				cyclic_buffer_ptr->buffer_mutex.lock();
 			}
-			lock_with_capacity(const welp::cyclic_buffer<Ty, _Allocator>::lock_with_capacity&) = delete;
-			welp::cyclic_buffer<Ty, _Allocator>::lock_with_capacity& operator=(const welp::cyclic_buffer<Ty, _Allocator>::lock_with_capacity&) = delete;
-			lock_with_capacity(welp::cyclic_buffer<Ty, _Allocator>::lock_with_capacity&&) = default;
-			welp::cyclic_buffer<Ty, _Allocator>::lock_with_capacity& operator=(welp::cyclic_buffer<Ty, _Allocator>::lock_with_capacity&&) = delete;
+			lock_with_capacity(const welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::lock_with_capacity&) = delete;
+			welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::lock_with_capacity& operator=(const welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::lock_with_capacity&) = delete;
+			lock_with_capacity(welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::lock_with_capacity&&) = default;
+			welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::lock_with_capacity& operator=(welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::lock_with_capacity&&) = delete;
 			~lock_with_capacity() { cyclic_buffer_ptr->buffer_mutex.unlock(); }
 
 		private:
 
-			welp::cyclic_buffer<Ty, _Allocator>* cyclic_buffer_ptr;
+			welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>* cyclic_buffer_ptr;
 		};
 #endif // WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
 
@@ -224,7 +231,7 @@ namespace welp
 		Ty bad_object = Ty();
 
 #ifdef WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
-		std::mutex buffer_mutex;
+		mutex_Ty buffer_mutex;
 
 		bool terminate_buffer = true;
 #endif // WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
@@ -241,10 +248,10 @@ namespace welp
 			Ty* storage_ptr = nullptr;
 
 			storage_cell() = default;
-			storage_cell(const welp::cyclic_buffer<Ty, _Allocator>::storage_cell&) = default;
-			welp::cyclic_buffer<Ty, _Allocator>::storage_cell& operator=(const welp::cyclic_buffer<Ty, _Allocator>::storage_cell&) = default;
-			storage_cell(welp::cyclic_buffer<Ty, _Allocator>::storage_cell&&) = default;
-			welp::cyclic_buffer<Ty, _Allocator>::storage_cell& operator=(welp::cyclic_buffer<Ty, _Allocator>::storage_cell&&) = default;
+			storage_cell(const welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::storage_cell&) = default;
+			welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::storage_cell& operator=(const welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::storage_cell&) = default;
+			storage_cell(welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::storage_cell&&) = default;
+			welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::storage_cell& operator=(welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::storage_cell&&) = default;
 			~storage_cell() = default;
 		};
 	};
@@ -253,8 +260,8 @@ namespace welp
 
 ////// IMPLEMENTATIONS //////
 
-template <class Ty, class _Allocator>
-inline bool welp::cyclic_buffer<Ty, _Allocator>::store_cpy(const Ty& obj)
+template <class Ty, class _Allocator, class mutex_Ty>
+inline bool welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::store_cpy(const Ty& obj)
 {
 	if ((last_cell_ptr + 1 != next_cell_ptr) && ((next_cell_ptr != cells_data_ptr) || (last_cell_ptr + 1 != cells_end_ptr)))
 	{
@@ -270,8 +277,8 @@ inline bool welp::cyclic_buffer<Ty, _Allocator>::store_cpy(const Ty& obj)
 	}
 }
 
-template <class Ty, class _Allocator>
-inline bool welp::cyclic_buffer<Ty, _Allocator>::store_move(Ty&& obj) noexcept
+template <class Ty, class _Allocator, class mutex_Ty>
+inline bool welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::store_move(Ty&& obj) noexcept
 {
 	if ((last_cell_ptr + 1 != next_cell_ptr) && ((next_cell_ptr != cells_data_ptr) || (last_cell_ptr + 1 != cells_end_ptr)))
 	{
@@ -287,8 +294,8 @@ inline bool welp::cyclic_buffer<Ty, _Allocator>::store_move(Ty&& obj) noexcept
 	}
 }
 
-template <class Ty, class _Allocator>
-inline bool welp::cyclic_buffer<Ty, _Allocator>::store_ptr(Ty* obj_ptr) noexcept
+template <class Ty, class _Allocator, class mutex_Ty>
+inline bool welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::store_ptr(Ty* obj_ptr) noexcept
 {
 	if ((last_cell_ptr + 1 != next_cell_ptr) && ((next_cell_ptr != cells_data_ptr) || (last_cell_ptr + 1 != cells_end_ptr)))
 	{
@@ -305,10 +312,10 @@ inline bool welp::cyclic_buffer<Ty, _Allocator>::store_ptr(Ty* obj_ptr) noexcept
 }
 
 #ifdef WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
-template <class Ty, class _Allocator>
-inline bool welp::cyclic_buffer<Ty, _Allocator>::store_cpy_sync(const Ty& obj)
+template <class Ty, class _Allocator, class mutex_Ty>
+inline bool welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::store_cpy_sync(const Ty& obj)
 {
-	std::lock_guard<std::mutex> _lock(buffer_mutex);
+	std::lock_guard<mutex_Ty> _lock(buffer_mutex);
 
 	if ((last_cell_ptr + 1 != next_cell_ptr) && ((next_cell_ptr != cells_data_ptr) || (last_cell_ptr + 1 != cells_end_ptr)))
 	{
@@ -324,10 +331,10 @@ inline bool welp::cyclic_buffer<Ty, _Allocator>::store_cpy_sync(const Ty& obj)
 	}
 }
 
-template <class Ty, class _Allocator>
-inline bool welp::cyclic_buffer<Ty, _Allocator>::store_move_sync(Ty&& obj) noexcept
+template <class Ty, class _Allocator, class mutex_Ty>
+inline bool welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::store_move_sync(Ty&& obj) noexcept
 {
-	std::lock_guard<std::mutex> _lock(buffer_mutex);
+	std::lock_guard<mutex_Ty> _lock(buffer_mutex);
 
 	if ((last_cell_ptr + 1 != next_cell_ptr) && ((next_cell_ptr != cells_data_ptr) || (last_cell_ptr + 1 != cells_end_ptr)))
 	{
@@ -343,10 +350,10 @@ inline bool welp::cyclic_buffer<Ty, _Allocator>::store_move_sync(Ty&& obj) noexc
 	}
 }
 
-template <class Ty, class _Allocator>
-inline bool welp::cyclic_buffer<Ty, _Allocator>::store_ptr_sync(Ty* obj_ptr) noexcept
+template <class Ty, class _Allocator, class mutex_Ty>
+inline bool welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::store_ptr_sync(Ty* obj_ptr) noexcept
 {
-	std::lock_guard<std::mutex> _lock(buffer_mutex);
+	std::lock_guard<mutex_Ty> _lock(buffer_mutex);
 
 	if ((last_cell_ptr + 1 != next_cell_ptr) && ((next_cell_ptr != cells_data_ptr) || (last_cell_ptr + 1 != cells_end_ptr)))
 	{
@@ -363,8 +370,8 @@ inline bool welp::cyclic_buffer<Ty, _Allocator>::store_ptr_sync(Ty* obj_ptr) noe
 }
 #endif // WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
 
-template <class Ty, class _Allocator>
-inline welp::cyclic_buffer<Ty, _Allocator>& welp::cyclic_buffer<Ty, _Allocator>::operator<<(const Ty& obj)
+template <class Ty, class _Allocator, class mutex_Ty>
+inline welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>& welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::operator<<(const Ty& obj)
 {
 	if ((last_cell_ptr + 1 != next_cell_ptr) && ((next_cell_ptr != cells_data_ptr) || (last_cell_ptr + 1 != cells_end_ptr)))
 	{
@@ -381,8 +388,8 @@ inline welp::cyclic_buffer<Ty, _Allocator>& welp::cyclic_buffer<Ty, _Allocator>:
 	}
 }
 
-template <class Ty, class _Allocator>
-inline welp::cyclic_buffer<Ty, _Allocator>& welp::cyclic_buffer<Ty, _Allocator>::operator<<(Ty&& obj) noexcept
+template <class Ty, class _Allocator, class mutex_Ty>
+inline welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>& welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::operator<<(Ty&& obj) noexcept
 {
 	if ((last_cell_ptr + 1 != next_cell_ptr) && ((next_cell_ptr != cells_data_ptr) || (last_cell_ptr + 1 != cells_end_ptr)))
 	{
@@ -399,8 +406,8 @@ inline welp::cyclic_buffer<Ty, _Allocator>& welp::cyclic_buffer<Ty, _Allocator>:
 	}
 }
 
-template <class Ty, class _Allocator>
-inline welp::cyclic_buffer<Ty, _Allocator>& welp::cyclic_buffer<Ty, _Allocator>::operator<<(Ty* obj_ptr) noexcept
+template <class Ty, class _Allocator, class mutex_Ty>
+inline welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>& welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::operator<<(Ty* obj_ptr) noexcept
 {
 	if ((last_cell_ptr + 1 != next_cell_ptr) && ((next_cell_ptr != cells_data_ptr) || (last_cell_ptr + 1 != cells_end_ptr)))
 	{
@@ -417,8 +424,8 @@ inline welp::cyclic_buffer<Ty, _Allocator>& welp::cyclic_buffer<Ty, _Allocator>:
 	}
 }
 
-template <class Ty, class _Allocator>
-inline welp::cyclic_buffer<Ty, _Allocator>& welp::cyclic_buffer<Ty, _Allocator>::operator<(const Ty& obj)
+template <class Ty, class _Allocator, class mutex_Ty>
+inline welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>& welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::operator<(const Ty& obj)
 {
 	if ((last_cell_ptr + 1 != next_cell_ptr) && ((next_cell_ptr != cells_data_ptr) || (last_cell_ptr + 1 != cells_end_ptr)))
 	{
@@ -435,8 +442,8 @@ inline welp::cyclic_buffer<Ty, _Allocator>& welp::cyclic_buffer<Ty, _Allocator>:
 	}
 }
 
-template <class Ty, class _Allocator>
-inline bool welp::cyclic_buffer<Ty, _Allocator>::load_cpy(Ty& obj)
+template <class Ty, class _Allocator, class mutex_Ty>
+inline bool welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::load_cpy(Ty& obj)
 {
 	if (last_cell_ptr != next_cell_ptr)
 	{
@@ -465,8 +472,8 @@ inline bool welp::cyclic_buffer<Ty, _Allocator>::load_cpy(Ty& obj)
 	}
 }
 
-template <class Ty, class _Allocator>
-inline bool welp::cyclic_buffer<Ty, _Allocator>::load(Ty& obj) noexcept
+template <class Ty, class _Allocator, class mutex_Ty>
+inline bool welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::load(Ty& obj) noexcept
 {
 	if (last_cell_ptr != next_cell_ptr)
 	{
@@ -494,8 +501,8 @@ inline bool welp::cyclic_buffer<Ty, _Allocator>::load(Ty& obj) noexcept
 	}
 }
 
-template <class Ty, class _Allocator>
-const Ty& welp::cyclic_buffer<Ty, _Allocator>::pop()
+template <class Ty, class _Allocator, class mutex_Ty>
+const Ty& welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::pop()
 {
 	if (last_cell_ptr != next_cell_ptr)
 	{
@@ -527,8 +534,8 @@ const Ty& welp::cyclic_buffer<Ty, _Allocator>::pop()
 	}
 }
 
-template <class Ty, class _Allocator>
-const Ty& welp::cyclic_buffer<Ty, _Allocator>::get()
+template <class Ty, class _Allocator, class mutex_Ty>
+const Ty& welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::get()
 {
 	if (last_cell_ptr != next_cell_ptr)
 	{
@@ -553,10 +560,10 @@ const Ty& welp::cyclic_buffer<Ty, _Allocator>::get()
 }
 
 #ifdef WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
-template <class Ty, class _Allocator>
-inline bool welp::cyclic_buffer<Ty, _Allocator>::load_cpy_sync(Ty& obj)
+template <class Ty, class _Allocator, class mutex_Ty>
+inline bool welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::load_cpy_sync(Ty& obj)
 {
-	std::lock_guard<std::mutex> _lock(buffer_mutex);
+	std::lock_guard<mutex_Ty> _lock(buffer_mutex);
 
 	if (last_cell_ptr != next_cell_ptr)
 	{
@@ -584,10 +591,10 @@ inline bool welp::cyclic_buffer<Ty, _Allocator>::load_cpy_sync(Ty& obj)
 	}
 }
 
-template <class Ty, class _Allocator>
-inline bool welp::cyclic_buffer<Ty, _Allocator>::load_sync(Ty& obj) noexcept
+template <class Ty, class _Allocator, class mutex_Ty>
+inline bool welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::load_sync(Ty& obj) noexcept
 {
-	std::lock_guard<std::mutex> _lock(buffer_mutex);
+	std::lock_guard<mutex_Ty> _lock(buffer_mutex);
 
 	if (last_cell_ptr != next_cell_ptr)
 	{
@@ -615,10 +622,10 @@ inline bool welp::cyclic_buffer<Ty, _Allocator>::load_sync(Ty& obj) noexcept
 	}
 }
 
-template <class Ty, class _Allocator>
-const Ty& welp::cyclic_buffer<Ty, _Allocator>::pop_sync()
+template <class Ty, class _Allocator, class mutex_Ty>
+const Ty& welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::pop_sync()
 {
-	std::lock_guard<std::mutex> _lock(buffer_mutex);
+	std::lock_guard<mutex_Ty> _lock(buffer_mutex);
 
 	if (last_cell_ptr != next_cell_ptr)
 	{
@@ -650,10 +657,10 @@ const Ty& welp::cyclic_buffer<Ty, _Allocator>::pop_sync()
 	}
 }
 
-template <class Ty, class _Allocator>
-const Ty& welp::cyclic_buffer<Ty, _Allocator>::get_sync()
+template <class Ty, class _Allocator, class mutex_Ty>
+const Ty& welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::get_sync()
 {
-	std::lock_guard<std::mutex> _lock(buffer_mutex);
+	std::lock_guard<mutex_Ty> _lock(buffer_mutex);
 
 	if (last_cell_ptr != next_cell_ptr)
 	{
@@ -678,8 +685,8 @@ const Ty& welp::cyclic_buffer<Ty, _Allocator>::get_sync()
 }
 #endif // WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
 
-template <class Ty, class _Allocator>
-inline welp::cyclic_buffer<Ty, _Allocator>& welp::cyclic_buffer<Ty, _Allocator>::operator>>(Ty& obj) noexcept
+template <class Ty, class _Allocator, class mutex_Ty>
+inline welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>& welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::operator>>(Ty& obj) noexcept
 {
 	if (last_cell_ptr != next_cell_ptr)
 	{
@@ -708,8 +715,8 @@ inline welp::cyclic_buffer<Ty, _Allocator>& welp::cyclic_buffer<Ty, _Allocator>:
 	}
 }
 
-template <class Ty, class _Allocator>
-inline welp::cyclic_buffer<Ty, _Allocator>& welp::cyclic_buffer<Ty, _Allocator>::operator>(Ty& obj)
+template <class Ty, class _Allocator, class mutex_Ty>
+inline welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>& welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::operator>(Ty& obj)
 {
 	if (last_cell_ptr != next_cell_ptr)
 	{
@@ -738,36 +745,36 @@ inline welp::cyclic_buffer<Ty, _Allocator>& welp::cyclic_buffer<Ty, _Allocator>:
 	}
 }
 
-template <class Ty, class _Allocator>
-inline bool welp::cyclic_buffer<Ty, _Allocator>::not_full() const noexcept
+template <class Ty, class _Allocator, class mutex_Ty>
+inline bool welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::not_full() const noexcept
 {
 	return (next_cell_ptr != cells_data_ptr) || (last_cell_ptr + 1 != cells_end_ptr);
 }
 
-template <class Ty, class _Allocator>
-inline bool welp::cyclic_buffer<Ty, _Allocator>::not_empty() const noexcept
+template <class Ty, class _Allocator, class mutex_Ty>
+inline bool welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::not_empty() const noexcept
 {
 	return last_cell_ptr != next_cell_ptr;
 }
 
-template <class Ty, class _Allocator>
-inline bool welp::cyclic_buffer<Ty, _Allocator>::stream_store_completed() noexcept
+template <class Ty, class _Allocator, class mutex_Ty>
+inline bool welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::stream_store_completed() noexcept
 {
 	bool temp = _stream_store_completed;
 	_stream_store_completed = true;
 	return temp;
 }
 
-template <class Ty, class _Allocator>
-inline bool welp::cyclic_buffer<Ty, _Allocator>::stream_load_completed() noexcept
+template <class Ty, class _Allocator, class mutex_Ty>
+inline bool welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::stream_load_completed() noexcept
 {
 	bool temp = _stream_load_completed;
 	_stream_load_completed = true;
 	return temp;
 }
 
-template <class Ty, class _Allocator>
-inline std::size_t welp::cyclic_buffer<Ty, _Allocator>::size() const noexcept
+template <class Ty, class _Allocator, class mutex_Ty>
+inline std::size_t welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::size() const noexcept
 {
 #ifdef WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
 	return reinterpret_cast<std::atomic<std::size_t>&>(_size).load();
@@ -776,8 +783,8 @@ inline std::size_t welp::cyclic_buffer<Ty, _Allocator>::size() const noexcept
 #endif // WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
 }
 
-template <class Ty, class _Allocator>
-inline std::size_t welp::cyclic_buffer<Ty, _Allocator>::capacity() const noexcept
+template <class Ty, class _Allocator, class mutex_Ty>
+inline std::size_t welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::capacity() const noexcept
 {
 	if (cells_data_ptr != nullptr)
 	{
@@ -789,8 +796,8 @@ inline std::size_t welp::cyclic_buffer<Ty, _Allocator>::capacity() const noexcep
 	}
 }
 
-template <class Ty, class _Allocator>
-inline std::size_t welp::cyclic_buffer<Ty, _Allocator>::capacity_remaining() const noexcept
+template <class Ty, class _Allocator, class mutex_Ty>
+inline std::size_t welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::capacity_remaining() const noexcept
 {
 #ifdef WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
 	return _capacity - reinterpret_cast<std::atomic<std::size_t>&>(_size).load();
@@ -799,8 +806,8 @@ inline std::size_t welp::cyclic_buffer<Ty, _Allocator>::capacity_remaining() con
 #endif // WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
 }
 
-template <class Ty, class _Allocator>
-bool welp::cyclic_buffer<Ty, _Allocator>::new_buffer(std::size_t instances)
+template <class Ty, class _Allocator, class mutex_Ty>
+bool welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::new_buffer(std::size_t instances)
 {
 	delete_buffer();
 
@@ -827,17 +834,17 @@ bool welp::cyclic_buffer<Ty, _Allocator>::new_buffer(std::size_t instances)
 	}
 }
 
-template <class Ty, class _Allocator>
-void welp::cyclic_buffer<Ty, _Allocator>::delete_buffer() noexcept
+template <class Ty, class _Allocator, class mutex_Ty>
+void welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::delete_buffer() noexcept
 {
 	if (cells_data_ptr != nullptr)
 	{
 #ifdef WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
 		{
-			std::lock_guard<std::mutex> _lock(buffer_mutex);
+			std::lock_guard<mutex_Ty> _lock(buffer_mutex);
 			terminate_buffer = true;
 		}
-		std::lock_guard<std::mutex> _lock(buffer_mutex);
+		std::lock_guard<mutex_Ty> _lock(buffer_mutex);
 #endif // WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
 		std::size_t buffer_size = static_cast<std::size_t>(cells_end_ptr - cells_data_ptr);
 		cells_end_ptr--;
@@ -856,47 +863,47 @@ void welp::cyclic_buffer<Ty, _Allocator>::delete_buffer() noexcept
 	}
 }
 
-template <class Ty, class _Allocator>
-void welp::cyclic_buffer<Ty, _Allocator>::set_bad_object(const Ty& bad_obj)
+template <class Ty, class _Allocator, class mutex_Ty>
+void welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::set_bad_object(const Ty& bad_obj)
 {
 	bad_object = bad_obj;
 }
 
-template <class Ty, class _Allocator>
-void welp::cyclic_buffer<Ty, _Allocator>::set_bad_object(Ty&& bad_obj) noexcept
+template <class Ty, class _Allocator, class mutex_Ty>
+void welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::set_bad_object(Ty&& bad_obj) noexcept
 {
 	bad_object = std::move(bad_obj);
 }
 
 #ifdef WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
-template <class Ty, class _Allocator>
-welp::cyclic_buffer<Ty, _Allocator>& welp::cyclic_buffer<Ty, _Allocator>::wait_for_capacity(std::size_t requested_capacity)
+template <class Ty, class _Allocator, class mutex_Ty>
+welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>& welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::wait_for_capacity(std::size_t requested_capacity)
 {
 	if (requested_capacity > _capacity) { requested_capacity = _capacity; }
-	std::unique_lock<std::mutex> waiting_lock(buffer_mutex);
+	std::unique_lock<mutex_Ty> waiting_lock(buffer_mutex);
 	capacity_condition_variable.wait(waiting_lock, [=]() {
 		return (_capacity - reinterpret_cast<std::atomic<std::size_t>&>(_size).load() >= requested_capacity) || terminate_buffer; });
 	return *this;
 }
 
-template <class Ty, class _Allocator>
-void welp::cyclic_buffer<Ty, _Allocator>::notify_one_for_capacity()
+template <class Ty, class _Allocator, class mutex_Ty>
+void welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::notify_one_for_capacity()
 {
 	size_condition_variable.notify_one();
 }
 
-template <class Ty, class _Allocator>
-welp::cyclic_buffer<Ty, _Allocator>& welp::cyclic_buffer<Ty, _Allocator>::wait_for_size(std::size_t requested_size)
+template <class Ty, class _Allocator, class mutex_Ty>
+welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>& welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::wait_for_size(std::size_t requested_size)
 {
 	if (requested_size > _capacity) { requested_size = _capacity; }
-	std::unique_lock<std::mutex> waiting_lock(buffer_mutex);
+	std::unique_lock<mutex_Ty> waiting_lock(buffer_mutex);
 	size_condition_variable.wait(waiting_lock, [=]() {
 		return (reinterpret_cast<std::atomic<std::size_t>&>(_size).load() >= requested_size) || terminate_buffer; });
 	return *this;
 }
 
-template <class Ty, class _Allocator>
-void welp::cyclic_buffer<Ty, _Allocator>::notify_one_for_size()
+template <class Ty, class _Allocator, class mutex_Ty>
+void welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::notify_one_for_size()
 {
 	size_condition_variable.notify_one();
 }
