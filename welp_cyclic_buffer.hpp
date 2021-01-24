@@ -233,6 +233,9 @@ namespace welp
 #ifdef WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
 		mutex_Ty buffer_mutex;
 
+		std::condition_variable size_condition_variable;
+		std::condition_variable capacity_condition_variable;
+
 		bool terminate_buffer = true;
 #endif // WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
 
@@ -840,6 +843,8 @@ void welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::delete_buffer() noexcept
 			std::lock_guard<mutex_Ty> _lock(buffer_mutex);
 			terminate_buffer = true;
 		}
+		capacity_condition_variable.notify_all();
+		size_condition_variable.notify_all();
 		std::lock_guard<mutex_Ty> _lock(buffer_mutex);
 #endif // WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
 		std::size_t buffer_size = static_cast<std::size_t>(cells_end_ptr - cells_data_ptr);
