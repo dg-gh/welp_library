@@ -44,7 +44,7 @@ namespace welp
 	// allocate and deallocate should preferably not throw
 	// allocate should preferably return a nullptr in case of allocation failure
 	// can be substituted by std::allocator<char> although a non-throwing version would be preferable
-	class _default_cyclic_sub_allocator
+	class default_cyclic_sub_allocator
 	{
 
 	public:
@@ -52,12 +52,12 @@ namespace welp
 		inline char* allocate(std::size_t bytes) const noexcept { return static_cast<char*>(std::malloc(bytes)); }
 		inline void deallocate(char* ptr, std::size_t) const noexcept { std::free(static_cast<void*>(ptr)); }
 
-		_default_cyclic_sub_allocator() = default;
-		~_default_cyclic_sub_allocator() = default;
+		default_cyclic_sub_allocator() = default;
+		~default_cyclic_sub_allocator() = default;
 	};
 
 	// memory resource
-	template <std::size_t mem_align, class sub_allocator = welp::_default_cyclic_sub_allocator> class cyclic_resource
+	template <std::size_t mem_align, class sub_allocator = welp::default_cyclic_sub_allocator> class cyclic_resource
 	{
 
 	private:
