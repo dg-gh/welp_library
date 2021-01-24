@@ -48,7 +48,7 @@ namespace welp
 	// allocate and deallocate should preferably not throw
 	// allocate should preferably return a nullptr in case of allocation failure
 	// can be substituted by std::allocator<char> although a non-throwing version would be preferable
-	class _default_threads_allocator
+	class default_threads_allocator
 	{
 
 	public:
@@ -115,7 +115,7 @@ namespace welp
 		welp::async_task_result<Ty>& operator=(welp::async_task_result<Ty>&& rhs) = delete;
 	};
 
-	template <class _Allocator = welp::_default_threads_allocator> class threads : private _Allocator
+	template <class _Allocator = welp::default_threads_allocator> class threads : private _Allocator
 	{
 
 	public:
