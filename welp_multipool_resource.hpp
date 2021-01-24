@@ -54,9 +54,6 @@
 
 #ifdef WELP_MULTIPOOL_INCLUDE_MUTEX
 #include <mutex>
-#ifndef WELP_MULTIPOOL_DEFAULT_MUTEX
-#define WELP_MULTIPOOL_DEFAULT_MUTEX std::mutex
-#endif
 #endif // WELP_MULTIPOOL_INCLUDE_MUTEX
 
 
@@ -219,7 +216,7 @@ namespace welp
 	// memory resource thread safe
 #ifdef WELP_MULTIPOOL_INCLUDE_MUTEX
 	template <std::size_t max_number_of_pools, class sub_allocator = welp::default_multipool_sub_allocator,
-		class mutex_Ty = WELP_MULTIPOOL_DEFAULT_MUTEX> class multipool_resource_sync
+		class mutex_Ty = std::mutex> class multipool_resource_sync
 	{
 
 	private:
