@@ -126,21 +126,21 @@ namespace welp
 		template <class function_Ty, class ... _Args> bool priority_async_task(const function_Ty& task, _Args&& ... args);
 		template <class function_Ty, class ... _Args> void force_priority_async_task(const function_Ty& task, _Args&& ... args);
 
-		template <class function_Ty, class ... _Args> bool async_task(welp::async_task_end& package, const function_Ty& task, _Args&& ... args);
-		template <class function_Ty, class ... _Args> void force_async_task(welp::async_task_end& package, const function_Ty& task, _Args&& ... args);
+		template <class function_Ty, class ... _Args> bool async_task(welp::async_task_end& box, const function_Ty& task, _Args&& ... args);
+		template <class function_Ty, class ... _Args> void force_async_task(welp::async_task_end& box, const function_Ty& task, _Args&& ... args);
 
-		template <class function_Ty, class ... _Args> bool priority_async_task(welp::async_task_end& package, const function_Ty& task, _Args&& ... args);
-		template <class function_Ty, class ... _Args> void force_priority_async_task(welp::async_task_end& package, const function_Ty& task, _Args&& ... args);
-
-		template <class return_Ty, class function_Ty, class ... _Args>
-		bool async_task(welp::async_task_result<return_Ty>& package, const function_Ty& task, _Args&& ... args);
-		template <class return_Ty, class function_Ty, class ... _Args>
-		void force_async_task(welp::async_task_result<return_Ty>& package, const function_Ty& task, _Args&& ... args);
+		template <class function_Ty, class ... _Args> bool priority_async_task(welp::async_task_end& box, const function_Ty& task, _Args&& ... args);
+		template <class function_Ty, class ... _Args> void force_priority_async_task(welp::async_task_end& box, const function_Ty& task, _Args&& ... args);
 
 		template <class return_Ty, class function_Ty, class ... _Args>
-		bool priority_async_task(welp::async_task_result<return_Ty>& package, const function_Ty& task, _Args&& ... args);
+		bool async_task(welp::async_task_result<return_Ty>& box, const function_Ty& task, _Args&& ... args);
 		template <class return_Ty, class function_Ty, class ... _Args>
-		void force_priority_async_task(welp::async_task_result<return_Ty>& package, const function_Ty& task, _Args&& ... args);
+		void force_async_task(welp::async_task_result<return_Ty>& box, const function_Ty& task, _Args&& ... args);
+
+		template <class return_Ty, class function_Ty, class ... _Args>
+		bool priority_async_task(welp::async_task_result<return_Ty>& box, const function_Ty& task, _Args&& ... args);
+		template <class return_Ty, class function_Ty, class ... _Args>
+		void force_priority_async_task(welp::async_task_result<return_Ty>& box, const function_Ty& task, _Args&& ... args);
 
 		void finish_all_tasks() noexcept;
 		inline std::size_t waiting_task_count() const noexcept;
@@ -215,13 +215,13 @@ namespace welp
 		template <class function_Ty, class ... _Args> bool force_async_task_sub(const function_Ty& task, _Args&& ... args);
 		template <class function_Ty, class ... _Args> bool force_priority_async_task_sub(const function_Ty& task, _Args&& ... args);
 
-		template <class function_Ty, class ... _Args> bool force_async_task_sub(welp::async_task_end& package, const function_Ty& task, _Args&& ... args);
-		template <class function_Ty, class ... _Args> bool force_priority_async_task_sub(welp::async_task_end& package, const function_Ty& task, _Args&& ... args);
+		template <class function_Ty, class ... _Args> bool force_async_task_sub(welp::async_task_end& box, const function_Ty& task, _Args&& ... args);
+		template <class function_Ty, class ... _Args> bool force_priority_async_task_sub(welp::async_task_end& box, const function_Ty& task, _Args&& ... args);
 
 		template <class return_Ty, class function_Ty, class ... _Args>
-		bool force_async_task_sub(welp::async_task_result<return_Ty>& package, const function_Ty& task, _Args&& ... args);
+		bool force_async_task_sub(welp::async_task_result<return_Ty>& box, const function_Ty& task, _Args&& ... args);
 		template <class return_Ty, class function_Ty, class ... _Args>
-		bool force_priority_async_task_sub(welp::async_task_result<return_Ty>& package, const function_Ty& task, _Args&& ... args);
+		bool force_priority_async_task_sub(welp::async_task_result<return_Ty>& box, const function_Ty& task, _Args&& ... args);
 
 #ifdef WELP_THREADS_DEBUG_MODE
 		std::atomic<WELP_THREADS_RECORD_INT> record_max_occupancy{ 0 };
@@ -452,34 +452,34 @@ void welp::threads<_Allocator>::force_priority_async_task(const function_Ty& tas
 
 
 template <class _Allocator> template <class function_Ty, class ... _Args>
-bool welp::threads<_Allocator>::async_task(welp::async_task_end& package, const function_Ty& task, _Args&& ... args)
+bool welp::threads<_Allocator>::async_task(welp::async_task_end& box, const function_Ty& task, _Args&& ... args)
 {
 	while (waiting_for_finish.load()) {}
 	std::unique_lock<std::mutex> lock(task_mutex);
 
 	if (threads_running && (last_task_ptr + 1 != next_task_ptr) &&
 		((next_task_ptr != task_buffer_data_ptr) || (last_task_ptr + 1 != task_buffer_end_ptr)) &&
-		!package._task_running.load())
+		!box._task_running.load())
 	{
 		try
 		{
 			*last_task_ptr = [&]()
 			{
 				task(std::forward<_Args>(args)...);
-				package._task_running.store(false);
+				box._task_running.store(false);
 			};
 		}
 		catch (...)
 		{
-			package._task_denied.store(true);
+			box._task_denied.store(true);
 #ifdef WELP_THREADS_DEBUG_MODE
 			if (record_on) { record_denied_task_count.fetch_add(1); }
 #endif // WELP_THREADS_DEBUG_MODE
 			return false;
 		}
 
-		package._task_running.store(true);
-		package._task_denied.store(false);
+		box._task_running.store(true);
+		box._task_denied.store(false);
 
 		last_task_ptr++;
 		if (last_task_ptr == task_buffer_end_ptr) { last_task_ptr = task_buffer_data_ptr; }
@@ -498,7 +498,7 @@ bool welp::threads<_Allocator>::async_task(welp::async_task_end& package, const 
 	}
 	else
 	{
-		package._task_denied.store(true);
+		box._task_denied.store(true);
 #ifdef WELP_THREADS_DEBUG_MODE
 		if (record_on) { record_denied_task_count.fetch_add(1); }
 #endif // WELP_THREADS_DEBUG_MODE
@@ -507,18 +507,18 @@ bool welp::threads<_Allocator>::async_task(welp::async_task_end& package, const 
 }
 
 template <class _Allocator> template <class function_Ty, class ... _Args>
-void welp::threads<_Allocator>::force_async_task(welp::async_task_end& package, const function_Ty& task, _Args&& ... args)
+void welp::threads<_Allocator>::force_async_task(welp::async_task_end& box, const function_Ty& task, _Args&& ... args)
 {
 	if (threads_running)
 	{
 #ifdef WELP_THREADS_DEBUG_MODE
-		if (!force_async_task_sub(package, task, std::forward<_Args>(args)...))
+		if (!force_async_task_sub(box, task, std::forward<_Args>(args)...))
 		{
 			record_delayed_task_count.fetch_add(1);
 		}
 		else { return; }
 #endif // WELP_THREADS_DEBUG_MODE
-		while (!force_async_task_sub(package, task, std::forward<_Args>(args)...)) {}
+		while (!force_async_task_sub(box, task, std::forward<_Args>(args)...)) {}
 	}
 #ifdef WELP_THREADS_DEBUG_MODE
 	else { record_denied_task_count.fetch_add(1); }
@@ -526,14 +526,14 @@ void welp::threads<_Allocator>::force_async_task(welp::async_task_end& package, 
 }
 
 template <class _Allocator> template <class function_Ty, class ... _Args>
-bool welp::threads<_Allocator>::priority_async_task(welp::async_task_end& package, const function_Ty& task, _Args&& ... args)
+bool welp::threads<_Allocator>::priority_async_task(welp::async_task_end& box, const function_Ty& task, _Args&& ... args)
 {
 	while (waiting_for_finish.load()) {}
 	std::unique_lock<std::mutex> lock(task_mutex);
 
 	if (threads_running && (last_task_ptr + 1 != next_task_ptr) &&
 		((next_task_ptr != task_buffer_data_ptr) || (last_task_ptr + 1 != task_buffer_end_ptr)) &&
-		!package._task_running.load())
+		!box._task_running.load())
 	{
 		try
 		{
@@ -542,7 +542,7 @@ bool welp::threads<_Allocator>::priority_async_task(welp::async_task_end& packag
 				*(next_task_ptr - 1) = [&]()
 				{
 					task(std::forward<_Args>(args)...);
-					package._task_running.store(false);
+					box._task_running.store(false);
 				};
 				next_task_ptr--;
 			}
@@ -551,22 +551,22 @@ bool welp::threads<_Allocator>::priority_async_task(welp::async_task_end& packag
 				*(task_buffer_end_ptr - 1) = [&]()
 				{
 					task(std::forward<_Args>(args)...);
-					package._task_running.store(false);
+					box._task_running.store(false);
 				};
 				next_task_ptr = task_buffer_end_ptr - 1;
 			}
 		}
 		catch (...)
 		{
-			package._task_denied.store(true);
+			box._task_denied.store(true);
 #ifdef WELP_THREADS_DEBUG_MODE
 			if (record_on) { record_denied_task_count.fetch_add(1); }
 #endif // WELP_THREADS_DEBUG_MODE
 			return false;
 		}
 
-		package._task_running.store(true);
-		package._task_denied.store(false);
+		box._task_running.store(true);
+		box._task_denied.store(false);
 		waiting_tasks.fetch_add(1);
 		unfinished_tasks.fetch_add(1);
 		task_condition_var.notify_one();
@@ -582,7 +582,7 @@ bool welp::threads<_Allocator>::priority_async_task(welp::async_task_end& packag
 	}
 	else
 	{
-		package._task_denied.store(true);
+		box._task_denied.store(true);
 #ifdef WELP_THREADS_DEBUG_MODE
 		if (record_on) { record_denied_task_count.fetch_add(1); }
 #endif // WELP_THREADS_DEBUG_MODE
@@ -591,18 +591,18 @@ bool welp::threads<_Allocator>::priority_async_task(welp::async_task_end& packag
 }
 
 template <class _Allocator> template <class function_Ty, class ... _Args>
-void welp::threads<_Allocator>::force_priority_async_task(welp::async_task_end& package, const function_Ty& task, _Args&& ... args)
+void welp::threads<_Allocator>::force_priority_async_task(welp::async_task_end& box, const function_Ty& task, _Args&& ... args)
 {
 	if (threads_running)
 	{
 #ifdef WELP_THREADS_DEBUG_MODE
-		if (!force_priority_async_task_sub(package, task, std::forward<_Args>(args)...))
+		if (!force_priority_async_task_sub(box, task, std::forward<_Args>(args)...))
 		{
 			record_delayed_task_count.fetch_add(1);
 		}
 		else { return; }
 #endif // WELP_THREADS_DEBUG_MODE
-		while (!force_priority_async_task_sub(package, task, std::forward<_Args>(args)...)) {}
+		while (!force_priority_async_task_sub(box, task, std::forward<_Args>(args)...)) {}
 	}
 #ifdef WELP_THREADS_DEBUG_MODE
 	else { record_denied_task_count.fetch_add(1); }
@@ -611,34 +611,34 @@ void welp::threads<_Allocator>::force_priority_async_task(welp::async_task_end& 
 
 
 template <class _Allocator> template <class return_Ty, class function_Ty, class ... _Args>
-bool welp::threads<_Allocator>::async_task(welp::async_task_result<return_Ty>& package, const function_Ty& task, _Args&& ... args)
+bool welp::threads<_Allocator>::async_task(welp::async_task_result<return_Ty>& box, const function_Ty& task, _Args&& ... args)
 {
 	while (waiting_for_finish.load()) {}
 	std::unique_lock<std::mutex> lock(task_mutex);
 
 	if (threads_running && (last_task_ptr + 1 != next_task_ptr) &&
 		((next_task_ptr != task_buffer_data_ptr) || (last_task_ptr + 1 != task_buffer_end_ptr)) &&
-		!package._task_running.load())
+		!box._task_running.load())
 	{
 		try
 		{
 			*last_task_ptr = [&]()
 			{
-				package.stored_value = task(std::forward<_Args>(args)...);
-				package._task_running.store(false);
+				box.stored_value = task(std::forward<_Args>(args)...);
+				box._task_running.store(false);
 			};
 		}
 		catch (...)
 		{
-			package._task_denied.store(true);
+			box._task_denied.store(true);
 #ifdef WELP_THREADS_DEBUG_MODE
 			if (record_on) { record_denied_task_count.fetch_add(1); }
 #endif // WELP_THREADS_DEBUG_MODE
 			return false;
 		}
 
-		package._task_running.store(true);
-		package._task_denied.store(false);
+		box._task_running.store(true);
+		box._task_denied.store(false);
 
 		last_task_ptr++;
 		if (last_task_ptr == task_buffer_end_ptr) { last_task_ptr = task_buffer_data_ptr; }
@@ -657,7 +657,7 @@ bool welp::threads<_Allocator>::async_task(welp::async_task_result<return_Ty>& p
 	}
 	else
 	{
-		package._task_denied.store(true);
+		box._task_denied.store(true);
 #ifdef WELP_THREADS_DEBUG_MODE
 		if (record_on) { record_denied_task_count.fetch_add(1); }
 #endif // WELP_THREADS_DEBUG_MODE
@@ -666,18 +666,18 @@ bool welp::threads<_Allocator>::async_task(welp::async_task_result<return_Ty>& p
 }
 
 template <class _Allocator> template <class return_Ty, class function_Ty, class ... _Args>
-void welp::threads<_Allocator>::force_async_task(welp::async_task_result<return_Ty>& package, const function_Ty& task, _Args&& ... args)
+void welp::threads<_Allocator>::force_async_task(welp::async_task_result<return_Ty>& box, const function_Ty& task, _Args&& ... args)
 {
 	if (threads_running)
 	{
 #ifdef WELP_THREADS_DEBUG_MODE
-		if (!force_async_task_sub(package, task, std::forward<_Args>(args)...))
+		if (!force_async_task_sub(box, task, std::forward<_Args>(args)...))
 		{
 			record_delayed_task_count.fetch_add(1);
 		}
 		else { return; }
 #endif // WELP_THREADS_DEBUG_MODE
-		while (!force_async_task_sub(package, task, std::forward<_Args>(args)...)) {}
+		while (!force_async_task_sub(box, task, std::forward<_Args>(args)...)) {}
 	}
 #ifdef WELP_THREADS_DEBUG_MODE
 	else { record_denied_task_count.fetch_add(1); }
@@ -685,14 +685,14 @@ void welp::threads<_Allocator>::force_async_task(welp::async_task_result<return_
 }
 
 template <class _Allocator> template <class return_Ty, class function_Ty, class ... _Args>
-bool welp::threads<_Allocator>::priority_async_task(welp::async_task_result<return_Ty>& package, const function_Ty& task, _Args&& ... args)
+bool welp::threads<_Allocator>::priority_async_task(welp::async_task_result<return_Ty>& box, const function_Ty& task, _Args&& ... args)
 {
 	while (waiting_for_finish.load()) {}
 	std::unique_lock<std::mutex> lock(task_mutex);
 
 	if (threads_running && (last_task_ptr + 1 != next_task_ptr) &&
 		((next_task_ptr != task_buffer_data_ptr) || (last_task_ptr + 1 != task_buffer_end_ptr)) &&
-		!package._task_running.load())
+		!box._task_running.load())
 	{
 		try
 		{
@@ -700,8 +700,8 @@ bool welp::threads<_Allocator>::priority_async_task(welp::async_task_result<retu
 			{
 				*(next_task_ptr - 1) = [&]()
 				{
-					package.stored_value = task(std::forward<_Args>(args)...);
-					package._task_running.store(false);
+					box.stored_value = task(std::forward<_Args>(args)...);
+					box._task_running.store(false);
 				};
 				next_task_ptr--;
 			}
@@ -709,23 +709,23 @@ bool welp::threads<_Allocator>::priority_async_task(welp::async_task_result<retu
 			{
 				*(task_buffer_end_ptr - 1) = [&]()
 				{
-					package.stored_value = task(std::forward<_Args>(args)...);
-					package._task_running.store(false);
+					box.stored_value = task(std::forward<_Args>(args)...);
+					box._task_running.store(false);
 				};
 				next_task_ptr = task_buffer_end_ptr - 1;
 			}
 		}
 		catch (...)
 		{
-			package._task_denied.store(true);
+			box._task_denied.store(true);
 #ifdef WELP_THREADS_DEBUG_MODE
 			if (record_on) { record_denied_task_count.fetch_add(1); }
 #endif // WELP_THREADS_DEBUG_MODE
 			return false;
 		}
 
-		package._task_running.store(true);
-		package._task_denied.store(false);
+		box._task_running.store(true);
+		box._task_denied.store(false);
 		waiting_tasks.fetch_add(1);
 		unfinished_tasks.fetch_add(1);
 		task_condition_var.notify_one();
@@ -741,7 +741,7 @@ bool welp::threads<_Allocator>::priority_async_task(welp::async_task_result<retu
 	}
 	else
 	{
-		package._task_denied.store(true);
+		box._task_denied.store(true);
 #ifdef WELP_THREADS_DEBUG_MODE
 		if (record_on) { record_denied_task_count.fetch_add(1); }
 #endif // WELP_THREADS_DEBUG_MODE
@@ -750,18 +750,18 @@ bool welp::threads<_Allocator>::priority_async_task(welp::async_task_result<retu
 }
 
 template <class _Allocator> template <class return_Ty, class function_Ty, class ... _Args>
-void welp::threads<_Allocator>::force_priority_async_task(welp::async_task_result<return_Ty>& package, const function_Ty& task, _Args&& ... args)
+void welp::threads<_Allocator>::force_priority_async_task(welp::async_task_result<return_Ty>& box, const function_Ty& task, _Args&& ... args)
 {
 	if (threads_running)
 	{
 #ifdef WELP_THREADS_DEBUG_MODE
-		if (!force_priority_async_task_sub(package, task, std::forward<_Args>(args)...))
+		if (!force_priority_async_task_sub(box, task, std::forward<_Args>(args)...))
 		{
 			record_delayed_task_count.fetch_add(1);
 		}
 		else { return; }
 #endif // WELP_THREADS_DEBUG_MODE
-		while (!force_priority_async_task_sub(package, task, std::forward<_Args>(args)...)) {}
+		while (!force_priority_async_task_sub(box, task, std::forward<_Args>(args)...)) {}
 	}
 #ifdef WELP_THREADS_DEBUG_MODE
 	else { record_denied_task_count.fetch_add(1); }
@@ -1178,31 +1178,31 @@ bool welp::threads<_Allocator>::force_priority_async_task_sub(const function_Ty&
 }
 
 template <class _Allocator> template <class function_Ty, class ... _Args>
-bool welp::threads<_Allocator>::force_async_task_sub(welp::async_task_end& package, const function_Ty& task, _Args&& ... args)
+bool welp::threads<_Allocator>::force_async_task_sub(welp::async_task_end& box, const function_Ty& task, _Args&& ... args)
 {
 	while (waiting_for_finish.load()) {}
 	std::unique_lock<std::mutex> lock(task_mutex);
 
 	if (threads_running && (last_task_ptr + 1 != next_task_ptr) &&
 		((next_task_ptr != task_buffer_data_ptr) || (last_task_ptr + 1 != task_buffer_end_ptr)) &&
-		!package._task_running.load())
+		!box._task_running.load())
 	{
 		try
 		{
 			*last_task_ptr = [&]()
 			{
 				task(std::forward<_Args>(args)...);
-				package._task_running.store(false);
+				box._task_running.store(false);
 			};
 		}
 		catch (...)
 		{
-			package._task_denied.store(true);
+			box._task_denied.store(true);
 			return false;
 		}
 
-		package._task_running.store(true);
-		package._task_denied.store(false);
+		box._task_running.store(true);
+		box._task_denied.store(false);
 
 		last_task_ptr++;
 		if (last_task_ptr == task_buffer_end_ptr) { last_task_ptr = task_buffer_data_ptr; }
@@ -1221,20 +1221,20 @@ bool welp::threads<_Allocator>::force_async_task_sub(welp::async_task_end& packa
 	}
 	else
 	{
-		package._task_denied.store(true);
+		box._task_denied.store(true);
 		return false;
 	}
 }
 
 template <class _Allocator> template <class function_Ty, class ... _Args>
-bool welp::threads<_Allocator>::force_priority_async_task_sub(welp::async_task_end& package, const function_Ty& task, _Args&& ... args)
+bool welp::threads<_Allocator>::force_priority_async_task_sub(welp::async_task_end& box, const function_Ty& task, _Args&& ... args)
 {
 	while (waiting_for_finish.load()) {}
 	std::unique_lock<std::mutex> lock(task_mutex);
 
 	if (threads_running && (last_task_ptr + 1 != next_task_ptr) &&
 		((next_task_ptr != task_buffer_data_ptr) || (last_task_ptr + 1 != task_buffer_end_ptr)) &&
-		!package._task_running.load())
+		!box._task_running.load())
 	{
 		try
 		{
@@ -1243,7 +1243,7 @@ bool welp::threads<_Allocator>::force_priority_async_task_sub(welp::async_task_e
 				*(next_task_ptr - 1) = [&]()
 				{
 					task(std::forward<_Args>(args)...);
-					package._task_running.store(false);
+					box._task_running.store(false);
 				};
 				next_task_ptr--;
 			}
@@ -1252,19 +1252,19 @@ bool welp::threads<_Allocator>::force_priority_async_task_sub(welp::async_task_e
 				*(task_buffer_end_ptr - 1) = [&]()
 				{
 					task(std::forward<_Args>(args)...);
-					package._task_running.store(false);
+					box._task_running.store(false);
 				};
 				next_task_ptr = task_buffer_end_ptr - 1;
 			}
 		}
 		catch (...)
 		{
-			package._task_denied.store(true);
+			box._task_denied.store(true);
 			return false;
 		}
 
-		package._task_running.store(true);
-		package._task_denied.store(false);
+		box._task_running.store(true);
+		box._task_denied.store(false);
 		waiting_tasks.fetch_add(1);
 		unfinished_tasks.fetch_add(1);
 		task_condition_var.notify_one();
@@ -1280,37 +1280,37 @@ bool welp::threads<_Allocator>::force_priority_async_task_sub(welp::async_task_e
 	}
 	else
 	{
-		package._task_denied.store(true);
+		box._task_denied.store(true);
 		return false;
 	}
 }
 
 template <class _Allocator> template <class return_Ty, class function_Ty, class ... _Args>
-bool welp::threads<_Allocator>::force_async_task_sub(welp::async_task_result<return_Ty>& package, const function_Ty& task, _Args&& ... args)
+bool welp::threads<_Allocator>::force_async_task_sub(welp::async_task_result<return_Ty>& box, const function_Ty& task, _Args&& ... args)
 {
 	while (waiting_for_finish.load()) {}
 	std::unique_lock<std::mutex> lock(task_mutex);
 
 	if (threads_running && (last_task_ptr + 1 != next_task_ptr) &&
 		((next_task_ptr != task_buffer_data_ptr) || (last_task_ptr + 1 != task_buffer_end_ptr)) &&
-		!package._task_running.load())
+		!box._task_running.load())
 	{
 		try
 		{
 			*last_task_ptr = [&]()
 			{
-				package.stored_value = task(std::forward<_Args>(args)...);
-				package._task_running.store(false);
+				box.stored_value = task(std::forward<_Args>(args)...);
+				box._task_running.store(false);
 			};
 		}
 		catch (...)
 		{
-			package._task_denied.store(true);
+			box._task_denied.store(true);
 			return false;
 		}
 
-		package._task_running.store(true);
-		package._task_denied.store(false);
+		box._task_running.store(true);
+		box._task_denied.store(false);
 
 		last_task_ptr++;
 		if (last_task_ptr == task_buffer_end_ptr) { last_task_ptr = task_buffer_data_ptr; }
@@ -1329,20 +1329,20 @@ bool welp::threads<_Allocator>::force_async_task_sub(welp::async_task_result<ret
 	}
 	else
 	{
-		package._task_denied.store(true);
+		box._task_denied.store(true);
 		return false;
 	}
 }
 
 template <class _Allocator> template <class return_Ty, class function_Ty, class ... _Args>
-bool welp::threads<_Allocator>::force_priority_async_task_sub(welp::async_task_result<return_Ty>& package, const function_Ty& task, _Args&& ... args)
+bool welp::threads<_Allocator>::force_priority_async_task_sub(welp::async_task_result<return_Ty>& box, const function_Ty& task, _Args&& ... args)
 {
 	while (waiting_for_finish.load()) {}
 	std::unique_lock<std::mutex> lock(task_mutex);
 
 	if (threads_running && (last_task_ptr + 1 != next_task_ptr) &&
 		((next_task_ptr != task_buffer_data_ptr) || (last_task_ptr + 1 != task_buffer_end_ptr)) &&
-		!package._task_running.load())
+		!box._task_running.load())
 	{
 		try
 		{
@@ -1350,8 +1350,8 @@ bool welp::threads<_Allocator>::force_priority_async_task_sub(welp::async_task_r
 			{
 				*(next_task_ptr - 1) = [&]()
 				{
-					package.stored_value = task(std::forward<_Args>(args)...);
-					package._task_running.store(false);
+					box.stored_value = task(std::forward<_Args>(args)...);
+					box._task_running.store(false);
 				};
 				next_task_ptr--;
 			}
@@ -1359,20 +1359,20 @@ bool welp::threads<_Allocator>::force_priority_async_task_sub(welp::async_task_r
 			{
 				*(task_buffer_end_ptr - 1) = [&]()
 				{
-					package.stored_value = task(std::forward<_Args>(args)...);
-					package._task_running.store(false);
+					box.stored_value = task(std::forward<_Args>(args)...);
+					box._task_running.store(false);
 				};
 				next_task_ptr = task_buffer_end_ptr - 1;
 			}
 		}
 		catch (...)
 		{
-			package._task_denied.store(true);
+			box._task_denied.store(true);
 			return false;
 		}
 
-		package._task_running.store(true);
-		package._task_denied.store(false);
+		box._task_running.store(true);
+		box._task_denied.store(false);
 		waiting_tasks.fetch_add(1);
 		unfinished_tasks.fetch_add(1);
 		task_condition_var.notify_one();
@@ -1388,7 +1388,7 @@ bool welp::threads<_Allocator>::force_priority_async_task_sub(welp::async_task_r
 	}
 	else
 	{
-		package._task_denied.store(true);
+		box._task_denied.store(true);
 		return false;
 	}
 }
