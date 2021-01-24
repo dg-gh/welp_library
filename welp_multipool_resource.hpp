@@ -1,4 +1,4 @@
-// welp_multipool_resource.hpp - last update : 24 / 12 / 2020
+// welp_multipool_resource.hpp - last update : 24 / 01 / 2020
 // License <http://unlicense.org/> (statement below at the end of the file)
 
 
@@ -54,6 +54,9 @@
 
 #ifdef WELP_MULTIPOOL_INCLUDE_MUTEX
 #include <mutex>
+#ifndef WELP_MULTIPOOL_DEFAULT_MUTEX
+#define WELP_MULTIPOOL_DEFAULT_MUTEX std::mutex
+#endif
 #endif // WELP_MULTIPOOL_INCLUDE_MUTEX
 
 
@@ -75,7 +78,7 @@ namespace welp
 	// allocate and deallocate should preferably not throw
 	// allocate should preferably return a nullptr in case of allocation failure
 	// can be substituted by std::allocator<char> although a non-throwing version would be preferable
-	class _default_multipool_sub_allocator
+	class default_multipool_sub_allocator
 	{
 
 	public:
@@ -85,7 +88,7 @@ namespace welp
 	};
 
 	// memory resource single thread
-	template <std::size_t max_number_of_pools, class sub_allocator = welp::_default_multipool_sub_allocator> class multipool_resource
+	template <std::size_t max_number_of_pools, class sub_allocator = welp::default_multipool_sub_allocator> class multipool_resource
 	{
 
 	private:
@@ -215,7 +218,8 @@ namespace welp
 
 	// memory resource thread safe
 #ifdef WELP_MULTIPOOL_INCLUDE_MUTEX
-	template <std::size_t max_number_of_pools, class sub_allocator = welp::_default_multipool_sub_allocator> class multipool_resource_sync
+	template <std::size_t max_number_of_pools, class sub_allocator = welp::default_multipool_sub_allocator,
+		class mutex_Ty = WELP_MULTIPOOL_DEFAULT_MUTEX> class multipool_resource_sync
 	{
 
 	private:
@@ -242,7 +246,7 @@ namespace welp
 		bool record_on = false;
 #endif // WELP_MULTIPOOL_DEBUG_MODE
 
-		std::mutex resource_mutex;
+		mutex_Ty resource_mutex;
 
 	public:
 
@@ -297,8 +301,8 @@ namespace welp
 		void delete_pools();
 
 #ifdef WELP_MULTIPOOL_DEBUG_MODE
-		void record_start() noexcept { std::lock_guard<std::mutex> resource_lock(resource_mutex); record_on = true; };
-		void record_stop() noexcept { std::lock_guard<std::mutex> resource_lock(resource_mutex); record_on = false; };
+		void record_start() noexcept { std::lock_guard<mutex_Ty> resource_lock(resource_mutex); record_on = true; };
+		void record_stop() noexcept { std::lock_guard<mutex_Ty> resource_lock(resource_mutex); record_on = false; };
 		void record_reset() noexcept;
 
 		void record_say();
@@ -336,12 +340,12 @@ namespace welp
 #endif // WELP_MULTIPOOL_INCLUDE_FSTREAM
 #endif // WELP_MULTIPOOL_DEBUG_MODE
 
-		multipool_resource_sync(const welp::multipool_resource_sync<max_number_of_pools, sub_allocator>&) = delete;
-		welp::multipool_resource_sync<max_number_of_pools, sub_allocator>& operator=
-			(const welp::multipool_resource_sync<max_number_of_pools, sub_allocator>&) = delete;
-		multipool_resource_sync(welp::multipool_resource_sync<max_number_of_pools, sub_allocator>&&) = delete;
-		welp::multipool_resource_sync<max_number_of_pools, sub_allocator>& operator=
-			(welp::multipool_resource_sync<max_number_of_pools, sub_allocator>&&) = delete;
+		multipool_resource_sync(const welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>&) = delete;
+		welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>& operator=
+			(const welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>&) = delete;
+		multipool_resource_sync(welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>&&) = delete;
+		welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>& operator=
+			(welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>&&) = delete;
 	};
 #endif // WELP_MULTIPOOL_INCLUDE_MUTEX
 #endif // DFG_MULTIPOOL_NO_TEMPLATE
@@ -1484,8 +1488,8 @@ void welp::multipool_resource<max_number_of_pools, sub_allocator>::record_write
 
 #ifdef WELP_MULTIPOOL_INCLUDE_MUTEX
 // ALLOCATE
-template <std::size_t max_number_of_pools, class sub_allocator>
-template <class Ty> inline Ty* welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::allocate_type(std::size_t instances) noexcept
+template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
+template <class Ty> inline Ty* welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::allocate_type(std::size_t instances) noexcept
 {
 	instances *= sizeof(Ty);
 #ifdef WELP_MULTIPOOL_DEBUG_MODE
@@ -1498,7 +1502,7 @@ template <class Ty> inline Ty* welp::multipool_resource_sync<max_number_of_pools
 	{
 		if (instances <= block_size[n])
 		{
-			std::lock_guard<std::mutex> resource_lock(resource_mutex);
+			std::lock_guard<mutex_Ty> resource_lock(resource_mutex);
 
 			if (first_address_ptr[n] < current_address_ptr[n])
 			{
@@ -1529,8 +1533,8 @@ template <class Ty> inline Ty* welp::multipool_resource_sync<max_number_of_pools
 
 
 // ALLOCATE PADDED
-template <std::size_t max_number_of_pools, class sub_allocator>
-template <class Ty> inline Ty* welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::allocate_type_padded(std::size_t instances, std::size_t line_size) noexcept
+template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
+template <class Ty> inline Ty* welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::allocate_type_padded(std::size_t instances, std::size_t line_size) noexcept
 {
 	instances *= sizeof(Ty);
 	{
@@ -1547,7 +1551,7 @@ template <class Ty> inline Ty* welp::multipool_resource_sync<max_number_of_pools
 	{
 		if (instances <= block_size[n])
 		{
-			std::lock_guard<std::mutex> resource_lock(resource_mutex);
+			std::lock_guard<mutex_Ty> resource_lock(resource_mutex);
 
 			if (first_address_ptr[n] < current_address_ptr[n])
 			{
@@ -1578,8 +1582,8 @@ template <class Ty> inline Ty* welp::multipool_resource_sync<max_number_of_pools
 
 
 // ALLOCATE IN POOL
-template <std::size_t max_number_of_pools, class sub_allocator>
-template <class Ty> inline Ty* welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::allocate_type_in_pool(std::size_t instances, std::size_t pool_number) noexcept
+template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
+template <class Ty> inline Ty* welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::allocate_type_in_pool(std::size_t instances, std::size_t pool_number) noexcept
 {
 	instances *= sizeof(Ty);
 #ifdef WELP_MULTIPOOL_DEBUG_MODE
@@ -1590,7 +1594,7 @@ template <class Ty> inline Ty* welp::multipool_resource_sync<max_number_of_pools
 #endif // WELP_MULTIPOOL_DEBUG_MODE
 	if (instances <= block_size[pool_number])
 	{
-		std::lock_guard<std::mutex> resource_lock(resource_mutex);
+		std::lock_guard<mutex_Ty> resource_lock(resource_mutex);
 
 		if (first_address_ptr[pool_number] < current_address_ptr[pool_number])
 		{
@@ -1622,8 +1626,8 @@ template <class Ty> inline Ty* welp::multipool_resource_sync<max_number_of_pools
 
 
 // ALLOCATE IN POOL RANGE
-template <std::size_t max_number_of_pools, class sub_allocator>
-template <class Ty> inline Ty* welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::allocate_type_in_pool_range(std::size_t instances,
+template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
+template <class Ty> inline Ty* welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::allocate_type_in_pool_range(std::size_t instances,
 	std::size_t first_pool, std::size_t end_pool) noexcept
 {
 	instances *= sizeof(Ty);
@@ -1637,7 +1641,7 @@ template <class Ty> inline Ty* welp::multipool_resource_sync<max_number_of_pools
 	{
 		if (instances <= block_size[n])
 		{
-			std::lock_guard<std::mutex> resource_lock(resource_mutex);
+			std::lock_guard<mutex_Ty> resource_lock(resource_mutex);
 
 			if (first_address_ptr[n] < current_address_ptr[n])
 			{
@@ -1668,8 +1672,8 @@ template <class Ty> inline Ty* welp::multipool_resource_sync<max_number_of_pools
 
 
 // ALLOCATE PADDED IN POOL RANGE
-template <std::size_t max_number_of_pools, class sub_allocator>
-template <class Ty> inline Ty* welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::allocate_type_padded_in_pool_range(
+template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
+template <class Ty> inline Ty* welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::allocate_type_padded_in_pool_range(
 	std::size_t instances, std::size_t line_size, std::size_t first_pool, std::size_t end_pool) noexcept
 {
 	instances *= sizeof(Ty);
@@ -1687,7 +1691,7 @@ template <class Ty> inline Ty* welp::multipool_resource_sync<max_number_of_pools
 	{
 		if (instances <= block_size[n])
 		{
-			std::lock_guard<std::mutex> resource_lock(resource_mutex);
+			std::lock_guard<mutex_Ty> resource_lock(resource_mutex);
 
 			if (first_address_ptr[n] < current_address_ptr[n])
 			{
@@ -1718,8 +1722,8 @@ template <class Ty> inline Ty* welp::multipool_resource_sync<max_number_of_pools
 
 
 // ALLOCATE BYTE
-template <std::size_t max_number_of_pools, class sub_allocator>
-inline void* welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::allocate_byte(std::size_t bytes) noexcept
+template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
+inline void* welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::allocate_byte(std::size_t bytes) noexcept
 {
 #ifdef WELP_MULTIPOOL_DEBUG_MODE
 	if (record_on)
@@ -1731,7 +1735,7 @@ inline void* welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::
 	{
 		if (bytes <= block_size[n])
 		{
-			std::lock_guard<std::mutex> resource_lock(resource_mutex);
+			std::lock_guard<mutex_Ty> resource_lock(resource_mutex);
 
 			if (first_address_ptr[n] < current_address_ptr[n])
 			{
@@ -1762,8 +1766,8 @@ inline void* welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::
 
 
 // ALLOCATE BYTE PADDED
-template <std::size_t max_number_of_pools, class sub_allocator>
-inline void* welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::allocate_byte_padded(std::size_t bytes, std::size_t line_size) noexcept
+template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
+inline void* welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::allocate_byte_padded(std::size_t bytes, std::size_t line_size) noexcept
 {
 	{
 		std::size_t line_size_m1 = line_size - 1;
@@ -1779,7 +1783,7 @@ inline void* welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::
 	{
 		if (bytes <= block_size[n])
 		{
-			std::lock_guard<std::mutex> resource_lock(resource_mutex);
+			std::lock_guard<mutex_Ty> resource_lock(resource_mutex);
 
 			if (first_address_ptr[n] < current_address_ptr[n])
 			{
@@ -1810,8 +1814,8 @@ inline void* welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::
 
 
 // ALLOCATE BYTE IN POOL
-template <std::size_t max_number_of_pools, class sub_allocator>
-inline void* welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::allocate_byte_in_pool(std::size_t bytes, std::size_t pool_number) noexcept
+template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
+inline void* welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::allocate_byte_in_pool(std::size_t bytes, std::size_t pool_number) noexcept
 {
 #ifdef WELP_MULTIPOOL_DEBUG_MODE
 	if (record_on)
@@ -1821,7 +1825,7 @@ inline void* welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::
 #endif // WELP_MULTIPOOL_DEBUG_MODE
 	if (bytes <= block_size[pool_number])
 	{
-		std::lock_guard<std::mutex> resource_lock(resource_mutex);
+		std::lock_guard<mutex_Ty> resource_lock(resource_mutex);
 
 		if (first_address_ptr[pool_number] < current_address_ptr[pool_number])
 		{
@@ -1853,8 +1857,8 @@ inline void* welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::
 
 
 // ALLOCATE BYTE IN POOL RANGE
-template <std::size_t max_number_of_pools, class sub_allocator>
-inline void* welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::allocate_byte_in_pool_range(std::size_t bytes,
+template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
+inline void* welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::allocate_byte_in_pool_range(std::size_t bytes,
 	std::size_t first_pool, std::size_t end_pool) noexcept
 {
 #ifdef WELP_MULTIPOOL_DEBUG_MODE
@@ -1867,7 +1871,7 @@ inline void* welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::
 	{
 		if (bytes <= block_size[n])
 		{
-			std::lock_guard<std::mutex> resource_lock(resource_mutex);
+			std::lock_guard<mutex_Ty> resource_lock(resource_mutex);
 
 			if (first_address_ptr[n] < current_address_ptr[n])
 			{
@@ -1898,8 +1902,8 @@ inline void* welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::
 
 
 // ALLOCATE BYTE PADDED IN POOL RANGE
-template <std::size_t max_number_of_pools, class sub_allocator>
-inline void* welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::allocate_byte_padded_in_pool_range(
+template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
+inline void* welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::allocate_byte_padded_in_pool_range(
 	std::size_t bytes, std::size_t line_size, std::size_t first_pool, std::size_t end_pool) noexcept
 {
 	{
@@ -1916,7 +1920,7 @@ inline void* welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::
 	{
 		if (bytes <= block_size[n])
 		{
-			std::lock_guard<std::mutex> resource_lock(resource_mutex);
+			std::lock_guard<mutex_Ty> resource_lock(resource_mutex);
 
 			if (first_address_ptr[n] < current_address_ptr[n])
 			{
@@ -1947,15 +1951,15 @@ inline void* welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::
 
 
 // DEALLOCATE
-template <std::size_t max_number_of_pools, class sub_allocator>
-template <class Ty> inline bool welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::deallocate_ptr(Ty* ptr) noexcept
+template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
+template <class Ty> inline bool welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::deallocate_ptr(Ty* ptr) noexcept
 {
 	char* char_ptr = static_cast<char*>(static_cast<void*>(ptr));
 	for (std::size_t n = 0; n < number_of_pools; n++)
 	{
 		if ((data_ptr[n] <= char_ptr) && (char_ptr < data_ptr[n] + block_instances[n] * block_size[n]))
 		{
-			std::lock_guard<std::mutex> resource_lock(resource_mutex);
+			std::lock_guard<mutex_Ty> resource_lock(resource_mutex);
 #ifdef WELP_MULTIPOOL_DEBUG_MODE
 			if (record_on) { record_deallocations[n]++; }
 #endif // WELP_MULTIPOOL_DEBUG_MODE
@@ -1972,13 +1976,13 @@ template <class Ty> inline bool welp::multipool_resource_sync<max_number_of_pool
 
 
 // DEALLOCATE IN POOL
-template <std::size_t max_number_of_pools, class sub_allocator>
-template <class Ty> inline bool welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::deallocate_ptr_in_pool(Ty* ptr, std::size_t pool_number) noexcept
+template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
+template <class Ty> inline bool welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::deallocate_ptr_in_pool(Ty* ptr, std::size_t pool_number) noexcept
 {
 	char* char_ptr = static_cast<char*>(static_cast<void*>(ptr));
 	if ((data_ptr[pool_number] <= char_ptr) && (char_ptr < data_ptr[pool_number] + block_instances[pool_number] * block_size[pool_number]))
 	{
-		std::lock_guard<std::mutex> resource_lock(resource_mutex);
+		std::lock_guard<mutex_Ty> resource_lock(resource_mutex);
 #ifdef WELP_MULTIPOOL_DEBUG_MODE
 		if (record_on) { record_deallocations[pool_number]++; }
 #endif // WELP_MULTIPOOL_DEBUG_MODE
@@ -1994,8 +1998,8 @@ template <class Ty> inline bool welp::multipool_resource_sync<max_number_of_pool
 
 
 // DEALLOCATE IN POOL RANGE
-template <std::size_t max_number_of_pools, class sub_allocator>
-template <class Ty> inline bool welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::deallocate_ptr_in_pool_range(Ty* ptr,
+template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
+template <class Ty> inline bool welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::deallocate_ptr_in_pool_range(Ty* ptr,
 	std::size_t first_pool, std::size_t end_pool) noexcept
 {
 	char* char_ptr = static_cast<char*>(static_cast<void*>(ptr));
@@ -2003,7 +2007,7 @@ template <class Ty> inline bool welp::multipool_resource_sync<max_number_of_pool
 	{
 		if ((data_ptr[n] <= char_ptr) && (char_ptr < data_ptr[n] + block_instances[n] * block_size[n]))
 		{
-			std::lock_guard<std::mutex> resource_lock(resource_mutex);
+			std::lock_guard<mutex_Ty> resource_lock(resource_mutex);
 #ifdef WELP_MULTIPOOL_DEBUG_MODE
 			if (record_on) { record_deallocations[n]++; }
 #endif // WELP_MULTIPOOL_DEBUG_MODE
@@ -2020,15 +2024,15 @@ template <class Ty> inline bool welp::multipool_resource_sync<max_number_of_pool
 
 
 // BLOCKS REMAINING
-template <std::size_t max_number_of_pools, class sub_allocator>
-template <class Ty> inline std::size_t welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::blocks_remaining_type() noexcept
+template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
+template <class Ty> inline std::size_t welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::blocks_remaining_type() noexcept
 {
 	std::size_t N = sizeof(Ty);
 	for (std::size_t n = 0; n < number_of_pools; n++)
 	{
 		if (N <= block_size[n])
 		{
-			std::lock_guard<std::mutex> resource_lock(resource_mutex);
+			std::lock_guard<mutex_Ty> resource_lock(resource_mutex);
 			return static_cast<std::size_t>(current_address_ptr[n] - first_address_ptr[n]);
 		}
 	}
@@ -2036,15 +2040,15 @@ template <class Ty> inline std::size_t welp::multipool_resource_sync<max_number_
 }
 
 
-template <std::size_t max_number_of_pools, class sub_allocator>
-template <class Ty> inline std::size_t welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::blocks_remaining_type(std::size_t instances) noexcept
+template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
+template <class Ty> inline std::size_t welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::blocks_remaining_type(std::size_t instances) noexcept
 {
 	instances *= sizeof(Ty);
 	for (std::size_t n = 0; n < number_of_pools; n++)
 	{
 		if (instances <= block_size[n])
 		{
-			std::lock_guard<std::mutex> resource_lock(resource_mutex);
+			std::lock_guard<mutex_Ty> resource_lock(resource_mutex);
 			return static_cast<std::size_t>(current_address_ptr[n] - first_address_ptr[n]);
 		}
 	}
@@ -2052,14 +2056,14 @@ template <class Ty> inline std::size_t welp::multipool_resource_sync<max_number_
 }
 
 
-template <std::size_t max_number_of_pools, class sub_allocator>
-inline std::size_t welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::blocks_remaining_byte(std::size_t bytes) noexcept
+template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
+inline std::size_t welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::blocks_remaining_byte(std::size_t bytes) noexcept
 {
 	for (std::size_t n = 0; n < number_of_pools; n++)
 	{
 		if (bytes <= block_size[n])
 		{
-			std::lock_guard<std::mutex> resource_lock(resource_mutex);
+			std::lock_guard<mutex_Ty> resource_lock(resource_mutex);
 			return static_cast<std::size_t>(current_address_ptr[n] - first_address_ptr[n]);
 		}
 	}
@@ -2067,20 +2071,20 @@ inline std::size_t welp::multipool_resource_sync<max_number_of_pools, sub_alloca
 }
 
 
-template <std::size_t max_number_of_pools, class sub_allocator>
-inline std::size_t welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::blocks_remaining_in_pool(std::size_t pool_number) noexcept
+template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
+inline std::size_t welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::blocks_remaining_in_pool(std::size_t pool_number) noexcept
 {
-	std::lock_guard<std::mutex> resource_lock(resource_mutex);
+	std::lock_guard<mutex_Ty> resource_lock(resource_mutex);
 	return static_cast<std::size_t>(current_address_ptr[pool_number] - first_address_ptr[pool_number]);
 }
 
 
 // SORT POOLS
 #ifdef WELP_MULTIPOOL_INCLUDE_ALGORITHM
-template <std::size_t max_number_of_pools, class sub_allocator>
-inline void welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::sort_pools() noexcept
+template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
+inline void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::sort_pools() noexcept
 {
-	std::lock_guard<std::mutex> resource_lock(resource_mutex);
+	std::lock_guard<mutex_Ty> resource_lock(resource_mutex);
 
 	for (std::size_t n = 0; n < number_of_pools; n++)
 	{
@@ -2089,10 +2093,10 @@ inline void welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::s
 }
 
 
-template <std::size_t max_number_of_pools, class sub_allocator>
-inline void welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::sort_pool(std::size_t n) noexcept
+template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
+inline void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::sort_pool(std::size_t n) noexcept
 {
-	std::lock_guard<std::mutex> resource_lock(resource_mutex);
+	std::lock_guard<mutex_Ty> resource_lock(resource_mutex);
 
 	if (n < number_of_pools)
 	{
@@ -2101,12 +2105,12 @@ inline void welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::s
 }
 
 
-template <std::size_t max_number_of_pools, class sub_allocator>
-inline void welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::sort_pool_range(std::size_t first_pool, std::size_t end_pool) noexcept
+template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
+inline void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::sort_pool_range(std::size_t first_pool, std::size_t end_pool) noexcept
 {
 	if (first_pool < number_of_pools)
 	{
-		std::lock_guard<std::mutex> resource_lock(resource_mutex);
+		std::lock_guard<mutex_Ty> resource_lock(resource_mutex);
 
 		if (end_pool > number_of_pools) { end_pool = number_of_pools; }
 		for (std::size_t n = first_pool; n < end_pool; n++)
@@ -2119,10 +2123,10 @@ inline void welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::s
 
 
 // RESET POOLS
-template <std::size_t max_number_of_pools, class sub_allocator>
-inline void welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::reset_pools() noexcept
+template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
+inline void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::reset_pools() noexcept
 {
-	std::lock_guard<std::mutex> resource_lock(resource_mutex);
+	std::lock_guard<mutex_Ty> resource_lock(resource_mutex);
 
 	for (std::size_t n = 0; n < number_of_pools; n++)
 	{
@@ -2138,10 +2142,10 @@ inline void welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::r
 }
 
 
-template <std::size_t max_number_of_pools, class sub_allocator>
-inline void welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::reset_pool(std::size_t pool_number) noexcept
+template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
+inline void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::reset_pool(std::size_t pool_number) noexcept
 {
-	std::lock_guard<std::mutex> resource_lock(resource_mutex);
+	std::lock_guard<mutex_Ty> resource_lock(resource_mutex);
 
 	if (pool_number < number_of_pools)
 	{
@@ -2157,12 +2161,12 @@ inline void welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::r
 }
 
 
-template <std::size_t max_number_of_pools, class sub_allocator>
-inline void welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::reset_pool_range(std::size_t first_pool, std::size_t end_pool) noexcept
+template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
+inline void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::reset_pool_range(std::size_t first_pool, std::size_t end_pool) noexcept
 {
 	if (first_pool < number_of_pools)
 	{
-		std::lock_guard<std::mutex> resource_lock(resource_mutex);
+		std::lock_guard<mutex_Ty> resource_lock(resource_mutex);
 
 		if (end_pool > number_of_pools) { end_pool = number_of_pools; }
 		for (std::size_t n = first_pool; n < end_pool; n++)
@@ -2181,8 +2185,8 @@ inline void welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::r
 
 
 // NEW POOLS
-template <std::size_t max_number_of_pools, class sub_allocator>
-bool welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::new_pools(std::size_t input_number_of_pools, const std::size_t* const input_block_size,
+template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
+bool welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::new_pools(std::size_t input_number_of_pools, const std::size_t* const input_block_size,
 	const std::size_t* const input_block_instances, std::size_t pool_align)
 {
 	delete_pools();
@@ -2226,8 +2230,8 @@ bool welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::new_pool
 
 
 #ifdef WELP_MULTIPOOL_INCLUDE_INITLIST
-template <std::size_t max_number_of_pools, class sub_allocator>
-bool welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::new_pools(std::size_t input_number_of_pools, std::initializer_list<std::size_t> input_block_size,
+template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
+bool welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::new_pools(std::size_t input_number_of_pools, std::initializer_list<std::size_t> input_block_size,
 	std::initializer_list<std::size_t> input_block_instances, std::size_t pool_align)
 {
 	delete_pools();
@@ -2277,8 +2281,8 @@ bool welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::new_pool
 
 
 // DELETE POOLS
-template <std::size_t max_number_of_pools, class sub_allocator>
-void welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::delete_pools()
+template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
+void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::delete_pools()
 {
 	sub_allocator _sub_allocator;
 	for (std::size_t n = 0; n < max_number_of_pools; n++)
@@ -2307,10 +2311,10 @@ void welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::delete_p
 
 #ifdef WELP_MULTIPOOL_DEBUG_MODE
 // RECORD RESET
-template <std::size_t max_number_of_pools, class sub_allocator>
-void welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::record_reset() noexcept
+template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
+void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::record_reset() noexcept
 {
-	std::lock_guard<std::mutex> resource_lock(resource_mutex);
+	std::lock_guard<mutex_Ty> resource_lock(resource_mutex);
 	std::memset(record_allocations, 0, max_number_of_pools * sizeof(WELP_MULTIPOOL_RECORD_INT));
 	std::memset(record_deallocations, 0, max_number_of_pools * sizeof(WELP_MULTIPOOL_RECORD_INT));
 	std::memset(record_max_occupancy, 0, max_number_of_pools * sizeof(std::size_t));
@@ -2323,8 +2327,8 @@ void welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::record_r
 
 
 // RECORD SAY
-template <std::size_t max_number_of_pools, class sub_allocator>
-void welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::record_say_sub()
+template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
+void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::record_say_sub()
 {
 	WELP_MULTIPOOL_RECORD_INT total_allocations = 0;
 	WELP_MULTIPOOL_RECORD_INT total_deallocations = 0;
@@ -2373,55 +2377,55 @@ void welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::record_s
 }
 
 
-template <std::size_t max_number_of_pools, class sub_allocator>
-void welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::record_say()
+template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
+void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::record_say()
 {
-	std::lock_guard<std::mutex> resource_lock(resource_mutex);
+	std::lock_guard<mutex_Ty> resource_lock(resource_mutex);
 	record_say_sub();
 }
 
 
-template <std::size_t max_number_of_pools, class sub_allocator>
-template <typename msg_Ty> void welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::record_say(const msg_Ty& msg)
+template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
+template <typename msg_Ty> void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::record_say(const msg_Ty& msg)
 {
-	std::lock_guard<std::mutex> resource_lock(resource_mutex);
+	std::lock_guard<mutex_Ty> resource_lock(resource_mutex);
 	std::cout << "[ " << msg << " ]\n"; record_say_sub();
 }
 
 
-template <std::size_t max_number_of_pools, class sub_allocator>
-template <typename msg_Ty1, typename msg_Ty2> void welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::record_say
+template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
+template <typename msg_Ty1, typename msg_Ty2> void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::record_say
 (const msg_Ty1& msg1, const msg_Ty2& msg2)
 {
-	std::lock_guard<std::mutex> resource_lock(resource_mutex);
+	std::lock_guard<mutex_Ty> resource_lock(resource_mutex);
 	std::cout << "[ " << msg1 << " " << msg2 << " ]\n"; record_say_sub();
 }
 
 
-template <std::size_t max_number_of_pools, class sub_allocator>
+template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
 template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3>
-void welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::record_say
+void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::record_say
 (const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3)
 {
-	std::lock_guard<std::mutex> resource_lock(resource_mutex);
+	std::lock_guard<mutex_Ty> resource_lock(resource_mutex);
 	std::cout << "[ " << msg1 << " " << msg2 << " " << msg3 << " ]\n"; record_say_sub();
 }
 
 
-template <std::size_t max_number_of_pools, class sub_allocator>
+template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
 template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3, typename msg_Ty4>
-void welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::record_say
+void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::record_say
 (const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3, const msg_Ty4& msg4)
 {
-	std::lock_guard<std::mutex> resource_lock(resource_mutex);
+	std::lock_guard<mutex_Ty> resource_lock(resource_mutex);
 	std::cout << "[ " << msg1 << " " << msg2 << " " << msg3 << " " << msg4 << " ]\n"; record_say_sub();
 }
 
 
 #ifdef WELP_MULTIPOOL_INCLUDE_FSTREAM
 // RECORD WRITE
-template <std::size_t max_number_of_pools, class sub_allocator>
-void welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::record_write_sub(std::ofstream& rec_write)
+template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
+void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::record_write_sub(std::ofstream& rec_write)
 {
 	WELP_MULTIPOOL_RECORD_INT total_allocations = 0;
 	WELP_MULTIPOOL_RECORD_INT total_deallocations = 0;
@@ -2461,10 +2465,10 @@ void welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::record_w
 }
 
 
-template <std::size_t max_number_of_pools, class sub_allocator>
-void welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::record_write(const char* const filename)
+template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
+void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::record_write(const char* const filename)
 {
-	std::lock_guard<std::mutex> resource_lock(resource_mutex);
+	std::lock_guard<mutex_Ty> resource_lock(resource_mutex);
 	std::ofstream rec_write;
 	rec_write.open(filename, std::ios::app);
 	record_write_sub(rec_write);
@@ -2472,10 +2476,10 @@ void welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::record_w
 }
 
 
-template <std::size_t max_number_of_pools, class sub_allocator>
-template <typename msg_Ty> void welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::record_write(const char* const filename, const msg_Ty& msg)
+template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
+template <typename msg_Ty> void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::record_write(const char* const filename, const msg_Ty& msg)
 {
-	std::lock_guard<std::mutex> resource_lock(resource_mutex);
+	std::lock_guard<mutex_Ty> resource_lock(resource_mutex);
 	std::ofstream rec_write;
 	rec_write.open(filename, std::ios::app);
 	rec_write << "[ " << msg << " ]\n";
@@ -2484,11 +2488,11 @@ template <typename msg_Ty> void welp::multipool_resource_sync<max_number_of_pool
 }
 
 
-template <std::size_t max_number_of_pools, class sub_allocator>
-template <typename msg_Ty1, typename msg_Ty2> void welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::record_write
+template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
+template <typename msg_Ty1, typename msg_Ty2> void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::record_write
 (const char* const filename, const msg_Ty1& msg1, const msg_Ty2& msg2)
 {
-	std::lock_guard<std::mutex> resource_lock(resource_mutex);
+	std::lock_guard<mutex_Ty> resource_lock(resource_mutex);
 	std::ofstream rec_write;
 	rec_write.open(filename, std::ios::app);
 	rec_write << "[ " << msg1 << " " << msg2 << " ]\n";
@@ -2497,12 +2501,12 @@ template <typename msg_Ty1, typename msg_Ty2> void welp::multipool_resource_sync
 }
 
 
-template <std::size_t max_number_of_pools, class sub_allocator>
+template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
 template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3>
-void welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::record_write
+void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::record_write
 (const char* const filename, const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3)
 {
-	std::lock_guard<std::mutex> resource_lock(resource_mutex);
+	std::lock_guard<mutex_Ty> resource_lock(resource_mutex);
 	std::ofstream rec_write;
 	rec_write.open(filename, std::ios::app);
 	rec_write << "[ " << msg1 << " " << msg2 << " " << msg3 << " ]\n";
@@ -2511,12 +2515,12 @@ void welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::record_w
 }
 
 
-template <std::size_t max_number_of_pools, class sub_allocator>
+template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
 template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3, typename msg_Ty4>
-void welp::multipool_resource_sync<max_number_of_pools, sub_allocator>::record_write
+void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::record_write
 (const char* const filename, const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3, const msg_Ty4& msg4)
 {
-	std::lock_guard<std::mutex> resource_lock(resource_mutex);
+	std::lock_guard<mutex_Ty> resource_lock(resource_mutex);
 	std::ofstream rec_write;
 	rec_write.open(filename, std::ios::app);
 	rec_write << "[ " << msg1 << " " << msg2 << " " << msg3 << " " << msg4 << " ]\n";
