@@ -345,7 +345,7 @@ namespace welp
 			(welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>&&) = delete;
 	};
 #endif // WELP_MULTIPOOL_INCLUDE_MUTEX
-#endif // DFG_MULTIPOOL_NO_TEMPLATE
+#endif // WELP_MULTIPOOL_NO_TEMPLATE
 
 	// non-templated memory resource single thread with a maximum of 4 pools
 	class quadpool_resource
