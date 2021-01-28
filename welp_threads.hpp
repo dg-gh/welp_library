@@ -332,8 +332,8 @@ bool welp::threads<_Allocator>::async_task(const function_Ty& task, _Args&& ... 
 
 		last_task_ptr++;
 		if (last_task_ptr == task_buffer_end_ptr) { last_task_ptr = task_buffer_data_ptr; }
-		waiting_tasks.fetch_add(1);
-		unfinished_tasks.fetch_add(1);
+		waiting_tasks.fetch_add(1, std::memory_order_relaxed);
+		unfinished_tasks.fetch_add(1, std::memory_order_relaxed);
 		task_condition_var.notify_one();
 #ifdef WELP_THREADS_DEBUG_MODE
 		if (record_on)
@@ -362,14 +362,14 @@ void welp::threads<_Allocator>::force_async_task(const function_Ty& task, _Args&
 #ifdef WELP_THREADS_DEBUG_MODE
 		if (!force_async_task_sub(task, std::forward<_Args>(args)...))
 		{
-			record_delayed_task_count.fetch_add(1);
+			record_delayed_task_count.fetch_add(1, std::memory_order_relaxed);
 		}
 		else { return; }
 #endif // WELP_THREADS_DEBUG_MODE
 		while (!force_async_task_sub(task, std::forward<_Args>(args)...)) {}
 	}
 #ifdef WELP_THREADS_DEBUG_MODE
-	else { record_denied_task_count.fetch_add(1); }
+	else { record_denied_task_count.fetch_add(1, std::memory_order_relaxed); }
 #endif // WELP_THREADS_DEBUG_MODE
 }
 
@@ -409,8 +409,8 @@ bool welp::threads<_Allocator>::priority_async_task(const function_Ty& task, _Ar
 			return false;
 		}
 
-		waiting_tasks.fetch_add(1);
-		unfinished_tasks.fetch_add(1);
+		waiting_tasks.fetch_add(1, std::memory_order_relaxed);
+		unfinished_tasks.fetch_add(1, std::memory_order_relaxed);
 		task_condition_var.notify_one();
 #ifdef WELP_THREADS_DEBUG_MODE
 		if (record_on)
@@ -439,14 +439,14 @@ void welp::threads<_Allocator>::force_priority_async_task(const function_Ty& tas
 #ifdef WELP_THREADS_DEBUG_MODE
 		if (!force_priority_async_task_sub(task, std::forward<_Args>(args)...))
 		{
-			record_delayed_task_count.fetch_add(1);
+			record_delayed_task_count.fetch_add(1, std::memory_order_relaxed);
 		}
 		else { return; }
 #endif // WELP_THREADS_DEBUG_MODE
 		while (!force_priority_async_task_sub(task, std::forward<_Args>(args)...)) {}
 	}
 #ifdef WELP_THREADS_DEBUG_MODE
-	else { record_denied_task_count.fetch_add(1); }
+	else { record_denied_task_count.fetch_add(1, std::memory_order_relaxed); }
 #endif // WELP_THREADS_DEBUG_MODE
 }
 
@@ -483,8 +483,8 @@ bool welp::threads<_Allocator>::async_task(welp::async_task_end& box, const func
 
 		last_task_ptr++;
 		if (last_task_ptr == task_buffer_end_ptr) { last_task_ptr = task_buffer_data_ptr; }
-		waiting_tasks.fetch_add(1);
-		unfinished_tasks.fetch_add(1);
+		waiting_tasks.fetch_add(1, std::memory_order_relaxed);
+		unfinished_tasks.fetch_add(1, std::memory_order_relaxed);
 		task_condition_var.notify_one();
 #ifdef WELP_THREADS_DEBUG_MODE
 		if (record_on)
@@ -514,14 +514,14 @@ void welp::threads<_Allocator>::force_async_task(welp::async_task_end& box, cons
 #ifdef WELP_THREADS_DEBUG_MODE
 		if (!force_async_task_sub(box, task, std::forward<_Args>(args)...))
 		{
-			record_delayed_task_count.fetch_add(1);
+			record_delayed_task_count.fetch_add(1, std::memory_order_relaxed);
 		}
 		else { return; }
 #endif // WELP_THREADS_DEBUG_MODE
 		while (!force_async_task_sub(box, task, std::forward<_Args>(args)...)) {}
 	}
 #ifdef WELP_THREADS_DEBUG_MODE
-	else { record_denied_task_count.fetch_add(1); }
+	else { record_denied_task_count.fetch_add(1, std::memory_order_relaxed); }
 #endif // WELP_THREADS_DEBUG_MODE
 }
 
@@ -567,8 +567,8 @@ bool welp::threads<_Allocator>::priority_async_task(welp::async_task_end& box, c
 
 		box._task_running.store(true);
 		box._task_denied.store(false);
-		waiting_tasks.fetch_add(1);
-		unfinished_tasks.fetch_add(1);
+		waiting_tasks.fetch_add(1, std::memory_order_relaxed);
+		unfinished_tasks.fetch_add(1, std::memory_order_relaxed);
 		task_condition_var.notify_one();
 #ifdef WELP_THREADS_DEBUG_MODE
 		if (record_on)
@@ -598,14 +598,14 @@ void welp::threads<_Allocator>::force_priority_async_task(welp::async_task_end& 
 #ifdef WELP_THREADS_DEBUG_MODE
 		if (!force_priority_async_task_sub(box, task, std::forward<_Args>(args)...))
 		{
-			record_delayed_task_count.fetch_add(1);
+			record_delayed_task_count.fetch_add(1, std::memory_order_relaxed);
 		}
 		else { return; }
 #endif // WELP_THREADS_DEBUG_MODE
 		while (!force_priority_async_task_sub(box, task, std::forward<_Args>(args)...)) {}
 	}
 #ifdef WELP_THREADS_DEBUG_MODE
-	else { record_denied_task_count.fetch_add(1); }
+	else { record_denied_task_count.fetch_add(1, std::memory_order_relaxed); }
 #endif // WELP_THREADS_DEBUG_MODE
 }
 
@@ -642,8 +642,8 @@ bool welp::threads<_Allocator>::async_task(welp::async_task_result<return_Ty>& b
 
 		last_task_ptr++;
 		if (last_task_ptr == task_buffer_end_ptr) { last_task_ptr = task_buffer_data_ptr; }
-		waiting_tasks.fetch_add(1);
-		unfinished_tasks.fetch_add(1);
+		waiting_tasks.fetch_add(1, std::memory_order_relaxed);
+		unfinished_tasks.fetch_add(1, std::memory_order_relaxed);
 		task_condition_var.notify_one();
 #ifdef WELP_THREADS_DEBUG_MODE
 		if (record_on)
@@ -673,14 +673,14 @@ void welp::threads<_Allocator>::force_async_task(welp::async_task_result<return_
 #ifdef WELP_THREADS_DEBUG_MODE
 		if (!force_async_task_sub(box, task, std::forward<_Args>(args)...))
 		{
-			record_delayed_task_count.fetch_add(1);
+			record_delayed_task_count.fetch_add(1, std::memory_order_relaxed);
 		}
 		else { return; }
 #endif // WELP_THREADS_DEBUG_MODE
 		while (!force_async_task_sub(box, task, std::forward<_Args>(args)...)) {}
 	}
 #ifdef WELP_THREADS_DEBUG_MODE
-	else { record_denied_task_count.fetch_add(1); }
+	else { record_denied_task_count.fetch_add(1, std::memory_order_relaxed); }
 #endif // WELP_THREADS_DEBUG_MODE
 }
 
@@ -726,8 +726,8 @@ bool welp::threads<_Allocator>::priority_async_task(welp::async_task_result<retu
 
 		box._task_running.store(true);
 		box._task_denied.store(false);
-		waiting_tasks.fetch_add(1);
-		unfinished_tasks.fetch_add(1);
+		waiting_tasks.fetch_add(1, std::memory_order_relaxed);
+		unfinished_tasks.fetch_add(1, std::memory_order_relaxed);
 		task_condition_var.notify_one();
 #ifdef WELP_THREADS_DEBUG_MODE
 		if (record_on)
@@ -757,14 +757,14 @@ void welp::threads<_Allocator>::force_priority_async_task(welp::async_task_resul
 #ifdef WELP_THREADS_DEBUG_MODE
 		if (!force_priority_async_task_sub(box, task, std::forward<_Args>(args)...))
 		{
-			record_delayed_task_count.fetch_add(1);
+			record_delayed_task_count.fetch_add(1, std::memory_order_relaxed);
 		}
 		else { return; }
 #endif // WELP_THREADS_DEBUG_MODE
 		while (!force_priority_async_task_sub(box, task, std::forward<_Args>(args)...)) {}
 	}
 #ifdef WELP_THREADS_DEBUG_MODE
-	else { record_denied_task_count.fetch_add(1); }
+	else { record_denied_task_count.fetch_add(1, std::memory_order_relaxed); }
 #endif // WELP_THREADS_DEBUG_MODE
 }
 
@@ -1106,8 +1106,8 @@ bool welp::threads<_Allocator>::force_async_task_sub(const function_Ty& task, _A
 
 		last_task_ptr++;
 		if (last_task_ptr == task_buffer_end_ptr) { last_task_ptr = task_buffer_data_ptr; }
-		waiting_tasks.fetch_add(1);
-		unfinished_tasks.fetch_add(1);
+		waiting_tasks.fetch_add(1, std::memory_order_relaxed);
+		unfinished_tasks.fetch_add(1, std::memory_order_relaxed);
 		task_condition_var.notify_one();
 #ifdef WELP_THREADS_DEBUG_MODE
 		if (record_on)
@@ -1158,8 +1158,8 @@ bool welp::threads<_Allocator>::force_priority_async_task_sub(const function_Ty&
 			return false;
 		}
 
-		waiting_tasks.fetch_add(1);
-		unfinished_tasks.fetch_add(1);
+		waiting_tasks.fetch_add(1, std::memory_order_relaxed);
+		unfinished_tasks.fetch_add(1, std::memory_order_relaxed);
 		task_condition_var.notify_one();
 #ifdef WELP_THREADS_DEBUG_MODE
 		if (record_on)
@@ -1206,8 +1206,8 @@ bool welp::threads<_Allocator>::force_async_task_sub(welp::async_task_end& box, 
 
 		last_task_ptr++;
 		if (last_task_ptr == task_buffer_end_ptr) { last_task_ptr = task_buffer_data_ptr; }
-		waiting_tasks.fetch_add(1);
-		unfinished_tasks.fetch_add(1);
+		waiting_tasks.fetch_add(1, std::memory_order_relaxed);
+		unfinished_tasks.fetch_add(1, std::memory_order_relaxed);
 		task_condition_var.notify_one();
 #ifdef WELP_THREADS_DEBUG_MODE
 		if (record_on)
@@ -1265,8 +1265,8 @@ bool welp::threads<_Allocator>::force_priority_async_task_sub(welp::async_task_e
 
 		box._task_running.store(true);
 		box._task_denied.store(false);
-		waiting_tasks.fetch_add(1);
-		unfinished_tasks.fetch_add(1);
+		waiting_tasks.fetch_add(1, std::memory_order_relaxed);
+		unfinished_tasks.fetch_add(1, std::memory_order_relaxed);
 		task_condition_var.notify_one();
 #ifdef WELP_THREADS_DEBUG_MODE
 		if (record_on)
@@ -1314,8 +1314,8 @@ bool welp::threads<_Allocator>::force_async_task_sub(welp::async_task_result<ret
 
 		last_task_ptr++;
 		if (last_task_ptr == task_buffer_end_ptr) { last_task_ptr = task_buffer_data_ptr; }
-		waiting_tasks.fetch_add(1);
-		unfinished_tasks.fetch_add(1);
+		waiting_tasks.fetch_add(1, std::memory_order_relaxed);
+		unfinished_tasks.fetch_add(1, std::memory_order_relaxed);
 		task_condition_var.notify_one();
 #ifdef WELP_THREADS_DEBUG_MODE
 		if (record_on)
@@ -1373,8 +1373,8 @@ bool welp::threads<_Allocator>::force_priority_async_task_sub(welp::async_task_r
 
 		box._task_running.store(true);
 		box._task_denied.store(false);
-		waiting_tasks.fetch_add(1);
-		unfinished_tasks.fetch_add(1);
+		waiting_tasks.fetch_add(1, std::memory_order_relaxed);
+		unfinished_tasks.fetch_add(1, std::memory_order_relaxed);
 		task_condition_var.notify_one();
 #ifdef WELP_THREADS_DEBUG_MODE
 		if (record_on)
