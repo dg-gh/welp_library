@@ -1,4 +1,4 @@
-// welp_multipool_resource.hpp - last update : 24 / 01 / 2020
+// welp_multipool_resource.hpp - last update : 29 / 01 / 2020
 // License <http://unlicense.org/> (statement below at the end of the file)
 
 
@@ -23,6 +23,9 @@
 #endif
 #ifndef WELP_MULTIPOOL_INCLUDE_MUTEX
 #define WELP_MULTIPOOL_INCLUDE_MUTEX
+#endif
+#ifndef WELP_MULTIPOOL_INCLUDE_ATOMIC
+#define WELP_MULTIPOOL_INCLUDE_ATOMIC
 #endif
 #ifndef WELP_MULTIPOOL_INCLUDE_FSTREAM
 #define WELP_MULTIPOOL_INCLUDE_FSTREAM
@@ -55,6 +58,10 @@
 #ifdef WELP_MULTIPOOL_INCLUDE_MUTEX
 #include <mutex>
 #endif // WELP_MULTIPOOL_INCLUDE_MUTEX
+
+#ifdef WELP_MULTIPOOL_INCLUDE_ATOMIC
+#include <atomic>
+#endif // WELP_MULTIPOOL_INCLUDE_ATOMIC
 
 
 ////// OPTIONS //////
@@ -213,7 +220,7 @@ namespace welp
 	};
 
 
-	// memory resource thread safe
+	// memory resource thread safe with lock
 #ifdef WELP_MULTIPOOL_INCLUDE_MUTEX
 	template <std::size_t max_number_of_pools, class sub_allocator = welp::default_multipool_sub_allocator,
 		class mutex_Ty = std::mutex> class multipool_resource_sync
@@ -345,7 +352,92 @@ namespace welp
 			(welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>&&) = delete;
 	};
 #endif // WELP_MULTIPOOL_INCLUDE_MUTEX
+
+
+	// memory resource thread safe with atomics
+#ifdef WELP_MULTIPOOL_INCLUDE_ATOMIC
+	template <std::size_t max_number_of_pools, class sub_allocator = welp::default_multipool_sub_allocator> class multipool_resource_atom
+	{
+
+	private:
+
+		std::atomic<char**> current_address_ptr[max_number_of_pools] = { nullptr };
+		char** first_address_ptr[max_number_of_pools] = { nullptr };
+		char* data_ptr[max_number_of_pools] = { nullptr };
+		char* data_ptr_unaligned[max_number_of_pools] = { nullptr };
+
+		std::size_t block_size[max_number_of_pools] = { 0 };
+		std::size_t block_instances[max_number_of_pools] = { 0 };
+		std::size_t number_of_pools = 0;
+		std::size_t pool_align_size = 0;
+
+	public:
+
+		template <class Ty> inline Ty* allocate_type(std::size_t instances) noexcept;
+		template <class Ty> inline Ty* allocate_type_padded(std::size_t instances, std::size_t line_size) noexcept;
+		template <class Ty> inline Ty* allocate_type_in_pool(std::size_t instances, std::size_t pool_number) noexcept;
+		template <class Ty> inline Ty* allocate_type_in_pool_range(std::size_t instances,
+			std::size_t first_pool, std::size_t end_pool) noexcept;
+		template <class Ty> inline Ty* allocate_type_padded_in_pool_range(std::size_t instances, std::size_t line_size,
+			std::size_t first_pool, std::size_t end_pool) noexcept;
+
+		inline void* allocate_byte(std::size_t bytes) noexcept;
+		inline void* allocate_byte_padded(std::size_t bytes, std::size_t line_size) noexcept;
+		inline void* allocate_byte_in_pool(std::size_t bytes, std::size_t pool_number) noexcept;
+		inline void* allocate_byte_in_pool_range(std::size_t bytes,
+			std::size_t first_pool, std::size_t end_pool) noexcept;
+		inline void* allocate_byte_padded_in_pool_range(std::size_t bytes, std::size_t line_size,
+			std::size_t first_pool, std::size_t end_pool) noexcept;
+
+		template <class Ty> inline bool deallocate_ptr(Ty* ptr) noexcept;
+		template <class Ty> inline bool deallocate_ptr_in_pool(Ty* ptr, std::size_t pool_number) noexcept;
+		template <class Ty> inline bool deallocate_ptr_in_pool_range(Ty* ptr, std::size_t first_pool, std::size_t end_pool) noexcept;
+
+		template <class Ty> inline std::size_t blocks_remaining_type() noexcept;
+		template <class Ty> inline std::size_t blocks_remaining_type(std::size_t instances) noexcept;
+		inline std::size_t blocks_remaining_byte(std::size_t bytes) noexcept;
+		inline std::size_t blocks_remaining_in_pool(std::size_t pool_number) noexcept;
+		inline std::size_t block_size_in_pool(std::size_t pool_number) const noexcept { return block_size[pool_number]; }
+
+		inline bool owns_resources() const noexcept { return number_of_pools != 0; }
+		inline std::size_t number_of_pools_allocated() const noexcept { return number_of_pools; }
+		constexpr inline std::size_t maximum_number_of_pools() const noexcept { return max_number_of_pools; }
+
+#ifdef WELP_MULTIPOOL_INCLUDE_ALGORITHM
+		inline void sort_pools() noexcept;
+		inline void sort_pool(std::size_t pool_number) noexcept;
+		inline void sort_pool_range(std::size_t first_pool, std::size_t end_pool) noexcept;
+#endif // WELP_MULTIPOOL_INCLUDE_ALGORITHM
+
+		inline void reset_pools() noexcept;
+		inline void reset_pool(std::size_t pool_number) noexcept;
+		inline void reset_pool_range(std::size_t first_pool, std::size_t end_pool) noexcept;
+
+		bool new_pools(std::size_t input_number_of_pools, const std::size_t* const input_block_size,
+			const std::size_t* const input_block_instances, std::size_t pool_align);
+
+#ifdef WELP_MULTIPOOL_INCLUDE_INITLIST
+		bool new_pools(std::size_t input_number_of_pools, std::initializer_list<std::size_t> input_block_size,
+			std::initializer_list<std::size_t> input_block_instances, std::size_t pool_align);
+#endif // WELP_MULTIPOOL_INCLUDE_INITLIST
+
+		void delete_pools();
+
+		multipool_resource_atom() = default;
+		virtual ~multipool_resource_atom() { delete_pools(); }
+
+	private:
+
+		multipool_resource_atom(const welp::multipool_resource_atom<max_number_of_pools, sub_allocator>&) = delete;
+		welp::multipool_resource_atom<max_number_of_pools, sub_allocator>& operator=
+			(const welp::multipool_resource_atom<max_number_of_pools, sub_allocator>&) = delete;
+		multipool_resource_atom(welp::multipool_resource_atom<max_number_of_pools, sub_allocator>&&) = delete;
+		welp::multipool_resource_atom<max_number_of_pools, sub_allocator>& operator=
+			(welp::multipool_resource_atom<max_number_of_pools, sub_allocator>&&) = delete;
+	};
+#endif // WELP_MULTIPOOL_INCLUDE_ATOMIC
 #endif // WELP_MULTIPOOL_NO_TEMPLATE
+
 
 	// non-templated memory resource single thread with a maximum of 4 pools
 	class quadpool_resource
@@ -2527,6 +2619,639 @@ void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>
 #endif // WELP_MULTIPOOL_INCLUDE_FSTREAM
 #endif // WELP_MULTIPOOL_DEBUG_MODE
 #endif // WELP_MULTIPOOL_INCLUDE_MUTEX
+
+
+#ifdef WELP_MULTIPOOL_INCLUDE_ATOMIC
+// ALLOCATE
+template <std::size_t max_number_of_pools, class sub_allocator>
+template <class Ty> inline Ty* welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::allocate_type(std::size_t instances) noexcept
+{
+	instances *= sizeof(Ty);
+
+	for (std::size_t n = 0; n < number_of_pools; n++)
+	{
+		if (instances <= block_size[n])
+		{
+			char** final_address_ptr;
+			char** initial_address_ptr = current_address_ptr[n].load();
+			do
+			{
+				if (first_address_ptr[n] < initial_address_ptr)
+				{
+					final_address_ptr = initial_address_ptr - 1;
+				}
+				else
+				{
+					return nullptr;
+				}
+			} while (!current_address_ptr[n].compare_exchange_strong(initial_address_ptr, final_address_ptr));
+			return static_cast<Ty*>(static_cast<void*>(*final_address_ptr));
+		}
+	}
+	return nullptr;
+}
+
+
+// ALLOCATE PADDED
+template <std::size_t max_number_of_pools, class sub_allocator>
+template <class Ty> inline Ty* welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::allocate_type_padded(std::size_t instances, std::size_t line_size) noexcept
+{
+	instances *= sizeof(Ty);
+	{
+		std::size_t line_size_m1 = line_size - 1;
+		instances += ((line_size - (instances & line_size_m1)) & line_size_m1);
+	}
+	for (std::size_t n = 0; n < number_of_pools; n++)
+	{
+		if (instances <= block_size[n])
+		{
+			char** final_address_ptr;
+			char** initial_address_ptr = current_address_ptr[n].load();
+			do
+			{
+				if (first_address_ptr[n] < initial_address_ptr)
+				{
+					final_address_ptr = initial_address_ptr - 1;
+				}
+				else
+				{
+					return nullptr;
+				}
+			} while (!current_address_ptr[n].compare_exchange_strong(initial_address_ptr, final_address_ptr));
+			return static_cast<Ty*>(static_cast<void*>(*final_address_ptr));
+		}
+	}
+	return nullptr;
+}
+
+
+// ALLOCATE IN POOL
+template <std::size_t max_number_of_pools, class sub_allocator>
+template <class Ty> inline Ty* welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::allocate_type_in_pool(std::size_t instances, std::size_t pool_number) noexcept
+{
+	instances *= sizeof(Ty);
+
+	if (instances <= block_size[pool_number])
+	{
+		char** final_address_ptr;
+		char** initial_address_ptr = current_address_ptr[pool_number].load();
+		do
+		{
+			if (first_address_ptr[pool_number] < initial_address_ptr)
+			{
+				final_address_ptr = initial_address_ptr - 1;
+			}
+			else
+			{
+				return nullptr;
+			}
+		} while (!current_address_ptr[pool_number].compare_exchange_strong(initial_address_ptr, final_address_ptr));
+		return static_cast<Ty*>(static_cast<void*>(*final_address_ptr));
+	}
+	return nullptr;
+}
+
+
+// ALLOCATE IN POOL RANGE
+template <std::size_t max_number_of_pools, class sub_allocator>
+template <class Ty> inline Ty* welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::allocate_type_in_pool_range(std::size_t instances,
+	std::size_t first_pool, std::size_t end_pool) noexcept
+{
+	instances *= sizeof(Ty);
+
+	for (std::size_t n = first_pool; n < end_pool; n++)
+	{
+		if (instances <= block_size[n])
+		{
+			char** final_address_ptr;
+			char** initial_address_ptr = current_address_ptr[n].load();
+			do
+			{
+				if (first_address_ptr[n] < initial_address_ptr)
+				{
+					final_address_ptr = initial_address_ptr - 1;
+				}
+				else
+				{
+					return nullptr;
+				}
+			} while (!current_address_ptr[n].compare_exchange_strong(initial_address_ptr, final_address_ptr));
+			return static_cast<Ty*>(static_cast<void*>(*final_address_ptr));
+		}
+	}
+	return nullptr;
+}
+
+
+// ALLOCATE PADDED IN POOL RANGE
+template <std::size_t max_number_of_pools, class sub_allocator>
+template <class Ty> inline Ty* welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::allocate_type_padded_in_pool_range(
+	std::size_t instances, std::size_t line_size, std::size_t first_pool, std::size_t end_pool) noexcept
+{
+	instances *= sizeof(Ty);
+	{
+		std::size_t line_size_m1 = line_size - 1;
+		instances += ((line_size - (instances & line_size_m1)) & line_size_m1);
+	}
+	for (std::size_t n = first_pool; n < end_pool; n++)
+	{
+		if (instances <= block_size[n])
+		{
+			char** final_address_ptr;
+			char** initial_address_ptr = current_address_ptr[n].load();
+			do
+			{
+				if (first_address_ptr[n] < initial_address_ptr)
+				{
+					final_address_ptr = initial_address_ptr - 1;
+				}
+				else
+				{
+					return nullptr;
+				}
+			} while (!current_address_ptr[n].compare_exchange_strong(initial_address_ptr, final_address_ptr));
+			return static_cast<Ty*>(static_cast<void*>(*final_address_ptr));
+		}
+	}
+	return nullptr;
+}
+
+
+// ALLOCATE BYTE
+template <std::size_t max_number_of_pools, class sub_allocator>
+inline void* welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::allocate_byte(std::size_t bytes) noexcept
+{
+	for (std::size_t n = 0; n < number_of_pools; n++)
+	{
+		if (bytes <= block_size[n])
+		{
+			char** final_address_ptr;
+			char** initial_address_ptr = current_address_ptr[n].load();
+			do
+			{
+				if (first_address_ptr[n] < initial_address_ptr)
+				{
+					final_address_ptr = initial_address_ptr - 1;
+				}
+				else
+				{
+					return nullptr;
+				}
+			} while (!current_address_ptr[n].compare_exchange_strong(initial_address_ptr, final_address_ptr));
+			return static_cast<void*>(*final_address_ptr);
+		}
+	}
+	return nullptr;
+}
+
+
+// ALLOCATE BYTE PADDED
+template <std::size_t max_number_of_pools, class sub_allocator>
+inline void* welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::allocate_byte_padded(std::size_t bytes, std::size_t line_size) noexcept
+{
+	{
+		std::size_t line_size_m1 = line_size - 1;
+		bytes += ((line_size - (bytes & line_size_m1)) & line_size_m1);
+	}
+	for (std::size_t n = 0; n < number_of_pools; n++)
+	{
+		if (bytes <= block_size[n])
+		{
+			char** final_address_ptr;
+			char** initial_address_ptr = current_address_ptr[n].load();
+			do
+			{
+				if (first_address_ptr[n] < initial_address_ptr)
+				{
+					final_address_ptr = initial_address_ptr - 1;
+				}
+				else
+				{
+					return nullptr;
+				}
+			} while (!current_address_ptr[n].compare_exchange_strong(initial_address_ptr, final_address_ptr));
+			return static_cast<void*>(*final_address_ptr);
+		}
+	}
+	return nullptr;
+}
+
+
+// ALLOCATE BYTE IN POOL
+template <std::size_t max_number_of_pools, class sub_allocator>
+inline void* welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::allocate_byte_in_pool(std::size_t bytes, std::size_t pool_number) noexcept
+{
+	if (bytes <= block_size[pool_number])
+	{
+		char** final_address_ptr;
+		char** initial_address_ptr = current_address_ptr[pool_number].load();
+		do
+		{
+			if (first_address_ptr[pool_number] < initial_address_ptr)
+			{
+				final_address_ptr = initial_address_ptr - 1;
+			}
+			else
+			{
+				return nullptr;
+			}
+		} while (!current_address_ptr[pool_number].compare_exchange_strong(initial_address_ptr, final_address_ptr));
+		return static_cast<void*>(*final_address_ptr);
+	}
+	return nullptr;
+}
+
+
+// ALLOCATE BYTE IN POOL RANGE
+template <std::size_t max_number_of_pools, class sub_allocator>
+inline void* welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::allocate_byte_in_pool_range(std::size_t bytes,
+	std::size_t first_pool, std::size_t end_pool) noexcept
+{
+	for (std::size_t n = first_pool; n < end_pool; n++)
+	{
+		if (bytes <= block_size[n])
+		{
+			char** final_address_ptr;
+			char** initial_address_ptr = current_address_ptr[n].load();
+			do
+			{
+				if (first_address_ptr[n] < initial_address_ptr)
+				{
+					final_address_ptr = initial_address_ptr - 1;
+				}
+				else
+				{
+					return nullptr;
+				}
+			} while (!current_address_ptr[n].compare_exchange_strong(initial_address_ptr, final_address_ptr));
+			return static_cast<void*>(*final_address_ptr);
+		}
+	}
+	return nullptr;
+}
+
+
+// ALLOCATE BYTE PADDED IN POOL RANGE
+template <std::size_t max_number_of_pools, class sub_allocator>
+inline void* welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::allocate_byte_padded_in_pool_range(
+	std::size_t bytes, std::size_t line_size, std::size_t first_pool, std::size_t end_pool) noexcept
+{
+	{
+		std::size_t line_size_m1 = line_size - 1;
+		bytes += ((line_size - (bytes & line_size_m1)) & line_size_m1);
+	}
+	for (std::size_t n = first_pool; n < end_pool; n++)
+	{
+		if (bytes <= block_size[n])
+		{
+			char** final_address_ptr;
+			char** initial_address_ptr = current_address_ptr[n].load();
+			do
+			{
+				if (first_address_ptr[n] < initial_address_ptr)
+				{
+					final_address_ptr = initial_address_ptr - 1;
+				}
+				else
+				{
+					return nullptr;
+				}
+			} while (!current_address_ptr[n].compare_exchange_strong(initial_address_ptr, final_address_ptr));
+			return static_cast<void*>(*final_address_ptr);
+		}
+	}
+	return nullptr;
+}
+
+
+// DEALLOCATE
+template <std::size_t max_number_of_pools, class sub_allocator>
+template <class Ty> inline bool welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::deallocate_ptr(Ty* ptr) noexcept
+{
+	char* char_ptr = static_cast<char*>(static_cast<void*>(ptr));
+	for (std::size_t n = 0; n < number_of_pools; n++)
+	{
+		if ((data_ptr[n] <= char_ptr) && (char_ptr < data_ptr[n] + block_instances[n] * block_size[n]))
+		{
+			char** final_address_ptr;
+			char** initial_address_ptr = current_address_ptr[n].load();
+			do
+			{
+				final_address_ptr = initial_address_ptr + 1;
+			} while (!current_address_ptr[n].compare_exchange_strong(initial_address_ptr, final_address_ptr));
+			*initial_address_ptr = char_ptr;
+			return true;
+		}
+	}
+	return false;
+}
+
+
+// DEALLOCATE IN POOL
+template <std::size_t max_number_of_pools, class sub_allocator>
+template <class Ty> inline bool welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::deallocate_ptr_in_pool(Ty* ptr, std::size_t pool_number) noexcept
+{
+	char* char_ptr = static_cast<char*>(static_cast<void*>(ptr));
+	if ((data_ptr[pool_number] <= char_ptr) && (char_ptr < data_ptr[pool_number] + block_instances[pool_number] * block_size[pool_number]))
+	{
+		char** final_address_ptr;
+		char** initial_address_ptr = current_address_ptr[pool_number].load();
+		do
+		{
+			final_address_ptr = initial_address_ptr + 1;
+		} while (!current_address_ptr[pool_number].compare_exchange_strong(initial_address_ptr, final_address_ptr));
+		*initial_address_ptr = char_ptr;
+		return true;
+	}
+	return false;
+}
+
+
+// DEALLOCATE IN POOL RANGE
+template <std::size_t max_number_of_pools, class sub_allocator>
+template <class Ty> inline bool welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::deallocate_ptr_in_pool_range(Ty* ptr,
+	std::size_t first_pool, std::size_t end_pool) noexcept
+{
+	char* char_ptr = static_cast<char*>(static_cast<void*>(ptr));
+	for (std::size_t n = first_pool; n < end_pool; n++)
+	{
+		if ((data_ptr[n] <= char_ptr) && (char_ptr < data_ptr[n] + block_instances[n] * block_size[n]))
+		{
+			char** final_address_ptr;
+			char** initial_address_ptr = current_address_ptr[n].load();
+			do
+			{
+				final_address_ptr = initial_address_ptr + 1;
+			} while (!current_address_ptr[n].compare_exchange_strong(initial_address_ptr, final_address_ptr));
+			*initial_address_ptr = char_ptr;
+			return true;
+		}
+	}
+	return false;
+}
+
+
+// BLOCKS REMAINING
+template <std::size_t max_number_of_pools, class sub_allocator>
+template <class Ty> inline std::size_t welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::blocks_remaining_type() noexcept
+{
+	std::size_t N = sizeof(Ty);
+	for (std::size_t n = 0; n < number_of_pools; n++)
+	{
+		if (N <= block_size[n])
+		{
+			return static_cast<std::size_t>(current_address_ptr[n].load() - first_address_ptr[n]);
+		}
+	}
+	return 0;
+}
+
+
+template <std::size_t max_number_of_pools, class sub_allocator>
+template <class Ty> inline std::size_t welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::blocks_remaining_type(std::size_t instances) noexcept
+{
+	instances *= sizeof(Ty);
+	for (std::size_t n = 0; n < number_of_pools; n++)
+	{
+		if (instances <= block_size[n])
+		{
+			return static_cast<std::size_t>(current_address_ptr[n].load() - first_address_ptr[n]);
+		}
+	}
+	return 0;
+}
+
+
+template <std::size_t max_number_of_pools, class sub_allocator>
+inline std::size_t welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::blocks_remaining_byte(std::size_t bytes) noexcept
+{
+	for (std::size_t n = 0; n < number_of_pools; n++)
+	{
+		if (bytes <= block_size[n])
+		{
+			return static_cast<std::size_t>(current_address_ptr[n].load() - first_address_ptr[n]);
+		}
+	}
+	return 0;
+}
+
+
+template <std::size_t max_number_of_pools, class sub_allocator>
+inline std::size_t welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::blocks_remaining_in_pool(std::size_t pool_number) noexcept
+{
+	return static_cast<std::size_t>(current_address_ptr[pool_number].load() - first_address_ptr[pool_number]);
+}
+
+
+// SORT POOLS
+#ifdef WELP_MULTIPOOL_INCLUDE_ALGORITHM
+template <std::size_t max_number_of_pools, class sub_allocator>
+inline void welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::sort_pools() noexcept
+{
+	for (std::size_t n = 0; n < number_of_pools; n++)
+	{
+		std::sort(first_address_ptr[n], current_address_ptr[n].load(), std::greater<char*>());
+	}
+}
+
+
+template <std::size_t max_number_of_pools, class sub_allocator>
+inline void welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::sort_pool(std::size_t n) noexcept
+{
+	if (n < number_of_pools)
+	{
+		std::sort(first_address_ptr[n], current_address_ptr[n].load(), std::greater<char*>());
+	}
+}
+
+
+template <std::size_t max_number_of_pools, class sub_allocator>
+inline void welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::sort_pool_range(std::size_t first_pool, std::size_t end_pool) noexcept
+{
+	if (first_pool < number_of_pools)
+	{
+		if (end_pool > number_of_pools) { end_pool = number_of_pools; }
+		for (std::size_t n = first_pool; n < end_pool; n++)
+		{
+			std::sort(first_address_ptr[n], current_address_ptr[n].load(), std::greater<char*>());
+		}
+	}
+}
+#endif // WELP_MULTIPOOL_INCLUDE_ALGORITHM
+
+
+// RESET POOLS
+template <std::size_t max_number_of_pools, class sub_allocator>
+inline void welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::reset_pools() noexcept
+{
+	for (std::size_t n = 0; n < number_of_pools; n++)
+	{
+		current_address_ptr[n].store(first_address_ptr[n] + block_instances[n]);
+		char* ptr = data_ptr[n] + (block_instances[n] - 1) * block_size[n]; // pointer to last block (will iter backwards)
+		char** address_ptr_iter = first_address_ptr[n]; // pointer to first address (will iter forward)
+		for (std::size_t k = block_instances[n]; k > 0; k--)
+		{
+			*address_ptr_iter++ = ptr;
+			ptr -= block_size[n];
+		}
+	}
+}
+
+
+template <std::size_t max_number_of_pools, class sub_allocator>
+inline void welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::reset_pool(std::size_t pool_number) noexcept
+{
+	if (pool_number < number_of_pools)
+	{
+		current_address_ptr[pool_number].store(first_address_ptr[pool_number] + block_instances[pool_number]);
+		char* ptr = data_ptr[pool_number] + (block_instances[pool_number] - 1) * block_size[pool_number]; // pointer to last block (will iter backwards)
+		char** address_ptr_iter = first_address_ptr[pool_number]; // pointer to first address (will iter forward)
+		for (std::size_t k = block_instances[pool_number]; k > 0; k--)
+		{
+			*address_ptr_iter++ = ptr;
+			ptr -= block_size[pool_number];
+		}
+	}
+}
+
+
+template <std::size_t max_number_of_pools, class sub_allocator>
+inline void welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::reset_pool_range(std::size_t first_pool, std::size_t end_pool) noexcept
+{
+	if (first_pool < number_of_pools)
+	{
+		if (end_pool > number_of_pools) { end_pool = number_of_pools; }
+		for (std::size_t n = first_pool; n < end_pool; n++)
+		{
+			current_address_ptr[n].store(first_address_ptr[n] + block_instances[n]);
+			char* ptr = data_ptr[n] + (block_instances[n] - 1) * block_size[n]; // pointer to last block (will iter backwards)
+			char** address_ptr_iter = first_address_ptr[n]; // pointer to first address (will iter forward)
+			for (std::size_t k = block_instances[n]; k > 0; k--)
+			{
+				*address_ptr_iter++ = ptr;
+				ptr -= block_size[n];
+			}
+		}
+	}
+}
+
+
+// NEW POOLS
+template <std::size_t max_number_of_pools, class sub_allocator>
+bool welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::new_pools(std::size_t input_number_of_pools, const std::size_t* const input_block_size,
+	const std::size_t* const input_block_instances, std::size_t pool_align)
+{
+	delete_pools();
+	if (input_number_of_pools == 0)
+	{
+		return false;
+	}
+
+	if (input_number_of_pools > max_number_of_pools) { input_number_of_pools = max_number_of_pools; }
+	if (pool_align == 0) { pool_align = 1; }
+
+	number_of_pools = (max_number_of_pools < input_number_of_pools) ? max_number_of_pools : input_number_of_pools;
+	std::memcpy(block_size, input_block_size, number_of_pools * sizeof(std::size_t));
+	std::memcpy(block_instances, input_block_instances, number_of_pools * sizeof(std::size_t));
+	pool_align_size = pool_align;
+	sub_allocator _sub_allocator;
+
+	for (std::size_t n = 0; n < number_of_pools; n++)
+	{
+		std::size_t pool_align_m1 = pool_align - 1;
+		data_ptr_unaligned[n] = _sub_allocator.allocate((block_instances[n] * block_size[n] + pool_align_m1)); // construct unaligned pool
+		if (data_ptr_unaligned[n] == nullptr) { delete_pools(); return false; }
+		data_ptr[n] = data_ptr_unaligned[n] + ((pool_align - (reinterpret_cast<std::size_t>(data_ptr_unaligned[n]) & pool_align_m1)) & pool_align_m1); // aligned pool
+		first_address_ptr[n] = static_cast<char**>(static_cast<void*>(_sub_allocator.allocate(block_instances[n] * sizeof(char*)))); // construct pointer to first address
+		if (first_address_ptr[n] == nullptr) { delete_pools(); return false; }
+		current_address_ptr[n].store(first_address_ptr[n] + block_instances[n]); // construct pointer to current address
+		char* ptr = data_ptr[n] + (block_instances[n] - 1) * block_size[n]; // pointer to last block (will iter backwards)
+		char** address_ptr_iter = first_address_ptr[n]; // pointer to first address (will iter forward)
+		for (std::size_t k = block_instances[n]; k > 0; k--)
+		{
+			*address_ptr_iter++ = ptr;
+			ptr -= block_size[n];
+		}
+	}
+	return true;
+}
+
+
+#ifdef WELP_MULTIPOOL_INCLUDE_INITLIST
+template <std::size_t max_number_of_pools, class sub_allocator>
+bool welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::new_pools(std::size_t input_number_of_pools, std::initializer_list<std::size_t> input_block_size,
+	std::initializer_list<std::size_t> input_block_instances, std::size_t pool_align)
+{
+	delete_pools();
+	if (input_number_of_pools == 0)
+	{
+		return false;
+	}
+
+	if (input_number_of_pools > max_number_of_pools) { input_number_of_pools = max_number_of_pools; }
+	if (pool_align == 0) { pool_align = 1; }
+
+	number_of_pools = (max_number_of_pools < input_number_of_pools) ? max_number_of_pools : input_number_of_pools;
+	const std::size_t* iter_block_size = input_block_size.begin();
+	const std::size_t* iter_block_instances = input_block_instances.begin();
+	for (std::size_t n = 0; n < input_number_of_pools; n++)
+	{
+		block_size[n] = *iter_block_size++;
+		block_instances[n] = *iter_block_instances++;
+	}
+	pool_align_size = pool_align;
+	sub_allocator _sub_allocator;
+
+	for (std::size_t n = 0; n < number_of_pools; n++)
+	{
+		std::size_t pool_align_m1 = pool_align - 1;
+		data_ptr_unaligned[n] = _sub_allocator.allocate((block_instances[n] * block_size[n] + pool_align_m1)); // construct unaligned pool
+		if (data_ptr_unaligned[n] == nullptr) { delete_pools(); return false; }
+		data_ptr[n] = data_ptr_unaligned[n] + ((pool_align - (reinterpret_cast<std::size_t>(data_ptr_unaligned[n]) & pool_align_m1)) & pool_align_m1); // aligned pool
+		first_address_ptr[n] = static_cast<char**>(static_cast<void*>(_sub_allocator.allocate(block_instances[n] * sizeof(char*)))); // construct pointer to first address
+		if (first_address_ptr[n] == nullptr) { delete_pools(); return false; }
+		current_address_ptr[n].store(first_address_ptr[n] + block_instances[n]); // construct pointer to current address
+		char* ptr = data_ptr[n] + (block_instances[n] - 1) * block_size[n]; // pointer to last block (will iter backwards)
+		char** address_ptr_iter = first_address_ptr[n]; // pointer to first address (will iter forward)
+		for (std::size_t k = block_instances[n]; k > 0; k--)
+		{
+			*address_ptr_iter++ = ptr;
+			ptr -= block_size[n];
+		}
+	}
+	return true;
+}
+#endif // WELP_MULTIPOOL_INCLUDE_INITLIST
+
+
+// DELETE POOLS
+template <std::size_t max_number_of_pools, class sub_allocator>
+void welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::delete_pools()
+{
+	sub_allocator _sub_allocator;
+	for (std::size_t n = 0; n < max_number_of_pools; n++)
+	{
+		if (data_ptr_unaligned[n] != nullptr)
+		{
+			_sub_allocator.deallocate(data_ptr_unaligned[n],
+				((pool_align_size - 1) + block_instances[n] * block_size[n]) * sizeof(char));
+		}
+		if (first_address_ptr[n] != nullptr)
+		{
+			_sub_allocator.deallocate(static_cast<char*>(static_cast<void*>(first_address_ptr[n])), block_instances[n] * sizeof(char*));
+		}
+	}
+	char** p = static_cast<char**>(data_ptr_unaligned);
+	char*** q = static_cast<char***>(first_address_ptr);
+	for (std::size_t n = max_number_of_pools; n > 0; n--)
+	{
+		*p++ = nullptr;
+		*q++ = nullptr;
+	}
+	number_of_pools = 0;
+	pool_align_size = 0;
+}
+#endif // WELP_MULTIPOOL_INCLUDE_ATOMIC
 #endif // WELP_MULTIPOOL_NO_TEMPLATE
 
 
