@@ -361,7 +361,7 @@ namespace welp
 
 	private:
 
-		std::atomic<char**> current_address_ptr[max_number_of_pools] = { nullptr };
+		std::atomic<char**> current_address_ptr[max_number_of_pools];
 		char** first_address_ptr[max_number_of_pools] = { nullptr };
 		char* data_ptr[max_number_of_pools] = { nullptr };
 		char* data_ptr_unaligned[max_number_of_pools] = { nullptr };
