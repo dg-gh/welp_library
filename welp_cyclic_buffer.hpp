@@ -1048,12 +1048,11 @@ namespace welp
 					next_cell_ptr = cells_data_ptr;
 				}
 				_size--;
-				return *this;
+				return true;
 			}
 			else
 			{
-				_stream_load_completed = false;
-				return *this;
+				return false;
 			}
 		}
 		inline bool load(Ty& obj) noexcept
