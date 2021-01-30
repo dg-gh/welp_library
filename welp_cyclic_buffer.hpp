@@ -444,12 +444,11 @@ inline bool welp::cyclic_buffer<Ty, _Allocator, mutex_Ty>::load_cpy(Ty& obj)
 			next_cell_ptr = cells_data_ptr;
 		}
 		_size--;
-		return *this;
+		return true;
 	}
 	else
 	{
-		_stream_load_completed = false;
-		return *this;
+		return false;
 	}
 }
 
