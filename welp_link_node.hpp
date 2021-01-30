@@ -79,7 +79,8 @@ namespace welp
 #ifdef WELP_LINK_NODE_INCLUDE_MUTEX
 	// the allocator must have std::pair<char* const, label_Ty>> as template parameter
 	// link_node_sync can add both an observer_node and a link_node_sync with the method add_observer_node
-	template<class msg_Ty, class label_Ty = int, class _Allocator = std::allocator<std::pair<char* const, label_Ty>>> class link_node_sync
+	template<class msg_Ty, class label_Ty = int, class _Allocator = std::allocator<std::pair<char* const, label_Ty>>,
+		class mutex_Ty = std::mutex> class link_node_sync
 	{
 
 	public:
@@ -122,7 +123,7 @@ namespace welp
 	private:
 
 		std::map<char*, label_Ty, std::less<char*>, _Allocator> _welp_link_node_map;
-		std::mutex _welp_link_node_mutex;
+		mutex_Ty _welp_link_node_mutex;
 	};
 #endif // WELP_LIN_NODE_INCLUDE_MUTEX
 
@@ -318,10 +319,10 @@ inline label_Ty welp::link_node<msg_Ty, label_Ty, _Allocator>::observer_node_lab
 
 
 #ifdef WELP_LINK_NODE_INCLUDE_MUTEX
-template <class msg_Ty, class label_Ty, class _Allocator>
-void welp::link_node_sync<msg_Ty, label_Ty, _Allocator>::notify_all_observer_nodes() const
+template <class msg_Ty, class label_Ty, class _Allocator, class mutex_Ty>
+void welp::link_node_sync<msg_Ty, label_Ty, _Allocator, mutex_Ty>::notify_all_observer_nodes() const
 {
-	std::lock_guard<std::mutex> lock(_welp_link_node_mutex);
+	std::lock_guard<mutex_Ty> lock(_welp_link_node_mutex);
 	msg_Ty msg = msg_Ty();
 	for (auto iter = reinterpret_cast<const std::map<welp::link_node_sync<msg_Ty, label_Ty, _Allocator>*, label_Ty>&>(_welp_link_node_map).begin();
 		iter != reinterpret_cast<const std::map<welp::link_node_sync<msg_Ty, label_Ty, _Allocator>*, label_Ty>&>(_welp_link_node_map).end(); ++iter)
@@ -330,10 +331,10 @@ void welp::link_node_sync<msg_Ty, label_Ty, _Allocator>::notify_all_observer_nod
 	}
 }
 
-template <class msg_Ty, class label_Ty, class _Allocator>
-void welp::link_node_sync<msg_Ty, label_Ty, _Allocator>::notify_all_observer_nodes(const msg_Ty& msg) const
+template <class msg_Ty, class label_Ty, class _Allocator, class mutex_Ty>
+void welp::link_node_sync<msg_Ty, label_Ty, _Allocator, mutex_Ty>::notify_all_observer_nodes(const msg_Ty& msg) const
 {
-	std::lock_guard<std::mutex> lock(_welp_link_node_mutex);
+	std::lock_guard<mutex_Ty> lock(_welp_link_node_mutex);
 	for (auto iter = reinterpret_cast<const std::map<welp::link_node_sync<msg_Ty, label_Ty, _Allocator>*, label_Ty>&>(_welp_link_node_map).begin();
 		iter != reinterpret_cast<const std::map<welp::link_node_sync<msg_Ty, label_Ty, _Allocator>*, label_Ty>&>(_welp_link_node_map).end(); ++iter)
 	{
@@ -341,10 +342,10 @@ void welp::link_node_sync<msg_Ty, label_Ty, _Allocator>::notify_all_observer_nod
 	}
 }
 
-template <class msg_Ty, class label_Ty, class _Allocator>
-void welp::link_node_sync<msg_Ty, label_Ty, _Allocator>::notify_all_observer_nodes(const msg_Ty& msg, const label_Ty& compare_label) const
+template <class msg_Ty, class label_Ty, class _Allocator, class mutex_Ty>
+void welp::link_node_sync<msg_Ty, label_Ty, _Allocator, mutex_Ty>::notify_all_observer_nodes(const msg_Ty& msg, const label_Ty& compare_label) const
 {
-	std::lock_guard<std::mutex> lock(_welp_link_node_mutex);
+	std::lock_guard<mutex_Ty> lock(_welp_link_node_mutex);
 	for (auto iter = reinterpret_cast<const std::map<welp::link_node_sync<msg_Ty, label_Ty, _Allocator>*, label_Ty>&>(_welp_link_node_map).begin();
 		iter != reinterpret_cast<const std::map<welp::link_node_sync<msg_Ty, label_Ty, _Allocator>*, label_Ty>&>(_welp_link_node_map).end(); ++iter)
 	{
@@ -355,10 +356,10 @@ void welp::link_node_sync<msg_Ty, label_Ty, _Allocator>::notify_all_observer_nod
 	}
 }
 
-template <class msg_Ty, class label_Ty, class _Allocator> template <class Predicate>
-void welp::link_node_sync<msg_Ty, label_Ty, _Allocator>::notify_all_observer_nodes(const msg_Ty& msg, Predicate Pr) const
+template <class msg_Ty, class label_Ty, class _Allocator, class mutex_Ty> template <class Predicate>
+void welp::link_node_sync<msg_Ty, label_Ty, _Allocator, mutex_Ty>::notify_all_observer_nodes(const msg_Ty& msg, Predicate Pr) const
 {
-	std::lock_guard<std::mutex> lock(_welp_link_node_mutex);
+	std::lock_guard<mutex_Ty> lock(_welp_link_node_mutex);
 	for (auto iter = reinterpret_cast<const std::map<welp::link_node_sync<msg_Ty, label_Ty, _Allocator>*, label_Ty>&>(_welp_link_node_map).begin();
 		iter != reinterpret_cast<const std::map<welp::link_node_sync<msg_Ty, label_Ty, _Allocator>*, label_Ty>&>(_welp_link_node_map).end(); ++iter)
 	{
@@ -369,38 +370,38 @@ void welp::link_node_sync<msg_Ty, label_Ty, _Allocator>::notify_all_observer_nod
 	}
 }
 
-template <class msg_Ty, class label_Ty, class _Allocator> template <class Ty>
-void welp::link_node_sync<msg_Ty, label_Ty, _Allocator>::add_observer_node(const Ty* const target_ptr)
+template <class msg_Ty, class label_Ty, class _Allocator, class mutex_Ty> template <class Ty>
+void welp::link_node_sync<msg_Ty, label_Ty, _Allocator, mutex_Ty>::add_observer_node(const Ty* const target_ptr)
 {
-	std::lock_guard<std::mutex> lock(_welp_link_node_mutex);
+	std::lock_guard<mutex_Ty> lock(_welp_link_node_mutex);
 	_welp_link_node_map.emplace(static_cast<char*>(static_cast<void*>(const_cast<Ty* const>(target_ptr))), label_Ty());
 }
 
-template <class msg_Ty, class label_Ty, class _Allocator> template <class Ty>
-void welp::link_node_sync<msg_Ty, label_Ty, _Allocator>::add_observer_node(const Ty* const target_ptr, const label_Ty& target_label)
+template <class msg_Ty, class label_Ty, class _Allocator, class mutex_Ty> template <class Ty>
+void welp::link_node_sync<msg_Ty, label_Ty, _Allocator, mutex_Ty>::add_observer_node(const Ty* const target_ptr, const label_Ty& target_label)
 {
-	std::lock_guard<std::mutex> lock(_welp_link_node_mutex);
+	std::lock_guard<mutex_Ty> lock(_welp_link_node_mutex);
 	_welp_link_node_map.emplace(static_cast<char*>(static_cast<void*>(const_cast<Ty* const>(target_ptr))), target_label);
 }
 
-template <class msg_Ty, class label_Ty, class _Allocator> template <class Ty>
-void welp::link_node_sync<msg_Ty, label_Ty, _Allocator>::remove_observer_node(const Ty* const target_ptr)
+template <class msg_Ty, class label_Ty, class _Allocator, class mutex_Ty> template <class Ty>
+void welp::link_node_sync<msg_Ty, label_Ty, _Allocator, mutex_Ty>::remove_observer_node(const Ty* const target_ptr)
 {
-	std::lock_guard<std::mutex> lock(_welp_link_node_mutex);
+	std::lock_guard<mutex_Ty> lock(_welp_link_node_mutex);
 	_welp_link_node_map.erase(static_cast<char*>(static_cast<void*>(const_cast<Ty* const>(target_ptr))));
 }
 
-template <class msg_Ty, class label_Ty, class _Allocator>
-inline void welp::link_node_sync<msg_Ty, label_Ty, _Allocator>::remove_all_observer_nodes() noexcept
+template <class msg_Ty, class label_Ty, class _Allocator, class mutex_Ty>
+inline void welp::link_node_sync<msg_Ty, label_Ty, _Allocator, mutex_Ty>::remove_all_observer_nodes() noexcept
 {
-	std::lock_guard<std::mutex> lock(_welp_link_node_mutex);
+	std::lock_guard<mutex_Ty> lock(_welp_link_node_mutex);
 	_welp_link_node_map.clear();
 }
 
-template <class msg_Ty, class label_Ty, class _Allocator>
-void welp::link_node_sync<msg_Ty, label_Ty, _Allocator>::remove_all_observer_nodes(const label_Ty& target_label)
+template <class msg_Ty, class label_Ty, class _Allocator, class mutex_Ty>
+void welp::link_node_sync<msg_Ty, label_Ty, _Allocator, mutex_Ty>::remove_all_observer_nodes(const label_Ty& target_label)
 {
-	std::lock_guard<std::mutex> lock(_welp_link_node_mutex);
+	std::lock_guard<mutex_Ty> lock(_welp_link_node_mutex);
 	auto iter = reinterpret_cast<std::map<welp::link_node_sync<msg_Ty, label_Ty, _Allocator>*, label_Ty>&>(_welp_link_node_map).begin();
 	while (iter != reinterpret_cast<std::map<welp::link_node_sync<msg_Ty, label_Ty, _Allocator>*, label_Ty>&>(_welp_link_node_map).end())
 	{
@@ -415,10 +416,10 @@ void welp::link_node_sync<msg_Ty, label_Ty, _Allocator>::remove_all_observer_nod
 	}
 }
 
-template <class msg_Ty, class label_Ty, class _Allocator> template <class Predicate>
-void welp::link_node_sync<msg_Ty, label_Ty, _Allocator>::remove_all_observer_nodes(Predicate Pr)
+template <class msg_Ty, class label_Ty, class _Allocator, class mutex_Ty> template <class Predicate>
+void welp::link_node_sync<msg_Ty, label_Ty, _Allocator, mutex_Ty>::remove_all_observer_nodes(Predicate Pr)
 {
-	std::lock_guard<std::mutex> lock(_welp_link_node_mutex);
+	std::lock_guard<mutex_Ty> lock(_welp_link_node_mutex);
 	auto iter = reinterpret_cast<std::map<welp::link_node_sync<msg_Ty, label_Ty, _Allocator>*, label_Ty>&>(_welp_link_node_map).begin();
 	while (iter != reinterpret_cast<std::map<welp::link_node_sync<msg_Ty, label_Ty, _Allocator>*, label_Ty>&>(_welp_link_node_map).end())
 	{
@@ -433,10 +434,10 @@ void welp::link_node_sync<msg_Ty, label_Ty, _Allocator>::remove_all_observer_nod
 	}
 }
 
-template <class msg_Ty, class label_Ty, class _Allocator> template <class Ty>
-bool welp::link_node_sync<msg_Ty, label_Ty, _Allocator>::contains_observer_node(const Ty* const target_ptr) const
+template <class msg_Ty, class label_Ty, class _Allocator, class mutex_Ty> template <class Ty>
+bool welp::link_node_sync<msg_Ty, label_Ty, _Allocator, mutex_Ty>::contains_observer_node(const Ty* const target_ptr) const
 {
-	std::lock_guard<std::mutex> lock(_welp_link_node_mutex);
+	std::lock_guard<mutex_Ty> lock(_welp_link_node_mutex);
 	if (_welp_link_node_map.count(static_cast<char*>(static_cast<void*>(const_cast<Ty* const>(target_ptr)))) == 0)
 	{
 		return false;
@@ -447,17 +448,17 @@ bool welp::link_node_sync<msg_Ty, label_Ty, _Allocator>::contains_observer_node(
 	}
 }
 
-template <class msg_Ty, class label_Ty, class _Allocator>
-inline std::size_t welp::link_node_sync<msg_Ty, label_Ty, _Allocator>::observer_node_count() const noexcept
+template <class msg_Ty, class label_Ty, class _Allocator, class mutex_Ty>
+inline std::size_t welp::link_node_sync<msg_Ty, label_Ty, _Allocator, mutex_Ty>::observer_node_count() const noexcept
 {
-	std::lock_guard<std::mutex> lock(_welp_link_node_mutex);
+	std::lock_guard<mutex_Ty> lock(_welp_link_node_mutex);
 	return _welp_link_node_map.size();
 }
 
-template <class msg_Ty, class label_Ty, class _Allocator>
-std::size_t welp::link_node_sync<msg_Ty, label_Ty, _Allocator>::observer_node_count(const label_Ty& compare_label) const
+template <class msg_Ty, class label_Ty, class _Allocator, class mutex_Ty>
+std::size_t welp::link_node_sync<msg_Ty, label_Ty, _Allocator, mutex_Ty>::observer_node_count(const label_Ty& compare_label) const
 {
-	std::lock_guard<std::mutex> lock(_welp_link_node_mutex);
+	std::lock_guard<mutex_Ty> lock(_welp_link_node_mutex);
 	std::size_t counter = 0;
 	for (auto iter = reinterpret_cast<const std::map<welp::link_node_sync<msg_Ty, label_Ty, _Allocator>*, label_Ty>&>(_welp_link_node_map).begin();
 		iter != reinterpret_cast<const std::map<welp::link_node_sync<msg_Ty, label_Ty, _Allocator>*, label_Ty>&>(_welp_link_node_map).end(); ++iter)
@@ -470,10 +471,10 @@ std::size_t welp::link_node_sync<msg_Ty, label_Ty, _Allocator>::observer_node_co
 	return counter;
 }
 
-template <class msg_Ty, class label_Ty, class _Allocator> template <class Predicate>
-std::size_t welp::link_node_sync<msg_Ty, label_Ty, _Allocator>::observer_node_count(Predicate Pr) const
+template <class msg_Ty, class label_Ty, class _Allocator, class mutex_Ty> template <class Predicate>
+std::size_t welp::link_node_sync<msg_Ty, label_Ty, _Allocator, mutex_Ty>::observer_node_count(Predicate Pr) const
 {
-	std::lock_guard<std::mutex> lock(_welp_link_node_mutex);
+	std::lock_guard<mutex_Ty> lock(_welp_link_node_mutex);
 	std::size_t counter = 0;
 	for (auto iter = reinterpret_cast<const std::map<welp::link_node_sync<msg_Ty, label_Ty, _Allocator>*, label_Ty>&>(_welp_link_node_map).begin();
 		iter != reinterpret_cast<const std::map<welp::link_node_sync<msg_Ty, label_Ty, _Allocator>*, label_Ty>&>(_welp_link_node_map).end(); ++iter)
@@ -486,10 +487,10 @@ std::size_t welp::link_node_sync<msg_Ty, label_Ty, _Allocator>::observer_node_co
 	return counter;
 }
 
-template <class msg_Ty, class label_Ty, class _Allocator> template <class Ty>
-inline label_Ty welp::link_node_sync<msg_Ty, label_Ty, _Allocator>::observer_node_label(const Ty* const ptr) const noexcept
+template <class msg_Ty, class label_Ty, class _Allocator, class mutex_Ty> template <class Ty>
+inline label_Ty welp::link_node_sync<msg_Ty, label_Ty, _Allocator, mutex_Ty>::observer_node_label(const Ty* const ptr) const noexcept
 {
-	std::lock_guard<std::mutex> lock(_welp_link_node_mutex);
+	std::lock_guard<mutex_Ty> lock(_welp_link_node_mutex);
 	char* const char_ptr = static_cast<char* const>(static_cast<void* const>(const_cast<Ty* const>(ptr)));
 	if (_welp_link_node_map.count(char_ptr) != 0)
 	{
