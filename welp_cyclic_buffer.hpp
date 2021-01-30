@@ -528,12 +528,11 @@ void welp::cyclic_buffer<Ty, _Allocator>::delete_buffer() noexcept
 template <class Ty, class _Allocator>
 inline bool welp::cyclic_buffer_atom<Ty, _Allocator>::store_cpy(const Ty& obj)
 {
-	storage_cell* temp_next_cell_ptr;
+	storage_cell* temp_next_cell_ptr = next_cell_ptr.load(std::memory_order_relaxed);
 	storage_cell* final_last_cell_ptr;
 	storage_cell* initial_last_cell_ptr = last_cell_ptr.load();
 	do
 	{
-		temp_next_cell_ptr = next_cell_ptr.load();
 		final_last_cell_ptr = initial_last_cell_ptr + 1;
 		if ((final_last_cell_ptr != temp_next_cell_ptr) && ((temp_next_cell_ptr != cells_data_ptr)
 			|| (final_last_cell_ptr != cells_end_ptr)))
@@ -553,12 +552,11 @@ inline bool welp::cyclic_buffer_atom<Ty, _Allocator>::store_cpy(const Ty& obj)
 template <class Ty, class _Allocator>
 inline bool welp::cyclic_buffer_atom<Ty, _Allocator>::store_move(Ty&& obj) noexcept
 {
-	storage_cell* temp_next_cell_ptr;
+	storage_cell* temp_next_cell_ptr = next_cell_ptr.load(std::memory_order_relaxed);
 	storage_cell* final_last_cell_ptr;
 	storage_cell* initial_last_cell_ptr = last_cell_ptr.load();
 	do
 	{
-		temp_next_cell_ptr = next_cell_ptr.load();
 		final_last_cell_ptr = initial_last_cell_ptr + 1;
 		if ((final_last_cell_ptr != temp_next_cell_ptr) && ((temp_next_cell_ptr != cells_data_ptr)
 			|| (final_last_cell_ptr != cells_end_ptr)))
@@ -578,12 +576,11 @@ inline bool welp::cyclic_buffer_atom<Ty, _Allocator>::store_move(Ty&& obj) noexc
 template <class Ty, class _Allocator>
 inline bool welp::cyclic_buffer_atom<Ty, _Allocator>::store_ptr(Ty* obj_ptr) noexcept
 {
-	storage_cell* temp_next_cell_ptr;
+	storage_cell* temp_next_cell_ptr = next_cell_ptr.load(std::memory_order_relaxed);
 	storage_cell* final_last_cell_ptr;
 	storage_cell* initial_last_cell_ptr = last_cell_ptr.load();
 	do
 	{
-		temp_next_cell_ptr = next_cell_ptr.load();
 		final_last_cell_ptr = initial_last_cell_ptr + 1;
 		if ((final_last_cell_ptr != temp_next_cell_ptr) && ((temp_next_cell_ptr != cells_data_ptr)
 			|| (final_last_cell_ptr != cells_end_ptr)))
