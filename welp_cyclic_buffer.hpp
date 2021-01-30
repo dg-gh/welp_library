@@ -603,11 +603,12 @@ inline bool welp::cyclic_buffer_atom<Ty, _Allocator>::store_ptr(Ty* obj_ptr) noe
 template <class Ty, class _Allocator>
 inline bool welp::cyclic_buffer_atom<Ty, _Allocator>::load_cpy(Ty& obj)
 {
+	storage_cell* temp_last_cell_ptr = last_cell_ptr.load(std::memory_order_relaxed);
 	storage_cell* final_next_cell_ptr;
 	storage_cell* initial_next_cell_ptr = next_cell_ptr.load();
 	do
 	{
-		if (last_cell_ptr.load() != initial_next_cell_ptr)
+		if (temp_last_cell_ptr != initial_next_cell_ptr)
 		{
 			final_next_cell_ptr = initial_next_cell_ptr + 1;
 			if (final_next_cell_ptr == cells_end_ptr)
@@ -638,11 +639,12 @@ inline bool welp::cyclic_buffer_atom<Ty, _Allocator>::load_cpy(Ty& obj)
 template <class Ty, class _Allocator>
 inline bool welp::cyclic_buffer_atom<Ty, _Allocator>::load(Ty& obj) noexcept
 {
+	storage_cell* temp_last_cell_ptr = last_cell_ptr.load(std::memory_order_relaxed);
 	storage_cell* final_next_cell_ptr;
 	storage_cell* initial_next_cell_ptr = next_cell_ptr.load();
 	do
 	{
-		if (last_cell_ptr.load() != initial_next_cell_ptr)
+		if (temp_last_cell_ptr != initial_next_cell_ptr)
 		{
 			final_next_cell_ptr = initial_next_cell_ptr + 1;
 			if (final_next_cell_ptr == cells_end_ptr)
