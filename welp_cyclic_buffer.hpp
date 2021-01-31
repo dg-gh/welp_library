@@ -530,7 +530,6 @@ bool welp::cyclic_buffer<Ty, _Allocator>::new_buffer(std::size_t instances)
 	if (cells_data_ptr != nullptr)
 	{
 		_capacity = instances;
-		_size = 0;
 		cells_end_ptr = cells_data_ptr;
 		next_cell_ptr = cells_data_ptr;
 		last_cell_ptr = cells_data_ptr;
@@ -918,14 +917,7 @@ inline std::size_t welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::size() co
 template <class Ty, class _Allocator, class mutex_Ty>
 inline std::size_t welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::capacity() const noexcept
 {
-	if (cells_data_ptr != nullptr)
-	{
-		return _capacity;
-	}
-	else
-	{
-		return 0;
-	}
+	return _capacity;
 }
 
 template <class Ty, class _Allocator, class mutex_Ty>
@@ -976,6 +968,7 @@ void welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::delete_buffer() noexcep
 		cells_end_ptr = nullptr;
 		next_cell_ptr = nullptr;
 		cells_end_ptr = nullptr;
+		_size = 0;
 		_capacity = 0;
 	}
 }
