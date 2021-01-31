@@ -75,11 +75,8 @@ namespace welp
 		storage_cell* cells_data_ptr = nullptr;
 		storage_cell* cells_end_ptr = nullptr;
 
-		int padding0[16];
 		storage_cell* last_cell_ptr = nullptr;
-		int padding1[16];
 		storage_cell* next_cell_ptr = nullptr;
-		int padding2[16];
 
 		std::size_t _size = 0;
 		std::size_t _capacity = 0;
@@ -102,7 +99,7 @@ namespace welp
 	};
 
 #ifdef WELP_CYCLIC_BUFFER_INCLUDE_ATOMIC
-	template <class Ty, class _Allocator = std::allocator<char>> class cyclic_buffer_atom : private _Allocator
+	template <class Ty, class _Allocator = std::allocator<char>, std::size_t padding_size = 8> class cyclic_buffer_atom : private _Allocator
 	{
 
 	private:
@@ -137,10 +134,12 @@ namespace welp
 		storage_cell* cells_data_ptr = nullptr;
 		storage_cell* cells_end_ptr = nullptr;
 
+		std::size_t padding0[padding_size] = { 0 };
 		std::atomic<storage_cell*> last_cell_ptr{ nullptr };
+		std::size_t padding1[padding_size] = { 0 };
 		std::atomic<storage_cell*> next_cell_ptr{ nullptr };
+		std::size_t padding2[padding_size] = { 0 };
 
-		std::atomic<std::size_t> _size{ 0 };
 		std::size_t _capacity = 0;
 
 		class storage_cell
@@ -152,10 +151,12 @@ namespace welp
 			Ty* storage_ptr = nullptr;
 
 			storage_cell() = default;
-			storage_cell(const welp::cyclic_buffer_atom<Ty, _Allocator>::storage_cell&) = default;
-			welp::cyclic_buffer_atom<Ty, _Allocator>::storage_cell& operator=(const welp::cyclic_buffer_atom<Ty, _Allocator>::storage_cell&) = default;
-			storage_cell(welp::cyclic_buffer_atom<Ty, _Allocator>::storage_cell&&) = default;
-			welp::cyclic_buffer_atom<Ty, _Allocator>::storage_cell& operator=(welp::cyclic_buffer_atom<Ty, _Allocator>::storage_cell&&) = default;
+			storage_cell(const welp::cyclic_buffer_atom<Ty, _Allocator, padding_size>::storage_cell&) = default;
+			welp::cyclic_buffer_atom<Ty, _Allocator, padding_size>::storage_cell& operator=(
+				const welp::cyclic_buffer_atom<Ty, _Allocator, padding_size>::storage_cell&) = default;
+			storage_cell(welp::cyclic_buffer_atom<Ty, _Allocator, padding_size>::storage_cell&&) = default;
+			welp::cyclic_buffer_atom<Ty, _Allocator, padding_size>::storage_cell& operator=(
+				welp::cyclic_buffer_atom<Ty, _Allocator, padding_size>::storage_cell&&) = default;
 			~storage_cell() = default;
 		};
 	};
@@ -525,8 +526,8 @@ void welp::cyclic_buffer<Ty, _Allocator>::delete_buffer() noexcept
 }
 
 #ifdef WELP_CYCLIC_BUFFER_INCLUDE_ATOMIC
-template <class Ty, class _Allocator>
-inline bool welp::cyclic_buffer_atom<Ty, _Allocator>::store_cpy(const Ty& obj)
+template <class Ty, class _Allocator, std::size_t padding_size>
+inline bool welp::cyclic_buffer_atom<Ty, _Allocator, padding_size>::store_cpy(const Ty& obj)
 {
 	storage_cell* temp_next_cell_ptr = next_cell_ptr.load(std::memory_order_relaxed);
 	storage_cell* final_last_cell_ptr;
@@ -544,13 +545,12 @@ inline bool welp::cyclic_buffer_atom<Ty, _Allocator>::store_cpy(const Ty& obj)
 			return false;
 		}
 	} while (!last_cell_ptr.compare_exchange_strong(initial_last_cell_ptr, final_last_cell_ptr));
-	_size.fetch_add(1, std::memory_order_relaxed);
 	initial_last_cell_ptr->storage = obj;
 	return true;
 }
 
-template <class Ty, class _Allocator>
-inline bool welp::cyclic_buffer_atom<Ty, _Allocator>::store_move(Ty&& obj) noexcept
+template <class Ty, class _Allocator, std::size_t padding_size>
+inline bool welp::cyclic_buffer_atom<Ty, _Allocator, padding_size>::store_move(Ty&& obj) noexcept
 {
 	storage_cell* temp_next_cell_ptr = next_cell_ptr.load(std::memory_order_relaxed);
 	storage_cell* final_last_cell_ptr;
@@ -568,13 +568,12 @@ inline bool welp::cyclic_buffer_atom<Ty, _Allocator>::store_move(Ty&& obj) noexc
 			return false;
 		}
 	} while (!last_cell_ptr.compare_exchange_strong(initial_last_cell_ptr, final_last_cell_ptr));
-	_size.fetch_add(1, std::memory_order_relaxed);
 	initial_last_cell_ptr->storage = std::move(obj);
 	return true;
 }
 
-template <class Ty, class _Allocator>
-inline bool welp::cyclic_buffer_atom<Ty, _Allocator>::store_ptr(Ty* obj_ptr) noexcept
+template <class Ty, class _Allocator, std::size_t padding_size>
+inline bool welp::cyclic_buffer_atom<Ty, _Allocator, padding_size>::store_ptr(Ty* obj_ptr) noexcept
 {
 	storage_cell* temp_next_cell_ptr = next_cell_ptr.load(std::memory_order_relaxed);
 	storage_cell* final_last_cell_ptr;
@@ -592,13 +591,12 @@ inline bool welp::cyclic_buffer_atom<Ty, _Allocator>::store_ptr(Ty* obj_ptr) noe
 			return false;
 		}
 	} while (!last_cell_ptr.compare_exchange_strong(initial_last_cell_ptr, final_last_cell_ptr));
-	_size.fetch_add(1, std::memory_order_relaxed);
 	initial_last_cell_ptr->storage_ptr = obj_ptr;
 	return true;
 }
 
-template <class Ty, class _Allocator>
-inline bool welp::cyclic_buffer_atom<Ty, _Allocator>::load_cpy(Ty& obj)
+template <class Ty, class _Allocator, std::size_t padding_size>
+inline bool welp::cyclic_buffer_atom<Ty, _Allocator, padding_size>::load_cpy(Ty& obj)
 {
 	storage_cell* temp_last_cell_ptr = last_cell_ptr.load(std::memory_order_relaxed);
 	storage_cell* final_next_cell_ptr;
@@ -629,12 +627,11 @@ inline bool welp::cyclic_buffer_atom<Ty, _Allocator>::load_cpy(Ty& obj)
 		initial_next_cell_ptr->storage_ptr = nullptr;
 		obj = *temp_storage_ptr;
 	}
-	_size.fetch_sub(1, std::memory_order_relaxed);
 	return true;
 }
 
-template <class Ty, class _Allocator>
-inline bool welp::cyclic_buffer_atom<Ty, _Allocator>::load(Ty& obj) noexcept
+template <class Ty, class _Allocator, std::size_t padding_size>
+inline bool welp::cyclic_buffer_atom<Ty, _Allocator, padding_size>::load(Ty& obj) noexcept
 {
 	storage_cell* temp_last_cell_ptr = last_cell_ptr.load(std::memory_order_relaxed);
 	storage_cell* final_next_cell_ptr;
@@ -665,31 +662,47 @@ inline bool welp::cyclic_buffer_atom<Ty, _Allocator>::load(Ty& obj) noexcept
 		initial_next_cell_ptr->storage_ptr = nullptr;
 		obj = std::move(*temp_storage_ptr);
 	}
-	_size.fetch_sub(1, std::memory_order_relaxed);
 	return true;
 }
 
-template <class Ty, class _Allocator>
-inline std::size_t welp::cyclic_buffer_atom<Ty, _Allocator>::size() const noexcept
+template <class Ty, class _Allocator, std::size_t padding_size>
+inline std::size_t welp::cyclic_buffer_atom<Ty, _Allocator, padding_size>::size() const noexcept
 {
-	return _size.load();
+	storage_cell* temp_last_cell_ptr = last_cell_ptr.load();
+	storage_cell* temp_next_cell_ptr = next_cell_ptr.load();
+	if (temp_last_cell_ptr >= temp_next_cell_ptr)
+	{
+		return static_cast<std::size_t>(temp_last_cell_ptr - temp_next_cell_ptr);
+	}
+	else
+	{
+		return (_capacity + 1) - static_cast<std::size_t>(temp_next_cell_ptr - temp_last_cell_ptr);
+	}
 }
 
-template <class Ty, class _Allocator>
-inline std::size_t welp::cyclic_buffer_atom<Ty, _Allocator>::capacity() const noexcept
+template <class Ty, class _Allocator, std::size_t padding_size>
+inline std::size_t welp::cyclic_buffer_atom<Ty, _Allocator, padding_size>::capacity() const noexcept
 {
 	return _capacity;
 }
 
-template <class Ty, class _Allocator>
-inline std::size_t welp::cyclic_buffer_atom<Ty, _Allocator>::capacity_remaining() const noexcept
+template <class Ty, class _Allocator, std::size_t padding_size>
+inline std::size_t welp::cyclic_buffer_atom<Ty, _Allocator, padding_size>::capacity_remaining() const noexcept
 {
-	return _capacity - _size.load();
+	storage_cell* temp_last_cell_ptr = last_cell_ptr.load();
+	storage_cell* temp_next_cell_ptr = next_cell_ptr.load();
+	if (temp_last_cell_ptr >= temp_next_cell_ptr)
+	{
+		return _capacity - static_cast<std::size_t>(temp_last_cell_ptr - temp_next_cell_ptr);
+	}
+	else
+	{
+		return static_cast<std::size_t>(temp_next_cell_ptr - temp_last_cell_ptr) - 1;
+	}
 }
 
-
-template <class Ty, class _Allocator>
-bool welp::cyclic_buffer_atom<Ty, _Allocator>::new_buffer(std::size_t instances)
+template <class Ty, class _Allocator, std::size_t padding_size>
+bool welp::cyclic_buffer_atom<Ty, _Allocator, padding_size>::new_buffer(std::size_t instances)
 {
 	delete_buffer();
 
@@ -698,7 +711,6 @@ bool welp::cyclic_buffer_atom<Ty, _Allocator>::new_buffer(std::size_t instances)
 	if (cells_data_ptr != nullptr)
 	{
 		_capacity = instances;
-		_size.store(0, std::memory_order_relaxed);
 		cells_end_ptr = cells_data_ptr;
 		next_cell_ptr.store(cells_data_ptr, std::memory_order_relaxed);
 		last_cell_ptr.store(cells_data_ptr, std::memory_order_relaxed);
@@ -714,8 +726,8 @@ bool welp::cyclic_buffer_atom<Ty, _Allocator>::new_buffer(std::size_t instances)
 	}
 }
 
-template <class Ty, class _Allocator>
-void welp::cyclic_buffer_atom<Ty, _Allocator>::delete_buffer() noexcept
+template <class Ty, class _Allocator, std::size_t padding_size>
+void welp::cyclic_buffer_atom<Ty, _Allocator, padding_size>::delete_buffer() noexcept
 {
 	if (cells_data_ptr != nullptr)
 	{
@@ -730,7 +742,6 @@ void welp::cyclic_buffer_atom<Ty, _Allocator>::delete_buffer() noexcept
 		cells_end_ptr = nullptr;
 		next_cell_ptr.store(nullptr, std::memory_order_relaxed);
 		last_cell_ptr.store(nullptr, std::memory_order_relaxed);
-		_size.store(0, std::memory_order_relaxed);
 		_capacity = 0;
 	}
 }
