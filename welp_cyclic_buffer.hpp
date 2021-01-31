@@ -8,8 +8,7 @@
 
 ////// INCLUDES //////
 
-#include <cstddef>
-#include <memory>
+#include <cstdlib>
 
 
 #if defined(WELP_CYCLIC_BUFFER_INCLUDE_ALL) || defined(WELP_ALWAYS_INCLUDE_ALL)
@@ -38,7 +37,19 @@
 
 namespace welp
 {
-	template <class Ty, class _Allocator = std::allocator<char>> class cyclic_buffer : private _Allocator
+	// allocate and deallocate should preferably not throw
+	// allocate should preferably return a nullptr in case of allocation failure
+	// can be substituted by std::allocator<char> although a non-throwing version would be preferable
+	class default_cyclic_buffer_allocator
+	{
+
+	public:
+
+		inline char* allocate(std::size_t bytes) const noexcept { return static_cast<char*>(std::malloc(bytes)); }
+		inline void deallocate(char* ptr, std::size_t) const noexcept { std::free(static_cast<void*>(ptr)); }
+	};
+
+	template <class Ty, class _Allocator = default_cyclic_buffer_allocator> class cyclic_buffer : private _Allocator
 	{
 
 	private:
@@ -97,7 +108,8 @@ namespace welp
 	};
 
 #ifdef WELP_CYCLIC_BUFFER_INCLUDE_ATOMIC
-	template <class Ty, class _Allocator = std::allocator<char>, std::size_t padding_size = 8> class cyclic_buffer_atom : private _Allocator
+	template <class Ty, class _Allocator = default_cyclic_buffer_allocator,
+		std::size_t padding_size = 8> class cyclic_buffer_atom : private _Allocator
 	{
 
 	private:
@@ -161,7 +173,7 @@ namespace welp
 #endif // WELP_CYCLIC_BUFFER_INCLUDE_ATOMIC
 
 #ifdef WELP_CYCLIC_BUFFER_INCLUDE_MUTEX
-	template <class Ty, class _Allocator = std::allocator<char>, class mutex_Ty = std::mutex> class cyclic_buffer_sync : private _Allocator
+	template <class Ty, class _Allocator = default_cyclic_buffer_allocator, class mutex_Ty = std::mutex> class cyclic_buffer_sync : private _Allocator
 	{
 
 	private:
@@ -525,23 +537,30 @@ bool welp::cyclic_buffer<Ty, _Allocator>::new_buffer(std::size_t instances)
 {
 	delete_buffer();
 
-	cells_data_ptr = static_cast<storage_cell*>(static_cast<void*>(
-		this->allocate((instances + 1) * sizeof(storage_cell))));
-	if (cells_data_ptr != nullptr)
+	try
 	{
-		_capacity = instances;
-		cells_end_ptr = cells_data_ptr;
-		next_cell_ptr = cells_data_ptr;
-		last_cell_ptr = cells_data_ptr;
-		for (std::size_t n = instances + 1; n > 0; n--)
+		cells_data_ptr = static_cast<storage_cell*>(static_cast<void*>(
+			this->allocate((instances + 1) * sizeof(storage_cell))));
+		if (cells_data_ptr != nullptr)
 		{
-			new (cells_end_ptr) storage_cell(); cells_end_ptr++;
+			_capacity = instances;
+			cells_end_ptr = cells_data_ptr;
+			next_cell_ptr = cells_data_ptr;
+			last_cell_ptr = cells_data_ptr;
+			for (std::size_t n = instances + 1; n > 0; n--)
+			{
+				new (cells_end_ptr) storage_cell(); cells_end_ptr++;
+			}
+			return true;
 		}
-		return true;
+		else
+		{
+			delete_buffer(); return false;
+		}
 	}
-	else
+	catch (...)
 	{
-		return false;
+		delete_buffer(); return false;
 	}
 }
 
@@ -747,23 +766,30 @@ bool welp::cyclic_buffer_atom<Ty, _Allocator, padding_size>::new_buffer(std::siz
 {
 	delete_buffer();
 
-	cells_data_ptr = static_cast<storage_cell*>(static_cast<void*>(
-		this->allocate((instances + 1) * sizeof(storage_cell))));
-	if (cells_data_ptr != nullptr)
+	try
 	{
-		_capacity = instances;
-		cells_end_ptr = cells_data_ptr;
-		next_cell_ptr.store(cells_data_ptr, std::memory_order_relaxed);
-		last_cell_ptr.store(cells_data_ptr, std::memory_order_relaxed);
-		for (std::size_t n = instances + 1; n > 0; n--)
+		cells_data_ptr = static_cast<storage_cell*>(static_cast<void*>(
+			this->allocate((instances + 1) * sizeof(storage_cell))));
+		if (cells_data_ptr != nullptr)
 		{
-			new (cells_end_ptr) storage_cell(); cells_end_ptr++;
+			_capacity = instances;
+			cells_end_ptr = cells_data_ptr;
+			next_cell_ptr.store(cells_data_ptr, std::memory_order_relaxed);
+			last_cell_ptr.store(cells_data_ptr, std::memory_order_relaxed);
+			for (std::size_t n = instances + 1; n > 0; n--)
+			{
+				new (cells_end_ptr) storage_cell(); cells_end_ptr++;
+			}
+			return true;
 		}
-		return true;
+		else
+		{
+			delete_buffer(); return false;
+		}
 	}
-	else
+	catch (...)
 	{
-		return false;
+		delete_buffer(); return false;
 	}
 }
 
@@ -931,23 +957,30 @@ bool welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::new_buffer(std::size_t 
 {
 	delete_buffer();
 
-	cells_data_ptr = static_cast<storage_cell*>(static_cast<void*>(
-		this->allocate((instances + 1) * sizeof(storage_cell))));
-	if (cells_data_ptr != nullptr)
+	try
 	{
-		_capacity = instances;
-		cells_end_ptr = cells_data_ptr;
-		next_cell_ptr = cells_data_ptr;
-		last_cell_ptr = cells_data_ptr;
-		for (std::size_t n = instances + 1; n > 0; n--)
+		cells_data_ptr = static_cast<storage_cell*>(static_cast<void*>(
+			this->allocate((instances + 1) * sizeof(storage_cell))));
+		if (cells_data_ptr != nullptr)
 		{
-			new (cells_end_ptr) storage_cell(); cells_end_ptr++;
+			_capacity = instances;
+			cells_end_ptr = cells_data_ptr;
+			next_cell_ptr = cells_data_ptr;
+			last_cell_ptr = cells_data_ptr;
+			for (std::size_t n = instances + 1; n > 0; n--)
+			{
+				new (cells_end_ptr) storage_cell(); cells_end_ptr++;
+			}
+			return true;
 		}
-		return true;
+		else
+		{
+			delete_buffer(); return false;
+		}
 	}
-	else
+	catch (...)
 	{
-		return false;
+		delete_buffer(); return false;
 	}
 }
 
