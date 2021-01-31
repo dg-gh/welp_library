@@ -24,11 +24,10 @@ Incoming ...
 
 	void g() // store values in Q
 	{
-		std::lock_guard<std::mutex> lock(mu);
-		
 		while (!(Q.store_stream(16) << 1 << 2 << 3 << 4 << 5 << 6 << 7 << 8
 			<< 9 << 10 << 11 << 12 << 13 << 14 << 15 << 16).good());
 		
+		std::lock_guard<std::mutex> lock(mu);
 		std::cout << "store successful !" << std::endl;
 	}
 	
