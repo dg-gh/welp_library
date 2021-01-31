@@ -181,16 +181,16 @@ namespace welp
 		inline std::size_t capacity() const noexcept;
 		inline std::size_t capacity_remaining() const noexcept;
 
-		class store_stream_lock;
-		welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::store_stream_lock store_stream(std::size_t requested_capacity)
+		class sstream;
+		welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::sstream store_stream(std::size_t requested_capacity)
 		{
-			return welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::store_stream_lock(this, requested_capacity);
+			return welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::sstream(this, requested_capacity);
 		}
 
-		class load_stream_lock;
-		welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::load_stream_lock load_stream(std::size_t requested_capacity)
+		class lstream;
+		welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::lstream load_stream(std::size_t requested_capacity)
 		{
-			return welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::load_stream_lock(this, requested_capacity);
+			return welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::lstream(this, requested_capacity);
 		}
 
 		bool new_buffer(std::size_t instances);
@@ -203,27 +203,27 @@ namespace welp
 		welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>& operator=(welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>&&) = delete;
 		~cyclic_buffer_sync() { delete_buffer(); }
 
-		class store_stream_lock
+		class sstream
 		{
 
 		public:
 
-			store_stream_lock() = delete;
-			store_stream_lock(welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>* _cyclic_buffer_ptr, std::size_t requested_capacity)
+			sstream() = delete;
+			sstream(welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>* _cyclic_buffer_ptr, std::size_t requested_capacity)
 				: cyclic_buffer_ptr(_cyclic_buffer_ptr)
 			{
 				cyclic_buffer_ptr->buffer_mutex.lock();
 				_good = (requested_capacity <= _cyclic_buffer_ptr->_capacity - reinterpret_cast<std::atomic<std::size_t>&>(_cyclic_buffer_ptr->_size).load());
 			}
-			store_stream_lock(const welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::store_stream_lock&) = delete;
-			welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::store_stream_lock& operator=(const welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::store_stream_lock&) = delete;
-			store_stream_lock(welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::store_stream_lock&&) = default;
-			welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::store_stream_lock& operator=(welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::store_stream_lock&&) = delete;
-			~store_stream_lock() { cyclic_buffer_ptr->buffer_mutex.unlock(); }
+			sstream(const welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::sstream&) = delete;
+			welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::sstream& operator=(const welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::sstream&) = delete;
+			sstream(welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::sstream&&) = default;
+			welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::sstream& operator=(welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::sstream&&) = delete;
+			~sstream() { cyclic_buffer_ptr->buffer_mutex.unlock(); }
 
 			inline bool good() const noexcept { return _good; }
 
-			inline welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::store_stream_lock& operator<<(const Ty& obj)
+			inline welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::sstream& operator<<(const Ty& obj)
 			{
 				if (_good)
 				{
@@ -237,7 +237,7 @@ namespace welp
 				}
 				return *this;
 			}
-			inline welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::store_stream_lock& operator<<(Ty&& obj) noexcept
+			inline welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::sstream& operator<<(Ty&& obj) noexcept
 			{
 				if (_good)
 				{
@@ -251,7 +251,7 @@ namespace welp
 				}
 				return *this;
 			}
-			inline welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::store_stream_lock& operator<<(Ty* obj_ptr) noexcept
+			inline welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::sstream& operator<<(Ty* obj_ptr) noexcept
 			{
 				if (_good)
 				{
@@ -265,7 +265,7 @@ namespace welp
 				}
 				return *this;
 			}
-			inline welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::store_stream_lock& operator<(const Ty& obj)
+			inline welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::sstream& operator<(const Ty& obj)
 			{
 				if (_good)
 				{
@@ -285,27 +285,27 @@ namespace welp
 			welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>* cyclic_buffer_ptr;
 			bool _good = false;
 		};
-		class load_stream_lock
+		class lstream
 		{
 
 		public:
 
-			load_stream_lock() = delete;
-			load_stream_lock(welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>* _cyclic_buffer_ptr, std::size_t requested_capacity)
+			lstream() = delete;
+			lstream(welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>* _cyclic_buffer_ptr, std::size_t requested_capacity)
 				: cyclic_buffer_ptr(_cyclic_buffer_ptr)
 			{
 				cyclic_buffer_ptr->buffer_mutex.lock();
 				_good = (requested_capacity <= reinterpret_cast<std::atomic<std::size_t>&>(_cyclic_buffer_ptr->_size).load());
 			}
-			load_stream_lock(const welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::load_stream_lock&) = delete;
-			welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::load_stream_lock& operator=(const welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::load_stream_lock&) = delete;
-			load_stream_lock(welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::load_stream_lock&&) = default;
-			welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::load_stream_lock& operator=(welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::load_stream_lock&&) = delete;
-			~load_stream_lock() { cyclic_buffer_ptr->buffer_mutex.unlock(); }
+			lstream(const welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::lstream&) = delete;
+			welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::lstream& operator=(const welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::lstream&) = delete;
+			lstream(welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::lstream&&) = default;
+			welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::lstream& operator=(welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::lstream&&) = delete;
+			~lstream() { cyclic_buffer_ptr->buffer_mutex.unlock(); }
 
 			inline bool good() const noexcept { return _good; }
 
-			inline welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::load_stream_lock& operator>>(Ty& obj) noexcept
+			inline welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::lstream& operator>>(Ty& obj) noexcept
 			{
 				if (_good)
 				{
@@ -328,7 +328,7 @@ namespace welp
 				}
 				return *this;
 			}
-			inline welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::load_stream_lock& operator>(Ty& obj)
+			inline welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::lstream& operator>(Ty& obj)
 			{
 				if (_good)
 				{
