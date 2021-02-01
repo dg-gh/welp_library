@@ -749,6 +749,7 @@ inline bool welp::acc_buffer_sync<Ty, _Allocator, mutex_Ty>::new_buffer(std::siz
 {
 	delete_buffer();
 
+	std::lock_guard<std::mutex> lock(buffer_mutex);
 	data_ptr = static_cast<storage_cell*>(static_cast<void*>(this->allocate(instances * sizeof(storage_cell))));
 	if (data_ptr != nullptr)
 	{
@@ -770,6 +771,7 @@ inline bool welp::acc_buffer_sync<Ty, _Allocator, mutex_Ty>::new_buffer(std::siz
 template <class Ty, class _Allocator, class mutex_Ty>
 inline void welp::acc_buffer_sync<Ty, _Allocator, mutex_Ty>::delete_buffer() noexcept
 {
+	std::lock_guard<std::mutex> lock(buffer_mutex);
 	if (data_ptr != nullptr)
 	{
 		storage_cell* ptr = data_ptr + (max_number_of_cells - 1);
