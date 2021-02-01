@@ -356,12 +356,15 @@ namespace welp
 
 	// memory resource thread safe with atomics
 #ifdef WELP_MULTIPOOL_INCLUDE_ATOMIC
-	template <std::size_t max_number_of_pools, class sub_allocator = welp::default_multipool_sub_allocator> class multipool_resource_atom
+	template <std::size_t max_number_of_pools, class sub_allocator = welp::default_multipool_sub_allocator, std::size_t padding_size = 8> class multipool_resource_atom
 	{
 
 	private:
 
+		std::size_t padding0[padding_size] = { 0 };
 		std::atomic<char**> current_address_ptr[max_number_of_pools];
+		std::size_t padding1[padding_size] = { 0 };
+
 		char** first_address_ptr[max_number_of_pools] = { nullptr };
 		char* data_ptr[max_number_of_pools] = { nullptr };
 		char* data_ptr_unaligned[max_number_of_pools] = { nullptr };
@@ -2623,8 +2626,8 @@ void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>
 
 #ifdef WELP_MULTIPOOL_INCLUDE_ATOMIC
 // ALLOCATE
-template <std::size_t max_number_of_pools, class sub_allocator>
-template <class Ty> inline Ty* welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::allocate_type(std::size_t instances) noexcept
+template <std::size_t max_number_of_pools, class sub_allocator, std::size_t padding_size>
+template <class Ty> inline Ty* welp::multipool_resource_atom<max_number_of_pools, sub_allocator, padding_size>::allocate_type(std::size_t instances) noexcept
 {
 	instances *= sizeof(Ty);
 
@@ -2653,8 +2656,8 @@ template <class Ty> inline Ty* welp::multipool_resource_atom<max_number_of_pools
 
 
 // ALLOCATE PADDED
-template <std::size_t max_number_of_pools, class sub_allocator>
-template <class Ty> inline Ty* welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::allocate_type_padded(std::size_t instances, std::size_t line_size) noexcept
+template <std::size_t max_number_of_pools, class sub_allocator, std::size_t padding_size>
+template <class Ty> inline Ty* welp::multipool_resource_atom<max_number_of_pools, sub_allocator, padding_size>::allocate_type_padded(std::size_t instances, std::size_t line_size) noexcept
 {
 	instances *= sizeof(Ty);
 	{
@@ -2686,8 +2689,8 @@ template <class Ty> inline Ty* welp::multipool_resource_atom<max_number_of_pools
 
 
 // ALLOCATE IN POOL
-template <std::size_t max_number_of_pools, class sub_allocator>
-template <class Ty> inline Ty* welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::allocate_type_in_pool(std::size_t instances, std::size_t pool_number) noexcept
+template <std::size_t max_number_of_pools, class sub_allocator, std::size_t padding_size>
+template <class Ty> inline Ty* welp::multipool_resource_atom<max_number_of_pools, sub_allocator, padding_size>::allocate_type_in_pool(std::size_t instances, std::size_t pool_number) noexcept
 {
 	instances *= sizeof(Ty);
 
@@ -2713,8 +2716,8 @@ template <class Ty> inline Ty* welp::multipool_resource_atom<max_number_of_pools
 
 
 // ALLOCATE IN POOL RANGE
-template <std::size_t max_number_of_pools, class sub_allocator>
-template <class Ty> inline Ty* welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::allocate_type_in_pool_range(std::size_t instances,
+template <std::size_t max_number_of_pools, class sub_allocator, std::size_t padding_size>
+template <class Ty> inline Ty* welp::multipool_resource_atom<max_number_of_pools, sub_allocator, padding_size>::allocate_type_in_pool_range(std::size_t instances,
 	std::size_t first_pool, std::size_t end_pool) noexcept
 {
 	instances *= sizeof(Ty);
@@ -2744,8 +2747,8 @@ template <class Ty> inline Ty* welp::multipool_resource_atom<max_number_of_pools
 
 
 // ALLOCATE PADDED IN POOL RANGE
-template <std::size_t max_number_of_pools, class sub_allocator>
-template <class Ty> inline Ty* welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::allocate_type_padded_in_pool_range(
+template <std::size_t max_number_of_pools, class sub_allocator, std::size_t padding_size>
+template <class Ty> inline Ty* welp::multipool_resource_atom<max_number_of_pools, sub_allocator, padding_size>::allocate_type_padded_in_pool_range(
 	std::size_t instances, std::size_t line_size, std::size_t first_pool, std::size_t end_pool) noexcept
 {
 	instances *= sizeof(Ty);
@@ -2778,8 +2781,8 @@ template <class Ty> inline Ty* welp::multipool_resource_atom<max_number_of_pools
 
 
 // ALLOCATE BYTE
-template <std::size_t max_number_of_pools, class sub_allocator>
-inline void* welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::allocate_byte(std::size_t bytes) noexcept
+template <std::size_t max_number_of_pools, class sub_allocator, std::size_t padding_size>
+inline void* welp::multipool_resource_atom<max_number_of_pools, sub_allocator, padding_size>::allocate_byte(std::size_t bytes) noexcept
 {
 	for (std::size_t n = 0; n < number_of_pools; n++)
 	{
@@ -2806,8 +2809,8 @@ inline void* welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::
 
 
 // ALLOCATE BYTE PADDED
-template <std::size_t max_number_of_pools, class sub_allocator>
-inline void* welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::allocate_byte_padded(std::size_t bytes, std::size_t line_size) noexcept
+template <std::size_t max_number_of_pools, class sub_allocator, std::size_t padding_size>
+inline void* welp::multipool_resource_atom<max_number_of_pools, sub_allocator, padding_size>::allocate_byte_padded(std::size_t bytes, std::size_t line_size) noexcept
 {
 	{
 		std::size_t line_size_m1 = line_size - 1;
@@ -2838,8 +2841,8 @@ inline void* welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::
 
 
 // ALLOCATE BYTE IN POOL
-template <std::size_t max_number_of_pools, class sub_allocator>
-inline void* welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::allocate_byte_in_pool(std::size_t bytes, std::size_t pool_number) noexcept
+template <std::size_t max_number_of_pools, class sub_allocator, std::size_t padding_size>
+inline void* welp::multipool_resource_atom<max_number_of_pools, sub_allocator, padding_size>::allocate_byte_in_pool(std::size_t bytes, std::size_t pool_number) noexcept
 {
 	if (bytes <= block_size[pool_number])
 	{
@@ -2863,8 +2866,8 @@ inline void* welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::
 
 
 // ALLOCATE BYTE IN POOL RANGE
-template <std::size_t max_number_of_pools, class sub_allocator>
-inline void* welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::allocate_byte_in_pool_range(std::size_t bytes,
+template <std::size_t max_number_of_pools, class sub_allocator, std::size_t padding_size>
+inline void* welp::multipool_resource_atom<max_number_of_pools, sub_allocator, padding_size>::allocate_byte_in_pool_range(std::size_t bytes,
 	std::size_t first_pool, std::size_t end_pool) noexcept
 {
 	for (std::size_t n = first_pool; n < end_pool; n++)
@@ -2892,8 +2895,8 @@ inline void* welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::
 
 
 // ALLOCATE BYTE PADDED IN POOL RANGE
-template <std::size_t max_number_of_pools, class sub_allocator>
-inline void* welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::allocate_byte_padded_in_pool_range(
+template <std::size_t max_number_of_pools, class sub_allocator, std::size_t padding_size>
+inline void* welp::multipool_resource_atom<max_number_of_pools, sub_allocator, padding_size>::allocate_byte_padded_in_pool_range(
 	std::size_t bytes, std::size_t line_size, std::size_t first_pool, std::size_t end_pool) noexcept
 {
 	{
@@ -2925,8 +2928,8 @@ inline void* welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::
 
 
 // DEALLOCATE
-template <std::size_t max_number_of_pools, class sub_allocator>
-template <class Ty> inline bool welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::deallocate_ptr(Ty* ptr) noexcept
+template <std::size_t max_number_of_pools, class sub_allocator, std::size_t padding_size>
+template <class Ty> inline bool welp::multipool_resource_atom<max_number_of_pools, sub_allocator, padding_size>::deallocate_ptr(Ty* ptr) noexcept
 {
 	char* char_ptr = static_cast<char*>(static_cast<void*>(ptr));
 	for (std::size_t n = 0; n < number_of_pools; n++)
@@ -2948,8 +2951,8 @@ template <class Ty> inline bool welp::multipool_resource_atom<max_number_of_pool
 
 
 // DEALLOCATE IN POOL
-template <std::size_t max_number_of_pools, class sub_allocator>
-template <class Ty> inline bool welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::deallocate_ptr_in_pool(Ty* ptr, std::size_t pool_number) noexcept
+template <std::size_t max_number_of_pools, class sub_allocator, std::size_t padding_size>
+template <class Ty> inline bool welp::multipool_resource_atom<max_number_of_pools, sub_allocator, padding_size>::deallocate_ptr_in_pool(Ty* ptr, std::size_t pool_number) noexcept
 {
 	char* char_ptr = static_cast<char*>(static_cast<void*>(ptr));
 	if ((data_ptr[pool_number] <= char_ptr) && (char_ptr < data_ptr[pool_number] + block_instances[pool_number] * block_size[pool_number]))
@@ -2968,8 +2971,8 @@ template <class Ty> inline bool welp::multipool_resource_atom<max_number_of_pool
 
 
 // DEALLOCATE IN POOL RANGE
-template <std::size_t max_number_of_pools, class sub_allocator>
-template <class Ty> inline bool welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::deallocate_ptr_in_pool_range(Ty* ptr,
+template <std::size_t max_number_of_pools, class sub_allocator, std::size_t padding_size>
+template <class Ty> inline bool welp::multipool_resource_atom<max_number_of_pools, sub_allocator, padding_size>::deallocate_ptr_in_pool_range(Ty* ptr,
 	std::size_t first_pool, std::size_t end_pool) noexcept
 {
 	char* char_ptr = static_cast<char*>(static_cast<void*>(ptr));
@@ -2992,8 +2995,8 @@ template <class Ty> inline bool welp::multipool_resource_atom<max_number_of_pool
 
 
 // BLOCKS REMAINING
-template <std::size_t max_number_of_pools, class sub_allocator>
-template <class Ty> inline std::size_t welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::blocks_remaining_type() noexcept
+template <std::size_t max_number_of_pools, class sub_allocator, std::size_t padding_size>
+template <class Ty> inline std::size_t welp::multipool_resource_atom<max_number_of_pools, sub_allocator, padding_size>::blocks_remaining_type() noexcept
 {
 	std::size_t N = sizeof(Ty);
 	for (std::size_t n = 0; n < number_of_pools; n++)
@@ -3007,8 +3010,8 @@ template <class Ty> inline std::size_t welp::multipool_resource_atom<max_number_
 }
 
 
-template <std::size_t max_number_of_pools, class sub_allocator>
-template <class Ty> inline std::size_t welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::blocks_remaining_type(std::size_t instances) noexcept
+template <std::size_t max_number_of_pools, class sub_allocator, std::size_t padding_size>
+template <class Ty> inline std::size_t welp::multipool_resource_atom<max_number_of_pools, sub_allocator, padding_size>::blocks_remaining_type(std::size_t instances) noexcept
 {
 	instances *= sizeof(Ty);
 	for (std::size_t n = 0; n < number_of_pools; n++)
@@ -3022,8 +3025,8 @@ template <class Ty> inline std::size_t welp::multipool_resource_atom<max_number_
 }
 
 
-template <std::size_t max_number_of_pools, class sub_allocator>
-inline std::size_t welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::blocks_remaining_byte(std::size_t bytes) noexcept
+template <std::size_t max_number_of_pools, class sub_allocator, std::size_t padding_size>
+inline std::size_t welp::multipool_resource_atom<max_number_of_pools, sub_allocator, padding_size>::blocks_remaining_byte(std::size_t bytes) noexcept
 {
 	for (std::size_t n = 0; n < number_of_pools; n++)
 	{
@@ -3036,8 +3039,8 @@ inline std::size_t welp::multipool_resource_atom<max_number_of_pools, sub_alloca
 }
 
 
-template <std::size_t max_number_of_pools, class sub_allocator>
-inline std::size_t welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::blocks_remaining_in_pool(std::size_t pool_number) noexcept
+template <std::size_t max_number_of_pools, class sub_allocator, std::size_t padding_size>
+inline std::size_t welp::multipool_resource_atom<max_number_of_pools, sub_allocator, padding_size>::blocks_remaining_in_pool(std::size_t pool_number) noexcept
 {
 	return static_cast<std::size_t>(current_address_ptr[pool_number].load() - first_address_ptr[pool_number]);
 }
@@ -3045,8 +3048,8 @@ inline std::size_t welp::multipool_resource_atom<max_number_of_pools, sub_alloca
 
 // SORT POOLS
 #ifdef WELP_MULTIPOOL_INCLUDE_ALGORITHM
-template <std::size_t max_number_of_pools, class sub_allocator>
-inline void welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::sort_pools() noexcept
+template <std::size_t max_number_of_pools, class sub_allocator, std::size_t padding_size>
+inline void welp::multipool_resource_atom<max_number_of_pools, sub_allocator, padding_size>::sort_pools() noexcept
 {
 	for (std::size_t n = 0; n < number_of_pools; n++)
 	{
@@ -3055,8 +3058,8 @@ inline void welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::s
 }
 
 
-template <std::size_t max_number_of_pools, class sub_allocator>
-inline void welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::sort_pool(std::size_t n) noexcept
+template <std::size_t max_number_of_pools, class sub_allocator, std::size_t padding_size>
+inline void welp::multipool_resource_atom<max_number_of_pools, sub_allocator, padding_size>::sort_pool(std::size_t n) noexcept
 {
 	if (n < number_of_pools)
 	{
@@ -3065,8 +3068,8 @@ inline void welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::s
 }
 
 
-template <std::size_t max_number_of_pools, class sub_allocator>
-inline void welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::sort_pool_range(std::size_t first_pool, std::size_t end_pool) noexcept
+template <std::size_t max_number_of_pools, class sub_allocator, std::size_t padding_size>
+inline void welp::multipool_resource_atom<max_number_of_pools, sub_allocator, padding_size>::sort_pool_range(std::size_t first_pool, std::size_t end_pool) noexcept
 {
 	if (first_pool < number_of_pools)
 	{
@@ -3081,8 +3084,8 @@ inline void welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::s
 
 
 // RESET POOLS
-template <std::size_t max_number_of_pools, class sub_allocator>
-inline void welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::reset_pools() noexcept
+template <std::size_t max_number_of_pools, class sub_allocator, std::size_t padding_size>
+inline void welp::multipool_resource_atom<max_number_of_pools, sub_allocator, padding_size>::reset_pools() noexcept
 {
 	for (std::size_t n = 0; n < number_of_pools; n++)
 	{
@@ -3098,8 +3101,8 @@ inline void welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::r
 }
 
 
-template <std::size_t max_number_of_pools, class sub_allocator>
-inline void welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::reset_pool(std::size_t pool_number) noexcept
+template <std::size_t max_number_of_pools, class sub_allocator, std::size_t padding_size>
+inline void welp::multipool_resource_atom<max_number_of_pools, sub_allocator, padding_size>::reset_pool(std::size_t pool_number) noexcept
 {
 	if (pool_number < number_of_pools)
 	{
@@ -3115,8 +3118,8 @@ inline void welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::r
 }
 
 
-template <std::size_t max_number_of_pools, class sub_allocator>
-inline void welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::reset_pool_range(std::size_t first_pool, std::size_t end_pool) noexcept
+template <std::size_t max_number_of_pools, class sub_allocator, std::size_t padding_size>
+inline void welp::multipool_resource_atom<max_number_of_pools, sub_allocator, padding_size>::reset_pool_range(std::size_t first_pool, std::size_t end_pool) noexcept
 {
 	if (first_pool < number_of_pools)
 	{
@@ -3137,8 +3140,8 @@ inline void welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::r
 
 
 // NEW POOLS
-template <std::size_t max_number_of_pools, class sub_allocator>
-bool welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::new_pools(std::size_t input_number_of_pools, const std::size_t* const input_block_size,
+template <std::size_t max_number_of_pools, class sub_allocator, std::size_t padding_size>
+bool welp::multipool_resource_atom<max_number_of_pools, sub_allocator, padding_size>::new_pools(std::size_t input_number_of_pools, const std::size_t* const input_block_size,
 	const std::size_t* const input_block_instances, std::size_t pool_align)
 {
 	delete_pools();
@@ -3178,8 +3181,8 @@ bool welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::new_pool
 
 
 #ifdef WELP_MULTIPOOL_INCLUDE_INITLIST
-template <std::size_t max_number_of_pools, class sub_allocator>
-bool welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::new_pools(std::size_t input_number_of_pools, std::initializer_list<std::size_t> input_block_size,
+template <std::size_t max_number_of_pools, class sub_allocator, std::size_t padding_size>
+bool welp::multipool_resource_atom<max_number_of_pools, sub_allocator, padding_size>::new_pools(std::size_t input_number_of_pools, std::initializer_list<std::size_t> input_block_size,
 	std::initializer_list<std::size_t> input_block_instances, std::size_t pool_align)
 {
 	delete_pools();
@@ -3225,8 +3228,8 @@ bool welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::new_pool
 
 
 // DELETE POOLS
-template <std::size_t max_number_of_pools, class sub_allocator>
-void welp::multipool_resource_atom<max_number_of_pools, sub_allocator>::delete_pools()
+template <std::size_t max_number_of_pools, class sub_allocator, std::size_t padding_size>
+void welp::multipool_resource_atom<max_number_of_pools, sub_allocator, padding_size>::delete_pools()
 {
 	sub_allocator _sub_allocator;
 	for (std::size_t n = 0; n < max_number_of_pools; n++)
