@@ -205,7 +205,7 @@ namespace welp
 		}
 
 		class lock;
-		welp::acc_buffer_sync<Ty, _Allocator, mutex_Ty>::lock lock_stream()
+		welp::acc_buffer_sync<Ty, _Allocator, mutex_Ty>::lock block()
 		{
 			return welp::acc_buffer_sync<Ty, _Allocator, mutex_Ty>::lock(this);
 		}
