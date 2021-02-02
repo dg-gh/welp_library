@@ -1,4 +1,4 @@
-// welp_matrix.hpp - last update : 06 / 01 / 2020
+// welp_matrix.hpp - last update : 02 / 02 / 2021
 // License <http://unlicense.org/> (statement below at the end of the file)
 
 
@@ -425,7 +425,7 @@ namespace welp
 		// reduces the amount of memory owned to the minimum
 		void shrink_to_fit();
 		// deallocates the memory currently owned
-		void make_empty() noexcept;
+		void clear() noexcept;
 
 	private:
 
@@ -13467,7 +13467,7 @@ template <typename Ty, class _Allocator> void welp::_matrix_container<Ty, _Alloc
 		}
 	}
 }
-template <typename Ty, class _Allocator> void welp::_matrix_container<Ty, _Allocator>::make_empty() noexcept
+template <typename Ty, class _Allocator> void welp::_matrix_container<Ty, _Allocator>::clear() noexcept
 {
 	if (data_ptr != nullptr)
 	{
@@ -15951,7 +15951,7 @@ namespace welp
 				C.resize(Cr, 1);
 				if (shrink_to_fit) { C.shrink_to_fit(); }
 			}
-			else { C.make_empty(); }
+			else { C.clear(); }
 			loadmat.close();
 			return C;
 		}
@@ -16026,7 +16026,7 @@ namespace welp
 				C.resize(Cr, C.c());
 				if (shrink_to_fit) { C.shrink_to_fit(); }
 			}
-			else { C.make_empty(); }
+			else { C.clear(); }
 			loadmat.close();
 			return C;
 		}
@@ -16099,7 +16099,7 @@ namespace welp
 				C.resize(Cr, C.c());
 				if (shrink_to_fit) { C.shrink_to_fit(); }
 			}
-			else { C.make_empty(); }
+			else { C.clear(); }
 			loadmat.close();
 			return C;
 		}
