@@ -1,4 +1,4 @@
-// welp_acc_buffer.hpp - last update : 01 / 02 / 2021
+// welp_acc_buffer.hpp - last update : 03 / 02 / 2021
 // License <http://unlicense.org/> (statement below at the end of the file)
 
 
@@ -205,7 +205,7 @@ namespace welp
 		}
 
 		class lock;
-		welp::acc_buffer_sync<Ty, _Allocator, mutex_Ty>::lock block()
+		const welp::acc_buffer_sync<Ty, _Allocator, mutex_Ty>::lock block()
 		{
 			return welp::acc_buffer_sync<Ty, _Allocator, mutex_Ty>::lock(this);
 		}
@@ -318,7 +318,7 @@ namespace welp
 				acc_buffer_ptr->current_ptr++;
 				return *this;
 			}
-			inline welp::acc_buffer_sync<Ty, _Allocator, mutex_Ty>::lock& operator<<(Ty&& obj) noexcept
+			inline const welp::acc_buffer_sync<Ty, _Allocator, mutex_Ty>::lock& operator<<(Ty&& obj) const noexcept
 			{
 #ifdef WELP_ACC_BUFFER_DEBUG_MODE
 				assert(acc_buffer_ptr->current_ptr < acc_buffer_ptr->data_ptr + acc_buffer_ptr->max_number_of_cells);
@@ -327,7 +327,7 @@ namespace welp
 				acc_buffer_ptr->current_ptr++;
 				return *this;
 			}
-			inline welp::acc_buffer_sync<Ty, _Allocator, mutex_Ty>::lock& operator<<(Ty* obj_ptr) noexcept
+			inline const welp::acc_buffer_sync<Ty, _Allocator, mutex_Ty>::lock& operator<<(Ty* obj_ptr) const noexcept
 			{
 #ifdef WELP_ACC_BUFFER_DEBUG_MODE
 				assert(acc_buffer_ptr->current_ptr < acc_buffer_ptr->data_ptr + acc_buffer_ptr->max_number_of_cells);
@@ -336,7 +336,7 @@ namespace welp
 				acc_buffer_ptr->current_ptr++;
 				return *this;
 			}
-			inline welp::acc_buffer_sync<Ty, _Allocator, mutex_Ty>::lock& operator<(const Ty& obj)
+			inline const welp::acc_buffer_sync<Ty, _Allocator, mutex_Ty>::lock& operator<(const Ty& obj) const
 			{
 #ifdef WELP_ACC_BUFFER_DEBUG_MODE
 				assert(acc_buffer_ptr->current_ptr < acc_buffer_ptr->data_ptr + acc_buffer_ptr->max_number_of_cells);
