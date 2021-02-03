@@ -1,4 +1,4 @@
-// welp_cyclic_buffer.hpp - last update : 01 / 02 / 2021
+// welp_cyclic_buffer.hpp - last update : 03 / 02 / 2021
 // License <http://unlicense.org/> (statement below at the end of the file)
 
 
@@ -194,13 +194,13 @@ namespace welp
 		inline std::size_t capacity_remaining() const noexcept;
 
 		class slock;
-		welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::slock store_block(std::size_t requested_capacity)
+		inline const welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::slock store_block(std::size_t requested_capacity)
 		{
 			return welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::slock(this, requested_capacity);
 		}
 
 		class llock;
-		welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::llock load_block(std::size_t requested_capacity)
+		inline const welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::llock load_block(std::size_t requested_capacity)
 		{
 			return welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::llock(this, requested_capacity);
 		}
@@ -235,7 +235,7 @@ namespace welp
 
 			inline bool good() const noexcept { return _good; }
 
-			inline welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::slock& operator<<(const Ty& obj)
+			inline const welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::slock& operator<<(const Ty& obj) const
 			{
 				if (_good)
 				{
@@ -249,7 +249,7 @@ namespace welp
 				}
 				return *this;
 			}
-			inline welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::slock& operator<<(Ty&& obj) noexcept
+			inline const welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::slock& operator<<(Ty&& obj) const noexcept
 			{
 				if (_good)
 				{
@@ -263,7 +263,7 @@ namespace welp
 				}
 				return *this;
 			}
-			inline welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::slock& operator<<(Ty* obj_ptr) noexcept
+			inline const welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::slock& operator<<(Ty* obj_ptr) const noexcept
 			{
 				if (_good)
 				{
@@ -277,7 +277,7 @@ namespace welp
 				}
 				return *this;
 			}
-			inline welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::slock& operator<(const Ty& obj)
+			inline const welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::slock& operator<(const Ty& obj) const
 			{
 				if (_good)
 				{
@@ -317,7 +317,7 @@ namespace welp
 
 			inline bool good() const noexcept { return _good; }
 
-			inline welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::llock& operator>>(Ty& obj) noexcept
+			inline const welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::llock& operator>>(Ty& obj) const noexcept
 			{
 				if (_good)
 				{
@@ -340,7 +340,7 @@ namespace welp
 				}
 				return *this;
 			}
-			inline welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::llock& operator>(Ty& obj)
+			inline const welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::llock& operator>(Ty& obj) const
 			{
 				if (_good)
 				{
