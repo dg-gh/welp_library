@@ -348,7 +348,7 @@ namespace welp
 
 		private:
 
-			welp::acc_buffer_sync<Ty, _Allocator, mutex_Ty>* acc_buffer_ptr;
+			welp::acc_buffer_sync<Ty, _Allocator, mutex_Ty>* const acc_buffer_ptr;
 		};
 
 	private:
