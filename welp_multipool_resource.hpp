@@ -169,7 +169,7 @@ namespace welp
 			std::initializer_list<std::size_t> input_block_instances, std::size_t pool_align);
 #endif // WELP_MULTIPOOL_INCLUDE_INITLIST
 
-		void delete_pools();
+		void delete_pools() noexcept;
 
 #ifdef WELP_MULTIPOOL_DEBUG_MODE
 		void record_start() noexcept { record_on = true; };
@@ -302,7 +302,7 @@ namespace welp
 			std::initializer_list<std::size_t> input_block_instances, std::size_t pool_align);
 #endif // WELP_MULTIPOOL_INCLUDE_INITLIST
 
-		void delete_pools();
+		void delete_pools() noexcept;
 
 #ifdef WELP_MULTIPOOL_DEBUG_MODE
 		void record_start() noexcept { std::lock_guard<mutex_Ty> resource_lock(resource_mutex); record_on = true; };
@@ -336,6 +336,8 @@ namespace welp
 		virtual ~multipool_resource_sync() { delete_pools(); }
 
 	private:
+
+		void delete_pools_sub() noexcept;
 
 #ifdef WELP_MULTIPOOL_DEBUG_MODE
 		void record_say_sub();
@@ -424,7 +426,7 @@ namespace welp
 			std::initializer_list<std::size_t> input_block_instances, std::size_t pool_align);
 #endif // WELP_MULTIPOOL_INCLUDE_INITLIST
 
-		void delete_pools();
+		void delete_pools() noexcept;
 
 		multipool_resource_atom() = default;
 		virtual ~multipool_resource_atom() { delete_pools(); }
@@ -510,7 +512,7 @@ namespace welp
 			std::initializer_list<std::size_t> input_block_instances, std::size_t pool_align);
 #endif // WELP_MULTIPOOL_INCLUDE_INITLIST
 
-		void delete_pools();
+		void delete_pools() noexcept;
 
 #ifdef WELP_MULTIPOOL_DEBUG_MODE
 		void record_start() noexcept { record_on = true; };
@@ -1340,7 +1342,7 @@ bool welp::multipool_resource<max_number_of_pools, sub_allocator>::new_pools(std
 
 // DELETE POOLS
 template <std::size_t max_number_of_pools, class sub_allocator>
-void welp::multipool_resource<max_number_of_pools, sub_allocator>::delete_pools()
+void welp::multipool_resource<max_number_of_pools, sub_allocator>::delete_pools() noexcept
 {
 	sub_allocator _sub_allocator;
 	for (std::size_t n = 0; n < max_number_of_pools; n++)
@@ -2281,7 +2283,9 @@ template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
 bool welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::new_pools(std::size_t input_number_of_pools, const std::size_t* const input_block_size,
 	const std::size_t* const input_block_instances, std::size_t pool_align)
 {
-	delete_pools();
+	std::lock_guard<mutex_Ty> resource_lock(resource_mutex);
+
+	delete_pools_sub();
 	if (input_number_of_pools == 0)
 	{
 		return false;
@@ -2300,10 +2304,10 @@ bool welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>
 	{
 		std::size_t pool_align_m1 = pool_align - 1;
 		data_ptr_unaligned[n] = _sub_allocator.allocate((block_instances[n] * block_size[n] + pool_align_m1)); // construct unaligned pool
-		if (data_ptr_unaligned[n] == nullptr) { delete_pools(); return false; }
+		if (data_ptr_unaligned[n] == nullptr) { delete_pools_sub(); return false; }
 		data_ptr[n] = data_ptr_unaligned[n] + ((pool_align - (reinterpret_cast<std::size_t>(data_ptr_unaligned[n]) & pool_align_m1)) & pool_align_m1); // aligned pool
 		first_address_ptr[n] = static_cast<char**>(static_cast<void*>(_sub_allocator.allocate(block_instances[n] * sizeof(char*)))); // construct pointer to first address
-		if (first_address_ptr[n] == nullptr) { delete_pools(); return false; }
+		if (first_address_ptr[n] == nullptr) { delete_pools_sub(); return false; }
 		current_address_ptr[n] = first_address_ptr[n] + block_instances[n]; // construct pointer to current address
 #ifdef WELP_MULTIPOOL_DEBUG_MODE
 		top_address_ptr[n] = current_address_ptr[n]; // pointer to top address before usage
@@ -2326,7 +2330,9 @@ template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
 bool welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::new_pools(std::size_t input_number_of_pools, std::initializer_list<std::size_t> input_block_size,
 	std::initializer_list<std::size_t> input_block_instances, std::size_t pool_align)
 {
-	delete_pools();
+	std::lock_guard<mutex_Ty> resource_lock(resource_mutex);
+
+	delete_pools_sub();
 	if (input_number_of_pools == 0)
 	{
 		return false;
@@ -2350,10 +2356,10 @@ bool welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>
 	{
 		std::size_t pool_align_m1 = pool_align - 1;
 		data_ptr_unaligned[n] = _sub_allocator.allocate((block_instances[n] * block_size[n] + pool_align_m1)); // construct unaligned pool
-		if (data_ptr_unaligned[n] == nullptr) { delete_pools(); return false; }
+		if (data_ptr_unaligned[n] == nullptr) { delete_pools_sub(); return false; }
 		data_ptr[n] = data_ptr_unaligned[n] + ((pool_align - (reinterpret_cast<std::size_t>(data_ptr_unaligned[n]) & pool_align_m1)) & pool_align_m1); // aligned pool
 		first_address_ptr[n] = static_cast<char**>(static_cast<void*>(_sub_allocator.allocate(block_instances[n] * sizeof(char*)))); // construct pointer to first address
-		if (first_address_ptr[n] == nullptr) { delete_pools(); return false; }
+		if (first_address_ptr[n] == nullptr) { delete_pools_sub(); return false; }
 		current_address_ptr[n] = first_address_ptr[n] + block_instances[n]; // construct pointer to current address
 #ifdef WELP_MULTIPOOL_DEBUG_MODE
 		top_address_ptr[n] = current_address_ptr[n]; // pointer to top address before usage
@@ -2374,7 +2380,14 @@ bool welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>
 
 // DELETE POOLS
 template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
-void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::delete_pools()
+void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::delete_pools() noexcept
+{
+	std::lock_guard<mutex_Ty> resource_lock(resource_mutex);
+	delete_pools_sub();
+}
+
+template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
+void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::delete_pools_sub() noexcept
 {
 	sub_allocator _sub_allocator;
 	for (std::size_t n = 0; n < max_number_of_pools; n++)
@@ -3229,7 +3242,7 @@ bool welp::multipool_resource_atom<max_number_of_pools, sub_allocator, padding_s
 
 // DELETE POOLS
 template <std::size_t max_number_of_pools, class sub_allocator, std::size_t padding_size>
-void welp::multipool_resource_atom<max_number_of_pools, sub_allocator, padding_size>::delete_pools()
+void welp::multipool_resource_atom<max_number_of_pools, sub_allocator, padding_size>::delete_pools() noexcept
 {
 	sub_allocator _sub_allocator;
 	for (std::size_t n = 0; n < max_number_of_pools; n++)
@@ -3739,7 +3752,7 @@ bool welp::quadpool_resource::new_pools(std::size_t input_number_of_pools, std::
 
 
 // DELETE POOLS
-void welp::quadpool_resource::delete_pools()
+void welp::quadpool_resource::delete_pools() noexcept
 {
 	for (std::size_t n = 0; n < 4; n++)
 	{
