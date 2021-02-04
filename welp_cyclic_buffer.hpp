@@ -61,7 +61,6 @@ namespace welp
 		inline bool store_cpy(const Ty& obj);
 		inline bool store_move(Ty&& obj) noexcept;
 		inline bool store_ptr(Ty* obj) noexcept;
-		template <class ... _Args> inline bool store_new(_Args&& ... args);
 
 		inline bool load_cpy(Ty& obj);
 		inline bool load(Ty& obj) noexcept;
@@ -122,7 +121,6 @@ namespace welp
 		inline bool store_cpy(const Ty& obj);
 		inline bool store_move(Ty&& obj) noexcept;
 		inline bool store_ptr(Ty* obj) noexcept;
-		template <class ... _Args> inline bool store_new(_Args&& ... args);
 
 		inline bool load_cpy(Ty& obj);
 		inline bool load(Ty& obj) noexcept;
@@ -187,7 +185,6 @@ namespace welp
 		inline bool store_cpy(const Ty& obj);
 		inline bool store_move(Ty&& obj) noexcept;
 		inline bool store_ptr(Ty* obj_ptr) noexcept;
-		template <class ... _Args> inline bool store_new(_Args&& ... args);
 
 		inline bool load_cpy(Ty& obj);
 		inline bool load(Ty& obj) noexcept;
@@ -459,24 +456,6 @@ inline bool welp::cyclic_buffer<Ty, _Allocator>::store_ptr(Ty* obj_ptr) noexcept
 	}
 }
 
-template <class Ty, class _Allocator> template <class ... _Args>
-inline bool welp::cyclic_buffer<Ty, _Allocator>::store_new(_Args&& ... args)
-{
-	if ((last_cell_ptr + 1 != next_cell_ptr) && ((next_cell_ptr != cells_data_ptr) || (last_cell_ptr + 1 != cells_end_ptr)))
-	{
-		last_cell_ptr->storage.~Ty();
-		new (&(last_cell_ptr->storage)) Ty(std::forward<_Args>(args)...);
-		last_cell_ptr++;
-		if (last_cell_ptr == cells_end_ptr) { last_cell_ptr = cells_data_ptr; }
-		_size++;
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
-
 template <class Ty, class _Allocator>
 inline bool welp::cyclic_buffer<Ty, _Allocator>::load_cpy(Ty& obj)
 {
@@ -673,30 +652,6 @@ inline bool welp::cyclic_buffer_atom<Ty, _Allocator, padding_size>::store_ptr(Ty
 		}
 	} while (!last_cell_ptr.compare_exchange_strong(initial_last_cell_ptr, final_last_cell_ptr));
 	initial_last_cell_ptr->storage_ptr = obj_ptr;
-	return true;
-}
-
-template <class Ty, class _Allocator, std::size_t padding_size> template <class ... _Args>
-inline bool welp::cyclic_buffer_atom<Ty, _Allocator, padding_size>::store_new(_Args&& ... args)
-{
-	storage_cell* temp_next_cell_ptr = next_cell_ptr.load(std::memory_order_relaxed);
-	storage_cell* final_last_cell_ptr;
-	storage_cell* initial_last_cell_ptr = last_cell_ptr.load();
-	do
-	{
-		final_last_cell_ptr = initial_last_cell_ptr + 1;
-		if ((final_last_cell_ptr != temp_next_cell_ptr) && ((temp_next_cell_ptr != cells_data_ptr)
-			|| (final_last_cell_ptr != cells_end_ptr)))
-		{
-			if (final_last_cell_ptr == cells_end_ptr) { final_last_cell_ptr = cells_data_ptr; }
-		}
-		else
-		{
-			return false;
-		}
-	} while (!last_cell_ptr.compare_exchange_strong(initial_last_cell_ptr, final_last_cell_ptr));
-	initial_last_cell_ptr->storage.~Ty();
-	new (&(initial_last_cell_ptr->storage)) Ty(std::forward<_Args>(args)...);
 	return true;
 }
 
@@ -906,26 +861,6 @@ inline bool welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::store_ptr(Ty* ob
 	if ((last_cell_ptr + 1 != next_cell_ptr) && ((next_cell_ptr != cells_data_ptr) || (last_cell_ptr + 1 != cells_end_ptr)))
 	{
 		last_cell_ptr->storage_ptr = obj_ptr;
-		last_cell_ptr++;
-		if (last_cell_ptr == cells_end_ptr) { last_cell_ptr = cells_data_ptr; }
-		_size++;
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
-
-template <class Ty, class _Allocator, class mutex_Ty> template <class ... _Args>
-inline bool welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::store_new(_Args&& ... args)
-{
-	std::lock_guard<mutex_Ty> _lock(buffer_mutex);
-
-	if ((last_cell_ptr + 1 != next_cell_ptr) && ((next_cell_ptr != cells_data_ptr) || (last_cell_ptr + 1 != cells_end_ptr)))
-	{
-		last_cell_ptr->storage.~Ty();
-		new (&(last_cell_ptr->storage)) Ty(std::forward<_Args>(args)...);
 		last_cell_ptr++;
 		if (last_cell_ptr == cells_end_ptr) { last_cell_ptr = cells_data_ptr; }
 		_size++;
