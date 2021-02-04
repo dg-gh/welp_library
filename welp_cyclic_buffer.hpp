@@ -383,6 +383,8 @@ namespace welp
 
 		mutex_Ty buffer_mutex;
 
+		void delete_buffer_sub() noexcept;
+
 		class storage_cell
 		{
 
@@ -955,7 +957,8 @@ inline std::size_t welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::capacity_
 template <class Ty, class _Allocator, class mutex_Ty>
 bool welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::new_buffer(std::size_t instances)
 {
-	delete_buffer();
+	std::lock_guard<mutex_Ty> _lock(buffer_mutex);
+	delete_buffer_sub();
 
 	try
 	{
@@ -975,21 +978,27 @@ bool welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::new_buffer(std::size_t 
 		}
 		else
 		{
-			delete_buffer(); return false;
+			delete_buffer_sub(); return false;
 		}
 	}
 	catch (...)
 	{
-		delete_buffer(); return false;
+		delete_buffer_sub(); return false;
 	}
 }
 
 template <class Ty, class _Allocator, class mutex_Ty>
 void welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::delete_buffer() noexcept
 {
+	std::lock_guard<mutex_Ty> _lock(buffer_mutex);
+	delete_buffer_sub();
+}
+
+template <class Ty, class _Allocator, class mutex_Ty>
+void welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>::delete_buffer_sub() noexcept
+{
 	if (cells_data_ptr != nullptr)
 	{
-		std::lock_guard<mutex_Ty> _lock(buffer_mutex);
 		std::size_t buffer_size = static_cast<std::size_t>(cells_end_ptr - cells_data_ptr);
 		cells_end_ptr--;
 		for (std::size_t n = buffer_size; n > 0; n--)
