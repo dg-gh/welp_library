@@ -294,7 +294,7 @@ namespace welp
 
 		private:
 
-			welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>* cyclic_buffer_ptr;
+			welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>* const cyclic_buffer_ptr;
 			bool _good = false;
 		};
 		class llock
@@ -366,7 +366,7 @@ namespace welp
 
 		private:
 
-			welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>* cyclic_buffer_ptr;
+			welp::cyclic_buffer_sync<Ty, _Allocator, mutex_Ty>* const cyclic_buffer_ptr;
 			bool _good = false;
 		};
 
