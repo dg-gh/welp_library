@@ -88,8 +88,7 @@ inline const Ty& welp::xdim<Ty, dim, _Allocator>::operator()(_Args&& ... args) c
 	std::size_t indices[dim] = { static_cast<std::size_t>(args)... };
 #ifdef WELP_XDIM_DEBUG_MODE
 	for (std::size_t n = 0; n < dim; n++) { assert(indices[n] < sizes[n]); }
-	std::initializer_list<std::size_t> L = { static_cast<std::size_t>(args)... };
-	assert(L.size() == dim);
+	assert(sizeof...(args) == dim);
 #endif // WELP_XDIM_DEBUG_MODE
 	std::size_t offset = indices[0] * offset_coeff[0];
 	for (std::size_t n = 1; n < dim; n++)
@@ -105,8 +104,7 @@ inline Ty& welp::xdim<Ty, dim, _Allocator>::operator()(_Args&& ... args) noexcep
 	std::size_t indices[dim] = { static_cast<std::size_t>(args)... };
 #ifdef WELP_XDIM_DEBUG_MODE
 	for (std::size_t n = 0; n < dim; n++) { assert(indices[n] < sizes[n]); }
-	std::initializer_list<std::size_t> L = { static_cast<std::size_t>(args)... };
-	assert(L.size() == dim);
+	assert(sizeof...(args) == dim);
 #endif // WELP_XDIM_DEBUG_MODE
 	std::size_t offset = indices[0] * offset_coeff[0];
 	for (std::size_t n = 1; n < dim; n++)
@@ -146,12 +144,12 @@ inline Ty* welp::xdim<Ty, dim, _Allocator>::data() noexcept
 template <class Ty, std::size_t dim, class _Allocator> template <class ... _Args>
 void welp::xdim<Ty, dim, _Allocator>::resize_le(_Args&& ... args)
 {
+#ifdef WELP_XDIM_DEBUG_MODE
+	assert(sizeof...(args) == dim);
+#endif // WELP_XDIM_DEBUG_MODE
 	clear();
 
 	std::initializer_list<std::size_t> L = { static_cast<std::size_t>(args)... };
-#ifdef WELP_XDIM_DEBUG_MODE
-	assert(L.size() == dim);
-#endif // WELP_XDIM_DEBUG_MODE
 	std::copy(L.begin(), L.end(), sizes);
 	total_size = 1;
 	std::size_t dim_m1 = dim - 1;
@@ -185,12 +183,12 @@ void welp::xdim<Ty, dim, _Allocator>::resize_le(_Args&& ... args)
 template <class Ty, std::size_t dim, class _Allocator> template <class ... _Args>
 void welp::xdim<Ty, dim, _Allocator>::resize_be(_Args&& ... args)
 {
+#ifdef WELP_XDIM_DEBUG_MODE
+	assert(sizeof...(args) == dim);
+#endif // WELP_XDIM_DEBUG_MODE
 	clear();
 
 	std::initializer_list<std::size_t> L = { static_cast<std::size_t>(args)... };
-#ifdef WELP_XDIM_DEBUG_MODE
-	assert(L.size() == dim);
-#endif // WELP_XDIM_DEBUG_MODE
 	std::copy(L.begin(), L.end(), sizes);
 	total_size = 1;
 	std::size_t dim_m1 = dim - 1;
