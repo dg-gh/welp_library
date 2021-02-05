@@ -12,7 +12,9 @@ Depedency free single-header files all under the Unlicense license that could be
 - **welp_matrix.hpp** : Row-major layout. Provides linear algebra subroutines (70% efficiency on theoretical maximum in matrix multiplication if compiled with Clang with AVX&FMA), a resizable matrix class, some solvers, some data manipulation/selection helpers and some functions to crunch, parse and write flat files.
 - **welp_multipool_resource.hpp** : Provide a multipool memory resource (with and without thread sync) backing an allocator.
 - **welp_threads.hpp** : Provides a thread pool that avoids std::future, std::result_of, std::invoke_result, and can avoid dynamic allocations if the functions launched as asynchronous tasks don't take too many arguments by using a fixed buffer for tasks. It can queue tasks at the end or the beginning of the waiting line depending on the desired level of priority.
+- **welp_repeat_macros.hpp** : Repeat lines with macros and without loops.
 - **welp_timer.hpp** : Provides classes for scheduling timings.
+- **welp_xdim.hpp** : Provides classes for multidimensional arrays.
 
 ### Optional includes and debug mode
 Every file contains its own mandatory includes and can include more with some preprocessor macros to unlock additional options. However, for every file welp_name.hpp, the macro WELP_NAME_INCLUDE_ALL will include all the necessary headers (those without hardware specifics) at once to unlock all the possible options. A full include would be done like this :
