@@ -1,4 +1,4 @@
-// welp_matrix.hpp - last update : 02 / 02 / 2021
+// welp_matrix.hpp - last update : 06 / 02 / 2021
 // License <http://unlicense.org/> (statement below at the end of the file)
 
 
@@ -388,10 +388,12 @@ namespace welp
 		// returns the number of elements that can be stored in the memory owned by *this
 		inline std::size_t capacity() const noexcept { return storage_capacity; }
 
+		inline const Ty* begin() const noexcept { return data_ptr; }
+		inline const Ty* end() const noexcept { return end_ptr; }
 		inline Ty* begin() noexcept { return data_ptr; }
 		inline Ty* end() noexcept { return end_ptr; }
-		inline const Ty* cbegin() const noexcept { return static_cast<const Ty*>(data_ptr); }
-		inline const Ty* cend() const noexcept { return static_cast<const Ty*>(end_ptr); }
+		inline const Ty* cbegin() const noexcept { return data_ptr; }
+		inline const Ty* cend() const noexcept { return end_ptr; }
 
 		// constructors, assign, copy, destructor
 
