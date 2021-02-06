@@ -185,7 +185,11 @@ In this code above, B is a reference with the bits of A reinterpreted. It allows
 		std::string buffer;
 		buffer.reserve(std::size_t(1) << 10);
 	
-		vec4 A = { .x = 1.3f, .y = 2.3f, .z = -0.999f, .w = 2000.0f };
+		vec4 A;
+		A.x = 1.3f;
+		A.y = 2.3f;
+		A.z = -0.999f;
+		A.w = 2000.0f;
 	
 		std::cout << "vec4 initially :  " << A.x << "  " << A.y << "  "
 			<< A.z << "  " << A.w << "\n" << std::endl;
