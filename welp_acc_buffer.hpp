@@ -514,13 +514,13 @@ inline bool welp::acc_buffer<Ty, _Allocator>::new_buffer(std::size_t instances)
 	data_ptr = static_cast<storage_cell*>(static_cast<void*>(this->allocate(instances * sizeof(storage_cell))));
 	if (data_ptr != nullptr)
 	{
-		current_ptr = data_ptr;
 		storage_cell* ptr = data_ptr;
-		max_number_of_cells = instances;
 		for (; instances > 0; instances--)
 		{
 			new (ptr) storage_cell(); ptr++;
 		}
+		current_ptr = data_ptr;
+		max_number_of_cells = instances;
 		return true;
 	}
 	else
@@ -753,13 +753,13 @@ inline bool welp::acc_buffer_sync<Ty, _Allocator, mutex_Ty>::new_buffer(std::siz
 	data_ptr = static_cast<storage_cell*>(static_cast<void*>(this->allocate(instances * sizeof(storage_cell))));
 	if (data_ptr != nullptr)
 	{
-		current_ptr = data_ptr;
 		storage_cell* ptr = data_ptr;
-		max_number_of_cells = instances;
 		for (; instances > 0; instances--)
 		{
 			new (ptr) storage_cell(); ptr++;
 		}
+		current_ptr = data_ptr;
+		max_number_of_cells = instances;
 		return true;
 	}
 	else
