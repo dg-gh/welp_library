@@ -13068,7 +13068,7 @@ template <typename Ty, class _Allocator> welp::_matrix_container<Ty, _Allocator>
 	if (storage_capacity != 0)
 	{
 		data_ptr = this->allocate(new_capacity);
-		end_ptr = data_ptr;
+		end_ptr = data_ptr + storage_capacity;
 		this->construct_all();
 	}
 	else
