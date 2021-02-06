@@ -1,4 +1,4 @@
-// welp_xdim.hpp - last update : 05 / 02 / 2021
+// welp_xdim.hpp - last update : 06 / 02 / 2021
 // License <http://unlicense.org/> (statement below at the end of the file)
 
 
@@ -32,18 +32,27 @@ namespace welp
 
 		inline const Ty& operator[](std::size_t offset) const noexcept;
 		inline Ty& operator[](std::size_t offset) noexcept;
-		template <class ... _Args> inline const Ty& operator()(_Args&& ... args) const noexcept;
-		template <class ... _Args> inline Ty& operator()(_Args&& ... args) noexcept;
+		template <class ... _index_pack> inline const Ty& operator()(_index_pack&& ... indices) const noexcept;
+		template <class ... _index_pack> inline Ty& operator()(_index_pack&& ... indices) noexcept;
 
-		inline std::size_t size(std::size_t index) const noexcept;
-		inline std::size_t size() const noexcept;
-
-		inline const Ty* data() const noexcept;
-		inline Ty* data() noexcept;
-
-		template <class ... _Args> void resize_le(_Args&& ... args);
-		template <class ... _Args> void resize_be(_Args&& ... args);
+		template <class ... _index_pack> void resize_le(_index_pack&& ... indices);
+		template <class ... _index_pack> void resize_be(_index_pack&& ... indices);
 		inline void clear() noexcept;
+
+
+		inline std::size_t size(std::size_t index_number) const noexcept { return sizes[index_number]; }
+		inline std::size_t size() const noexcept { return total_size; }
+
+		inline const Ty* data() const noexcept { return data_ptr; }
+		inline Ty* data() noexcept { return data_ptr; }
+
+		inline const Ty* begin() const noexcept { return data_ptr; }
+		inline const Ty* end() const noexcept { return end_ptr; }
+		inline Ty* begin() noexcept { return data_ptr; }
+		inline Ty* end() noexcept { return end_ptr; }
+		inline const Ty* cbegin() const noexcept { return data_ptr; }
+		inline const Ty* cend() const noexcept { return end_ptr; }
+
 
 		xdim() = default;
 		xdim(const welp::xdim<Ty, dim, _Allocator>& rhs);
@@ -55,9 +64,10 @@ namespace welp
 	private:
 
 		Ty* data_ptr = nullptr;
+		Ty* end_ptr = nullptr;
+		std::size_t total_size = 0;
 		std::size_t offset_coeff[dim] = { 0 };
 		std::size_t sizes[dim] = { 0 };
-		std::size_t total_size = 0;
 	};
 }
 
@@ -82,140 +92,109 @@ inline Ty& welp::xdim<Ty, dim, _Allocator>::operator[](std::size_t offset) noexc
 	return *(data_ptr + offset);
 }
 
-template <class Ty, std::size_t dim, class _Allocator> template <class ... _Args>
-inline const Ty& welp::xdim<Ty, dim, _Allocator>::operator()(_Args&& ... args) const noexcept
+template <class Ty, std::size_t dim, class _Allocator> template <class ... _index_pack>
+inline const Ty& welp::xdim<Ty, dim, _Allocator>::operator()(_index_pack&& ... indices) const noexcept
 {
-	std::size_t indices[dim] = { static_cast<std::size_t>(args)... };
+	std::size_t _indices[dim] = { static_cast<std::size_t>(indices)... };
 #ifdef WELP_XDIM_DEBUG_MODE
-	for (std::size_t n = 0; n < dim; n++) { assert(indices[n] < sizes[n]); }
-	assert(sizeof...(args) == dim);
+	for (std::size_t n = 0; n < dim; n++) { assert(_indices[n] < sizes[n]); }
+	assert(sizeof...(indices) == dim);
 #endif // WELP_XDIM_DEBUG_MODE
-	std::size_t offset = indices[0] * offset_coeff[0];
+	std::size_t offset = _indices[0] * offset_coeff[0];
 	for (std::size_t n = 1; n < dim; n++)
 	{
-		offset += indices[n] * offset_coeff[n];
+		offset += _indices[n] * offset_coeff[n];
 	}
 	return *(data_ptr + offset);
 }
 
-template <class Ty, std::size_t dim, class _Allocator> template <class ... _Args>
-inline Ty& welp::xdim<Ty, dim, _Allocator>::operator()(_Args&& ... args) noexcept
+template <class Ty, std::size_t dim, class _Allocator> template <class ... _index_pack>
+inline Ty& welp::xdim<Ty, dim, _Allocator>::operator()(_index_pack&& ... indices) noexcept
 {
-	std::size_t indices[dim] = { static_cast<std::size_t>(args)... };
+	std::size_t _indices[dim] = { static_cast<std::size_t>(indices)... };
 #ifdef WELP_XDIM_DEBUG_MODE
-	for (std::size_t n = 0; n < dim; n++) { assert(indices[n] < sizes[n]); }
-	assert(sizeof...(args) == dim);
+	for (std::size_t n = 0; n < dim; n++) { assert(_indices[n] < sizes[n]); }
+	assert(sizeof...(indices) == dim);
 #endif // WELP_XDIM_DEBUG_MODE
-	std::size_t offset = indices[0] * offset_coeff[0];
+	std::size_t offset = _indices[0] * offset_coeff[0];
 	for (std::size_t n = 1; n < dim; n++)
 	{
-		offset += indices[n] * offset_coeff[n];
+		offset += _indices[n] * offset_coeff[n];
 	}
 	return *(data_ptr + offset);
 }
 
-template <class Ty, std::size_t dim, class _Allocator>
-inline std::size_t welp::xdim<Ty, dim, _Allocator>::size(std::size_t index) const noexcept
+template <class Ty, std::size_t dim, class _Allocator> template <class ... _index_pack>
+void welp::xdim<Ty, dim, _Allocator>::resize_le(_index_pack&& ... indices)
 {
 #ifdef WELP_XDIM_DEBUG_MODE
-	assert(index < dim);
-#endif // WELP_XDIM_DEBUG_MODE
-	return sizes[index];
-}
-
-template <class Ty, std::size_t dim, class _Allocator>
-inline std::size_t welp::xdim<Ty, dim, _Allocator>::size() const noexcept
-{
-	return total_size;
-}
-
-template <class Ty, std::size_t dim, class _Allocator>
-inline const Ty* welp::xdim<Ty, dim, _Allocator>::data() const noexcept
-{
-	return data_ptr;
-}
-
-template <class Ty, std::size_t dim, class _Allocator>
-inline Ty* welp::xdim<Ty, dim, _Allocator>::data() noexcept
-{
-	return data_ptr;
-}
-
-template <class Ty, std::size_t dim, class _Allocator> template <class ... _Args>
-void welp::xdim<Ty, dim, _Allocator>::resize_le(_Args&& ... args)
-{
-#ifdef WELP_XDIM_DEBUG_MODE
-	assert(sizeof...(args) == dim);
+	assert(sizeof...(indices) == dim);
 #endif // WELP_XDIM_DEBUG_MODE
 	clear();
 
-	std::initializer_list<std::size_t> L = { static_cast<std::size_t>(args)... };
-	std::copy(L.begin(), L.end(), sizes);
-	total_size = 1;
-	std::size_t dim_m1 = dim - 1;
-	offset_coeff[0] = 1;
-	for (std::size_t n = 0; n < dim_m1; n++)
+	std::initializer_list<std::size_t> L = { static_cast<std::size_t>(indices)... };
+	std::size_t _total_size = 1;
+	for (auto iter = L.begin(); iter != L.end(); ++iter)
 	{
-		total_size *= sizes[n];
-		offset_coeff[n + 1] = total_size;
+		_total_size *= (*iter);
 	}
-	total_size *= sizes[dim_m1];
-	if (total_size != 0)
+	if (_total_size != 0)
 	{
-		data_ptr = this->allocate(total_size);
+		data_ptr = this->allocate(_total_size);
 		Ty* ptr = data_ptr;
-		for (std::size_t n = total_size; n > 0; n--)
+		for (std::size_t n = _total_size; n > 0; n--)
 		{
 			new (ptr) Ty(); ptr++;
 		}
-	}
-	else
-	{
-		for (std::size_t n = 0; n < dim; n++)
+		end_ptr = data_ptr + _total_size;
+		total_size = _total_size;
+		std::size_t dim_m1 = dim - 1;
+		auto iter = L.begin();
+		offset_coeff[0] = 1;
+		for (std::size_t n = 0; n < dim_m1; n++)
 		{
-			offset_coeff[n] = 0;
-			sizes[n] = 0;
+			sizes[n] = *iter;
+			offset_coeff[n + 1] = offset_coeff[n] * (*iter);
+			++iter;
 		}
-		total_size = 0;
+		sizes[dim_m1] = *iter;
 	}
 }
 
-template <class Ty, std::size_t dim, class _Allocator> template <class ... _Args>
-void welp::xdim<Ty, dim, _Allocator>::resize_be(_Args&& ... args)
+template <class Ty, std::size_t dim, class _Allocator> template <class ... _index_pack>
+void welp::xdim<Ty, dim, _Allocator>::resize_be(_index_pack&& ... indices)
 {
 #ifdef WELP_XDIM_DEBUG_MODE
-	assert(sizeof...(args) == dim);
+	assert(sizeof...(indices) == dim);
 #endif // WELP_XDIM_DEBUG_MODE
 	clear();
 
-	std::initializer_list<std::size_t> L = { static_cast<std::size_t>(args)... };
-	std::copy(L.begin(), L.end(), sizes);
-	total_size = 1;
-	std::size_t dim_m1 = dim - 1;
-	offset_coeff[dim_m1] = 1;
-	for (std::size_t n = 0; n < dim_m1; n++)
+	std::initializer_list<std::size_t> L = { static_cast<std::size_t>(indices)... };
+	std::size_t _total_size = 1;
+	for (auto iter = L.begin(); iter != L.end(); ++iter)
 	{
-		total_size *= sizes[n];
-		offset_coeff[dim_m1 - 1 - n] = total_size;
+		_total_size *= (*iter);
 	}
-	total_size *= sizes[dim_m1];
-	if (total_size != 0)
+	if (_total_size != 0)
 	{
-		data_ptr = this->allocate(total_size);
+		data_ptr = this->allocate(_total_size);
 		Ty* ptr = data_ptr;
-		for (std::size_t n = total_size; n > 0; n--)
+		for (std::size_t n = _total_size; n > 0; n--)
 		{
 			new (ptr) Ty(); ptr++;
 		}
-	}
-	else
-	{
-		for (std::size_t n = 0; n < dim; n++)
+		end_ptr = data_ptr + _total_size;
+		total_size = _total_size;
+		std::size_t dim_m1 = dim - 1;
+		auto iter = L.begin();
+		offset_coeff[dim_m1] = 1;
+		for (std::size_t n = 0; n < dim_m1; n++)
 		{
-			offset_coeff[n] = 0;
-			sizes[n] = 0;
+			sizes[n] = *iter;
+			offset_coeff[dim_m1 - 1 - n] = offset_coeff[dim_m1 - n] * (*iter);
+			++iter;
 		}
-		total_size = 0;
+		sizes[dim_m1] = *iter;
 	}
 }
 
@@ -230,6 +209,8 @@ inline void welp::xdim<Ty, dim, _Allocator>::clear() noexcept
 			ptr->~Ty(); ptr--;
 		}
 		this->deallocate(data_ptr, total_size);
+		data_ptr = nullptr;
+		end_ptr = nullptr;
 		for (std::size_t n = 0; n < dim; n++)
 		{
 			offset_coeff[n] = 0;
@@ -244,18 +225,19 @@ welp::xdim<Ty, dim, _Allocator>::xdim(const welp::xdim<Ty, dim, _Allocator>& rhs
 {
 	if (rhs.data_ptr != nullptr)
 	{
+		data_ptr = this->allocate(rhs.total_size);
+		Ty* ptr = data_ptr;
+		for (std::size_t n = rhs.total_size; n > 0; n--)
+		{
+			new (ptr) Ty(); ptr++;
+		}
+		end_ptr = data_ptr + rhs.total_size;
 		for (std::size_t n = 0; n < dim; n++)
 		{
 			offset_coeff[n] = rhs.offset_coeff[n];
 			sizes[n] = rhs.sizes[n];
 		}
 		total_size = rhs.total_size;
-		data_ptr = this->allocate(total_size);
-		Ty* ptr = data_ptr;
-		for (std::size_t n = total_size; n > 0; n--)
-		{
-			new (ptr) Ty(); ptr++;
-		}
 		ptr = data_ptr;
 		Ty* rhs_ptr = rhs.data_ptr;
 		for (std::size_t n = total_size; n > 0; n--)
@@ -272,18 +254,19 @@ welp::xdim<Ty, dim, _Allocator>& welp::xdim<Ty, dim, _Allocator>::operator=(cons
 
 	if (rhs.data_ptr != nullptr)
 	{
+		data_ptr = this->allocate(rhs.total_size);
+		Ty* ptr = data_ptr;
+		for (std::size_t n = rhs.total_size; n > 0; n--)
+		{
+			new (ptr) Ty(); ptr++;
+		}
+		end_ptr = data_ptr + rhs.total_size;
 		for (std::size_t n = 0; n < dim; n++)
 		{
 			offset_coeff[n] = rhs.offset_coeff[n];
 			sizes[n] = rhs.sizes[n];
 		}
 		total_size = rhs.total_size;
-		data_ptr = this->allocate(total_size);
-		Ty* ptr = data_ptr;
-		for (std::size_t n = total_size; n > 0; n--)
-		{
-			new (ptr) Ty(); ptr++;
-		}
 		ptr = data_ptr;
 		Ty* rhs_ptr = rhs.data_ptr;
 		for (std::size_t n = total_size; n > 0; n--)
@@ -299,17 +282,21 @@ welp::xdim<Ty, dim, _Allocator>::xdim(welp::xdim<Ty, dim, _Allocator>&& rhs) noe
 	if (rhs.data_ptr != nullptr)
 	{
 		data_ptr = rhs.data_ptr;
+		end_ptr = rhs.end_ptr;
 		for (std::size_t n = 0; n < dim; n++)
 		{
 			offset_coeff[n] = rhs.offset_coeff[n];
 			sizes[n] = rhs.sizes[n];
 		}
+		total_size = rhs.total_size;
 		rhs.data_ptr = nullptr;
+		rhs.end_ptr = nullptr;
 		for (std::size_t n = 0; n < dim; n++)
 		{
 			rhs.offset_coeff[n] = 0;
 			rhs.sizes[n] = 0;
 		}
+		rhs.total_size = 0;
 	}
 }
 
@@ -321,17 +308,21 @@ welp::xdim<Ty, dim, _Allocator>& welp::xdim<Ty, dim, _Allocator>::operator=(welp
 	if (rhs.data_ptr != nullptr)
 	{
 		data_ptr = rhs.data_ptr;
+		end_ptr = rhs.end_ptr;
 		for (std::size_t n = 0; n < dim; n++)
 		{
 			offset_coeff[n] = rhs.offset_coeff[n];
 			sizes[n] = rhs.sizes[n];
 		}
+		total_size = rhs.total_size;
 		rhs.data_ptr = nullptr;
+		rhs.end_ptr = nullptr;
 		for (std::size_t n = 0; n < dim; n++)
 		{
 			rhs.offset_coeff[n] = 0;
 			rhs.sizes[n] = 0;
 		}
+		rhs.total_size = 0;
 	}
 }
 
