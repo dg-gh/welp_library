@@ -204,14 +204,7 @@ inline void welp::xdim<Ty, dim, _Allocator>::clear() noexcept
 			ptr->~Ty(); ptr--;
 		}
 		this->deallocate(data_ptr, total_size);
-		data_ptr = nullptr;
-		end_ptr = nullptr;
-		for (std::size_t n = 0; n < dim; n++)
-		{
-			offset_coeff[n] = 0;
-			sizes[n] = 0;
-		}
-		total_size = 0;
+		std::memset(this, 0, sizeof(welp::xdim<Ty, dim, _Allocator>));
 	}
 }
 
