@@ -132,11 +132,11 @@ void welp::xdim<Ty, dim, _Allocator>::resize_le(_index_pack&& ... indices)
 #endif // WELP_XDIM_DEBUG_MODE
 	clear();
 
-	std::initializer_list<std::size_t> L = { static_cast<std::size_t>(indices)... };
+	std::size_t _indices[dim] = { static_cast<std::size_t>(indices)... };
 	std::size_t _total_size = 1;
-	for (auto iter = L.begin(); iter != L.end(); ++iter)
+	for (std::size_t n = 0; n < dim; n++)
 	{
-		_total_size *= (*iter);
+		_total_size *= _indices[n];
 	}
 	if (_total_size != 0)
 	{
@@ -148,16 +148,14 @@ void welp::xdim<Ty, dim, _Allocator>::resize_le(_index_pack&& ... indices)
 		}
 		end_ptr = data_ptr + _total_size;
 		total_size = _total_size;
-		std::size_t dim_m1 = dim - 1;
-		auto iter = L.begin();
+		constexpr std::size_t dim_m1 = dim - 1;
 		offset_coeff[0] = 1;
 		for (std::size_t n = 0; n < dim_m1; n++)
 		{
-			sizes[n] = *iter;
-			offset_coeff[n + 1] = offset_coeff[n] * (*iter);
-			++iter;
+			sizes[n] = _indices[n];
+			offset_coeff[n + 1] = offset_coeff[n] * _indices[n];
 		}
-		sizes[dim_m1] = *iter;
+		sizes[dim_m1] = _indices[dim_m1];
 	}
 }
 
@@ -169,11 +167,11 @@ void welp::xdim<Ty, dim, _Allocator>::resize_be(_index_pack&& ... indices)
 #endif // WELP_XDIM_DEBUG_MODE
 	clear();
 
-	std::initializer_list<std::size_t> L = { static_cast<std::size_t>(indices)... };
+	std::size_t _indices[dim] = { static_cast<std::size_t>(indices)... };
 	std::size_t _total_size = 1;
-	for (auto iter = L.begin(); iter != L.end(); ++iter)
+	for (std::size_t n = 0; n < dim; n++)
 	{
-		_total_size *= (*iter);
+		_total_size *= _indices[n];
 	}
 	if (_total_size != 0)
 	{
@@ -185,16 +183,14 @@ void welp::xdim<Ty, dim, _Allocator>::resize_be(_index_pack&& ... indices)
 		}
 		end_ptr = data_ptr + _total_size;
 		total_size = _total_size;
-		std::size_t dim_m1 = dim - 1;
-		auto iter = L.begin();
+		constexpr std::size_t dim_m1 = dim - 1;
 		offset_coeff[dim_m1] = 1;
 		for (std::size_t n = 0; n < dim_m1; n++)
 		{
-			sizes[n] = *iter;
-			offset_coeff[dim_m1 - 1 - n] = offset_coeff[dim_m1 - n] * (*iter);
-			++iter;
+			sizes[n] = _indices[n];
+			offset_coeff[dim_m1 - 1 - n] = offset_coeff[dim_m1 - n] * _indices[n];
 		}
-		sizes[dim_m1] = *iter;
+		sizes[dim_m1] = _indices[dim_m1];
 	}
 }
 
