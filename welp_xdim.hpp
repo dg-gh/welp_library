@@ -95,7 +95,7 @@ inline Ty& welp::xdim<Ty, dim, _Allocator>::operator[](std::size_t offset) noexc
 template <class Ty, std::size_t dim, class _Allocator> template <class ... _index_pack>
 inline const Ty& welp::xdim<Ty, dim, _Allocator>::operator()(_index_pack&& ... indices) const noexcept
 {
-	std::size_t _indices[dim] = { static_cast<std::size_t>(indices)... };
+	std::size_t _indices[dim] = { static_cast<std::size_t>(std::forward<_index_pack>(indices))... };
 #ifdef WELP_XDIM_DEBUG_MODE
 	for (std::size_t n = 0; n < dim; n++) { assert(_indices[n] < sizes[n]); }
 	assert(sizeof...(indices) == dim);
@@ -111,7 +111,7 @@ inline const Ty& welp::xdim<Ty, dim, _Allocator>::operator()(_index_pack&& ... i
 template <class Ty, std::size_t dim, class _Allocator> template <class ... _index_pack>
 inline Ty& welp::xdim<Ty, dim, _Allocator>::operator()(_index_pack&& ... indices) noexcept
 {
-	std::size_t _indices[dim] = { static_cast<std::size_t>(indices)... };
+	std::size_t _indices[dim] = { static_cast<std::size_t>(std::forward<_index_pack>(indices))... };
 #ifdef WELP_XDIM_DEBUG_MODE
 	for (std::size_t n = 0; n < dim; n++) { assert(_indices[n] < sizes[n]); }
 	assert(sizeof...(indices) == dim);
@@ -132,7 +132,7 @@ void welp::xdim<Ty, dim, _Allocator>::resize_le(_index_pack&& ... indices)
 #endif // WELP_XDIM_DEBUG_MODE
 	clear();
 
-	std::size_t _indices[dim] = { static_cast<std::size_t>(indices)... };
+	std::size_t _indices[dim] = { static_cast<std::size_t>(std::forward<_index_pack>(indices))... };
 	std::size_t _total_size = 1;
 	for (std::size_t n = 0; n < dim; n++)
 	{
@@ -167,7 +167,7 @@ void welp::xdim<Ty, dim, _Allocator>::resize_be(_index_pack&& ... indices)
 #endif // WELP_XDIM_DEBUG_MODE
 	clear();
 
-	std::size_t _indices[dim] = { static_cast<std::size_t>(indices)... };
+	std::size_t _indices[dim] = { static_cast<std::size_t>(std::forward<_index_pack>(indices))... };
 	std::size_t _total_size = 1;
 	for (std::size_t n = 0; n < dim; n++)
 	{
