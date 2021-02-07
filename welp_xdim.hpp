@@ -284,14 +284,7 @@ welp::xdim<Ty, dim, _Allocator>::xdim(welp::xdim<Ty, dim, _Allocator>&& rhs) noe
 			sizes[n] = rhs.sizes[n];
 		}
 		total_size = rhs.total_size;
-		rhs.data_ptr = nullptr;
-		rhs.end_ptr = nullptr;
-		for (std::size_t n = 0; n < dim; n++)
-		{
-			rhs.offset_coeff[n] = 0;
-			rhs.sizes[n] = 0;
-		}
-		rhs.total_size = 0;
+		std::memset(&rhs, 0, sizeof(welp::xdim<Ty, dim, _Allocator>));
 	}
 }
 
@@ -309,8 +302,9 @@ welp::xdim<Ty, dim, _Allocator>& welp::xdim<Ty, dim, _Allocator>::operator=(welp
 			offset_coeff[n] = rhs.offset_coeff[n];
 			sizes[n] = rhs.sizes[n];
 		}
+		total_size = rhs.total_size;
+		std::memset(&rhs, 0, sizeof(welp::xdim<Ty, dim, _Allocator>));
 	}
-	std::memset(this, 0, sizeof(welp::xdim<Ty, dim, _Allocator>));
 }
 
 template <class Ty, std::size_t dim, class _Allocator>
