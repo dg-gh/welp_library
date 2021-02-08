@@ -24,6 +24,8 @@
 
 namespace welp
 {
+	enum xdim_memory_layout { xdim_left_major, xdim_right_major, xdim_undefined_layout };
+
 	template <class Ty, std::size_t dim, class _Allocator = std::allocator<Ty>> class xdim : private _Allocator
 	{
 
@@ -34,6 +36,7 @@ namespace welp
 		template <class ... _index_pack> inline const Ty& operator()(_index_pack&& ... indices) const noexcept;
 		template <class ... _index_pack> inline Ty& operator()(_index_pack&& ... indices) noexcept;
 
+		template <class ... _index_pack> void resize(welp::xdim_memory_layout layout, _index_pack&& ... indices);
 		template <class ... _index_pack> void resize_left(_index_pack&& ... indices);
 		template <class ... _index_pack> void resize_right(_index_pack&& ... indices);
 		inline void clear() noexcept;
@@ -56,6 +59,7 @@ namespace welp
 
 
 		xdim() = default;
+		template <class ... _index_pack> xdim(welp::xdim_memory_layout memory_layout, _index_pack&& ... indices);
 		xdim(const welp::xdim<Ty, dim, _Allocator>& rhs);
 		welp::xdim<Ty, dim, _Allocator>& operator=(const welp::xdim<Ty, dim, _Allocator>& rhs);
 		xdim(welp::xdim<Ty, dim, _Allocator>&& rhs) noexcept;
@@ -123,6 +127,25 @@ inline Ty& welp::xdim<Ty, dim, _Allocator>::operator()(_index_pack&& ... indices
 		offset += _indices[n] * offset_coeff[n];
 	}
 	return *(data_ptr + offset);
+}
+
+template <class Ty, std::size_t dim, class _Allocator> template <class ... _index_pack>
+void welp::xdim<Ty, dim, _Allocator>::resize(welp::xdim_memory_layout memory_layout, _index_pack&& ... indices)
+{
+	switch (memory_layout)
+	{
+
+	case welp::xdim_left_major:
+		resize_left(std::forward<_index_pack>(indices)...);
+		break;
+
+	case welp::xdim_right_major:
+		resize_right(std::forward<_index_pack>(indices)...);
+		break;
+
+	case welp::xdim_undefined_layout:
+		break;
+	}
 }
 
 template <class Ty, std::size_t dim, class _Allocator> template <class ... _index_pack>
@@ -207,6 +230,25 @@ inline void welp::xdim<Ty, dim, _Allocator>::clear() noexcept
 		}
 		this->deallocate(data_ptr, total_size);
 		std::memset(this, 0, sizeof(welp::xdim<Ty, dim, _Allocator>));
+	}
+}
+
+template <class Ty, std::size_t dim, class _Allocator> template <class ... _index_pack>
+welp::xdim<Ty, dim, _Allocator>::xdim(const welp::xdim_memory_layout memory_layout, _index_pack&& ... indices)
+{
+	switch (memory_layout)
+	{
+
+	case welp::xdim_left_major:
+		resize_left(std::forward<_index_pack>(indices)...);
+		break;
+
+	case welp::xdim_right_major:
+		resize_right(std::forward<_index_pack>(indices)...);
+		break;
+
+	case welp::xdim_undefined_layout:
+		break;
 	}
 }
 
