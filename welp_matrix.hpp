@@ -13475,13 +13475,13 @@ template <typename Ty, class _Allocator> void welp::_matrix_container<Ty, _Alloc
 	{
 		this->destroy_all();
 		this->deallocate(data_ptr, storage_capacity);
-
-		data_ptr = nullptr;
-		end_ptr = nullptr;
-		rows = 0;
-		cols = 0;
-		storage_capacity = 0;
 	}
+	
+	data_ptr = nullptr;
+	end_ptr = nullptr;
+	rows = 0;
+	cols = 0;
+	storage_capacity = 0;
 }
 
 
