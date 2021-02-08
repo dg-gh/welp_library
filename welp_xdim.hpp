@@ -1,4 +1,4 @@
-// welp_xdim.hpp - last update : 06 / 02 / 2021
+// welp_xdim.hpp - last update : 08 / 02 / 2021
 // License <http://unlicense.org/> (statement below at the end of the file)
 
 
@@ -34,8 +34,8 @@ namespace welp
 		template <class ... _index_pack> inline const Ty& operator()(_index_pack&& ... indices) const noexcept;
 		template <class ... _index_pack> inline Ty& operator()(_index_pack&& ... indices) noexcept;
 
-		template <class ... _index_pack> void resize_le(_index_pack&& ... indices);
-		template <class ... _index_pack> void resize_be(_index_pack&& ... indices);
+		template <class ... _index_pack> void resize_left(_index_pack&& ... indices);
+		template <class ... _index_pack> void resize_right(_index_pack&& ... indices);
 		inline void clear() noexcept;
 
 
@@ -124,42 +124,7 @@ inline Ty& welp::xdim<Ty, dim, _Allocator>::operator()(_index_pack&& ... indices
 }
 
 template <class Ty, std::size_t dim, class _Allocator> template <class ... _index_pack>
-void welp::xdim<Ty, dim, _Allocator>::resize_le(_index_pack&& ... indices)
-{
-#ifdef WELP_XDIM_DEBUG_MODE
-	assert(sizeof...(indices) == dim);
-#endif // WELP_XDIM_DEBUG_MODE
-	clear();
-
-	std::size_t _indices[dim] = { static_cast<std::size_t>(std::forward<_index_pack>(indices))... };
-	std::size_t _total_size = 1;
-	for (std::size_t n = 0; n < dim; n++)
-	{
-		_total_size *= _indices[n];
-	}
-	if (_total_size != 0)
-	{
-		data_ptr = this->allocate(_total_size);
-		Ty* ptr = data_ptr;
-		for (std::size_t n = _total_size; n > 0; n--)
-		{
-			new (ptr) Ty(); ptr++;
-		}
-		end_ptr = data_ptr + _total_size;
-		total_size = _total_size;
-		constexpr std::size_t dim_m1 = dim - 1;
-		offset_coeff[0] = 1;
-		for (std::size_t n = 0; n < dim_m1; n++)
-		{
-			sizes[n] = _indices[n];
-			offset_coeff[n + 1] = offset_coeff[n] * _indices[n];
-		}
-		sizes[dim_m1] = _indices[dim_m1];
-	}
-}
-
-template <class Ty, std::size_t dim, class _Allocator> template <class ... _index_pack>
-void welp::xdim<Ty, dim, _Allocator>::resize_be(_index_pack&& ... indices)
+void welp::xdim<Ty, dim, _Allocator>::resize_left(_index_pack&& ... indices)
 {
 #ifdef WELP_XDIM_DEBUG_MODE
 	assert(sizeof...(indices) == dim);
@@ -188,6 +153,41 @@ void welp::xdim<Ty, dim, _Allocator>::resize_be(_index_pack&& ... indices)
 		{
 			sizes[n] = _indices[n];
 			offset_coeff[dim_m1 - 1 - n] = offset_coeff[dim_m1 - n] * _indices[n];
+		}
+		sizes[dim_m1] = _indices[dim_m1];
+	}
+}
+
+template <class Ty, std::size_t dim, class _Allocator> template <class ... _index_pack>
+void welp::xdim<Ty, dim, _Allocator>::resize_right(_index_pack&& ... indices)
+{
+#ifdef WELP_XDIM_DEBUG_MODE
+	assert(sizeof...(indices) == dim);
+#endif // WELP_XDIM_DEBUG_MODE
+	clear();
+
+	std::size_t _indices[dim] = { static_cast<std::size_t>(std::forward<_index_pack>(indices))... };
+	std::size_t _total_size = 1;
+	for (std::size_t n = 0; n < dim; n++)
+	{
+		_total_size *= _indices[n];
+	}
+	if (_total_size != 0)
+	{
+		data_ptr = this->allocate(_total_size);
+		Ty* ptr = data_ptr;
+		for (std::size_t n = _total_size; n > 0; n--)
+		{
+			new (ptr) Ty(); ptr++;
+		}
+		end_ptr = data_ptr + _total_size;
+		total_size = _total_size;
+		constexpr std::size_t dim_m1 = dim - 1;
+		offset_coeff[0] = 1;
+		for (std::size_t n = 0; n < dim_m1; n++)
+		{
+			sizes[n] = _indices[n];
+			offset_coeff[n + 1] = offset_coeff[n] * _indices[n];
 		}
 		sizes[dim_m1] = _indices[dim_m1];
 	}
