@@ -397,7 +397,7 @@ namespace welp
 
 		// constructors, assign, copy, destructor
 
-		_matrix_container();
+		_matrix_container() noexcept;
 		_matrix_container(std::size_t new_capacity);
 		_matrix_container(std::size_t new_r, std::size_t new_c);
 		_matrix_container(std::size_t new_capacity, std::size_t new_r, std::size_t new_c);
@@ -13062,7 +13062,7 @@ template <typename Ty, class _Allocator> inline void welp::_matrix_container<Ty,
 
 // constructors, assign, copy, destructor
 
-template <typename Ty, class _Allocator> welp::_matrix_container<Ty, _Allocator>::_matrix_container() : data_ptr(nullptr), end_ptr(nullptr), rows(0), cols(0), storage_capacity(0) {}
+template <typename Ty, class _Allocator> welp::_matrix_container<Ty, _Allocator>::_matrix_container() noexcept : data_ptr(nullptr), end_ptr(nullptr), rows(0), cols(0), storage_capacity(0) {}
 template <typename Ty, class _Allocator> welp::_matrix_container<Ty, _Allocator>::_matrix_container(std::size_t new_capacity) : rows(0), cols(0), storage_capacity(new_capacity)
 {
 	if (storage_capacity != 0)
