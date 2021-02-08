@@ -41,6 +41,8 @@ namespace welp
 
 		inline std::size_t size(std::size_t index_number) const noexcept { return sizes[index_number]; }
 		inline std::size_t size() const noexcept { return total_size; }
+		inline bool left_major() noexcept { constexpr std::size_t dim_m1 = dim - 1; return offset_coeff[dim_m1] == 1; };
+		inline bool right_major() noexcept { return offset_coeff[0] == 1; };
 
 		inline const Ty* data() const noexcept { return data_ptr; }
 		inline Ty* data() noexcept { return data_ptr; }
