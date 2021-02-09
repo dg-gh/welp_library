@@ -24,7 +24,12 @@
 
 namespace welp
 {
-	enum xdim_layout { xdim_left, xdim_right, xdim_undef };
+	enum xdim_layout
+	{
+		xdim_left,
+		xdim_right,
+		xdim_undef
+	};
 
 	template <class Ty, std::size_t dim, class _Allocator = std::allocator<Ty>> class xdim : private _Allocator
 	{
