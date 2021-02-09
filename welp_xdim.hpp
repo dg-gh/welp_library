@@ -24,7 +24,7 @@
 
 namespace welp
 {
-	enum xdim_memory_layout { xdim_left_major, xdim_right_major, xdim_undefined_layout };
+	enum xdim_memory_layout { xdim_left, xdim_right, xdim_undefined };
 
 	template <class Ty, std::size_t dim, class _Allocator = std::allocator<Ty>> class xdim : private _Allocator
 	{
@@ -37,15 +37,10 @@ namespace welp
 		template <class ... _index_pack> inline Ty& operator()(_index_pack&& ... indices) noexcept;
 
 		template <class ... _index_pack> void resize(welp::xdim_memory_layout layout, _index_pack&& ... indices);
-		template <class ... _index_pack> void resize_left(_index_pack&& ... indices);
-		template <class ... _index_pack> void resize_right(_index_pack&& ... indices);
-		inline void clear() noexcept;
-
-
 		inline std::size_t size(std::size_t index_number) const noexcept { return sizes[index_number]; }
 		inline std::size_t size() const noexcept { return total_size; }
-		inline bool left_major() noexcept { constexpr std::size_t dim_m1 = dim - 1; return offset_coeff[dim_m1] == 1; };
-		inline bool right_major() noexcept { return offset_coeff[0] == 1; };
+		inline welp::xdim_memory_layout layout() const noexcept { return _layout; }
+		inline void clear() noexcept;
 
 		inline const Ty* data() const noexcept { return data_ptr; }
 		inline Ty* data() noexcept { return data_ptr; }
@@ -73,6 +68,10 @@ namespace welp
 		std::size_t total_size = 0;
 		std::size_t offset_coeff[dim] = { 0 };
 		std::size_t sizes[dim] = { 0 };
+		welp::xdim_memory_layout _layout = welp::xdim_undefined;
+
+		template <class ... _index_pack> inline void resize_left(_index_pack&& ... indices);
+		template <class ... _index_pack> inline void resize_right(_index_pack&& ... indices);
 	};
 }
 
@@ -135,21 +134,21 @@ void welp::xdim<Ty, dim, _Allocator>::resize(welp::xdim_memory_layout memory_lay
 	switch (memory_layout)
 	{
 
-	case welp::xdim_left_major:
+	case welp::xdim_left:
 		resize_left(std::forward<_index_pack>(indices)...);
 		break;
 
-	case welp::xdim_right_major:
+	case welp::xdim_right:
 		resize_right(std::forward<_index_pack>(indices)...);
 		break;
 
-	case welp::xdim_undefined_layout:
+	case welp::xdim_undefined:
 		break;
 	}
 }
 
 template <class Ty, std::size_t dim, class _Allocator> template <class ... _index_pack>
-void welp::xdim<Ty, dim, _Allocator>::resize_left(_index_pack&& ... indices)
+inline void welp::xdim<Ty, dim, _Allocator>::resize_left(_index_pack&& ... indices)
 {
 #ifdef WELP_XDIM_DEBUG_MODE
 	assert(sizeof...(indices) == dim);
@@ -180,11 +179,12 @@ void welp::xdim<Ty, dim, _Allocator>::resize_left(_index_pack&& ... indices)
 			offset_coeff[dim_m1 - 1 - n] = offset_coeff[dim_m1 - n] * _indices[n];
 		}
 		sizes[dim_m1] = _indices[dim_m1];
+		_layout = welp::xdim_left;
 	}
 }
 
 template <class Ty, std::size_t dim, class _Allocator> template <class ... _index_pack>
-void welp::xdim<Ty, dim, _Allocator>::resize_right(_index_pack&& ... indices)
+inline void welp::xdim<Ty, dim, _Allocator>::resize_right(_index_pack&& ... indices)
 {
 #ifdef WELP_XDIM_DEBUG_MODE
 	assert(sizeof...(indices) == dim);
@@ -215,6 +215,7 @@ void welp::xdim<Ty, dim, _Allocator>::resize_right(_index_pack&& ... indices)
 			offset_coeff[n + 1] = offset_coeff[n] * _indices[n];
 		}
 		sizes[dim_m1] = _indices[dim_m1];
+		_layout = welp::xdim_right;
 	}
 }
 
@@ -229,8 +230,9 @@ inline void welp::xdim<Ty, dim, _Allocator>::clear() noexcept
 			ptr->~Ty(); ptr--;
 		}
 		this->deallocate(data_ptr, total_size);
-		std::memset(this, 0, sizeof(welp::xdim<Ty, dim, _Allocator>));
 	}
+	std::memset(this, 0, sizeof(welp::xdim<Ty, dim, _Allocator>));
+	_layout = welp::xdim_undefined;
 }
 
 template <class Ty, std::size_t dim, class _Allocator> template <class ... _index_pack>
@@ -239,15 +241,15 @@ welp::xdim<Ty, dim, _Allocator>::xdim(const welp::xdim_memory_layout memory_layo
 	switch (memory_layout)
 	{
 
-	case welp::xdim_left_major:
+	case welp::xdim_left:
 		resize_left(std::forward<_index_pack>(indices)...);
 		break;
 
-	case welp::xdim_right_major:
+	case welp::xdim_right:
 		resize_right(std::forward<_index_pack>(indices)...);
 		break;
 
-	case welp::xdim_undefined_layout:
+	case welp::xdim_undefined:
 		break;
 	}
 }
@@ -276,6 +278,7 @@ welp::xdim<Ty, dim, _Allocator>::xdim(const welp::xdim<Ty, dim, _Allocator>& rhs
 		{
 			*ptr++ = *rhs_ptr++;
 		}
+		_layout = rhs._layout;
 	}
 }
 
@@ -305,6 +308,7 @@ welp::xdim<Ty, dim, _Allocator>& welp::xdim<Ty, dim, _Allocator>::operator=(cons
 		{
 			*ptr++ = *rhs_ptr++;
 		}
+		_layout = rhs._layout;
 	}
 }
 
@@ -321,7 +325,9 @@ welp::xdim<Ty, dim, _Allocator>::xdim(welp::xdim<Ty, dim, _Allocator>&& rhs) noe
 			sizes[n] = rhs.sizes[n];
 		}
 		total_size = rhs.total_size;
+		_layout = rhs._layout;
 		std::memset(&rhs, 0, sizeof(welp::xdim<Ty, dim, _Allocator>));
+		rhs._layout = welp::xdim_undefined;
 	}
 }
 
@@ -340,7 +346,9 @@ welp::xdim<Ty, dim, _Allocator>& welp::xdim<Ty, dim, _Allocator>::operator=(welp
 			sizes[n] = rhs.sizes[n];
 		}
 		total_size = rhs.total_size;
+		_layout = rhs._layout;
 		std::memset(&rhs, 0, sizeof(welp::xdim<Ty, dim, _Allocator>));
+		rhs._layout = welp::xdim_undefined;
 	}
 }
 
