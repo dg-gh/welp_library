@@ -24,7 +24,7 @@
 
 namespace welp
 {
-	enum xdim_memory_layout { xdim_left, xdim_right, xdim_undef };
+	enum xdim_layout { xdim_left, xdim_right, xdim_undef };
 
 	template <class Ty, std::size_t dim, class _Allocator = std::allocator<Ty>> class xdim : private _Allocator
 	{
@@ -36,10 +36,10 @@ namespace welp
 		template <class ... _index_pack> inline const Ty& operator()(_index_pack&& ... indices) const noexcept;
 		template <class ... _index_pack> inline Ty& operator()(_index_pack&& ... indices) noexcept;
 
-		template <class ... _index_pack> void resize(welp::xdim_memory_layout layout, _index_pack&& ... indices);
+		template <class ... _index_pack> void resize(welp::xdim_layout layout, _index_pack&& ... indices);
 		inline std::size_t size(std::size_t index_number) const noexcept { return sizes[index_number]; }
 		inline std::size_t size() const noexcept { return total_size; }
-		inline welp::xdim_memory_layout layout() const noexcept { return _layout; }
+		inline welp::xdim_layout layout() const noexcept { return _layout; }
 		inline void clear() noexcept;
 
 		inline const Ty* data() const noexcept { return data_ptr; }
@@ -54,7 +54,7 @@ namespace welp
 
 
 		xdim() = default;
-		template <class ... _index_pack> xdim(welp::xdim_memory_layout memory_layout, _index_pack&& ... indices);
+		template <class ... _index_pack> xdim(welp::xdim_layout memory_layout, _index_pack&& ... indices);
 		xdim(const welp::xdim<Ty, dim, _Allocator>& rhs);
 		welp::xdim<Ty, dim, _Allocator>& operator=(const welp::xdim<Ty, dim, _Allocator>& rhs);
 		xdim(welp::xdim<Ty, dim, _Allocator>&& rhs) noexcept;
@@ -68,7 +68,7 @@ namespace welp
 		std::size_t total_size = 0;
 		std::size_t offset_coeff[dim] = { 0 };
 		std::size_t sizes[dim] = { 0 };
-		welp::xdim_memory_layout _layout = welp::xdim_undef;
+		welp::xdim_layout _layout = welp::xdim_undef;
 
 		template <class ... _index_pack> inline void resize_left(_index_pack&& ... indices);
 		template <class ... _index_pack> inline void resize_right(_index_pack&& ... indices);
@@ -129,7 +129,7 @@ inline Ty& welp::xdim<Ty, dim, _Allocator>::operator()(_index_pack&& ... indices
 }
 
 template <class Ty, std::size_t dim, class _Allocator> template <class ... _index_pack>
-void welp::xdim<Ty, dim, _Allocator>::resize(welp::xdim_memory_layout memory_layout, _index_pack&& ... indices)
+void welp::xdim<Ty, dim, _Allocator>::resize(welp::xdim_layout memory_layout, _index_pack&& ... indices)
 {
 	switch (memory_layout)
 	{
@@ -236,7 +236,7 @@ inline void welp::xdim<Ty, dim, _Allocator>::clear() noexcept
 }
 
 template <class Ty, std::size_t dim, class _Allocator> template <class ... _index_pack>
-welp::xdim<Ty, dim, _Allocator>::xdim(const welp::xdim_memory_layout memory_layout, _index_pack&& ... indices)
+welp::xdim<Ty, dim, _Allocator>::xdim(const welp::xdim_layout memory_layout, _index_pack&& ... indices)
 {
 	switch (memory_layout)
 	{
