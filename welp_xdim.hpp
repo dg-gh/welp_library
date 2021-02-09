@@ -176,14 +176,15 @@ inline void welp::xdim<Ty, dim, _Allocator>::resize_left(_index_pack&& ... indic
 		}
 		end_ptr = data_ptr + _total_size;
 		total_size = _total_size;
-		constexpr std::size_t dim_m1 = dim - 1;
-		offset_coeff[dim_m1] = 1;
-		for (std::size_t n = 0; n < dim_m1; n++)
+		for (std::size_t n = 0; n < dim; n++)
 		{
 			sizes[n] = _indices[n];
-			offset_coeff[dim_m1 - 1 - n] = offset_coeff[dim_m1 - n] * _indices[n];
 		}
-		sizes[dim_m1] = _indices[dim_m1];
+		offset_coeff[dim - 1] = 1;
+		for (std::size_t n = dim - 1; n > 0; n--)
+		{
+			offset_coeff[n - 1] = offset_coeff[n] * _indices[n];
+		}
 		_layout = welp::xdim_left;
 	}
 }
