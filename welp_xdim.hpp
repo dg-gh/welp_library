@@ -110,9 +110,9 @@ namespace welp
 		xdim_ref() = default;
 		template <class ... _index_pack> xdim_ref(Ty* new_data_ptr, welp::xdim_layout memory_layout, _index_pack&& ... indices);
 		xdim_ref(const welp::xdim_ref<Ty, dim>& rhs) noexcept = default;
-		welp::xdim_ref<Ty, dim>& operator=(const welp::xdim<Ty, dim>& rhs) noexcept = default;
+		welp::xdim_ref<Ty, dim>& operator=(const welp::xdim_ref<Ty, dim>& rhs) noexcept = default;
 		xdim_ref(welp::xdim_ref<Ty, dim>&& rhs) noexcept = default;
-		welp::xdim<Ty, dim>& operator=(welp::xdim<Ty, dim>&& rhs) noexcept = default;
+		welp::xdim_ref<Ty, dim>& operator=(welp::xdim_ref<Ty, dim>&& rhs) noexcept = default;
 		~xdim_ref() = default;
 
 	private:
@@ -154,9 +154,9 @@ namespace welp
 		xdim_const_ref() = default;
 		template <class ... _index_pack> xdim_const_ref(const Ty* new_data_ptr, welp::xdim_layout memory_layout, _index_pack&& ... indices);
 		xdim_const_ref(const welp::xdim_const_ref<Ty, dim>& rhs) noexcept = default;
-		welp::xdim_const_ref<Ty, dim>& operator=(const welp::xdim<Ty, dim>& rhs) noexcept = default;
+		welp::xdim_const_ref<Ty, dim>& operator=(const welp::xdim_const_ref<Ty, dim>& rhs) noexcept = default;
 		xdim_const_ref(welp::xdim_const_ref<Ty, dim>&& rhs) noexcept = default;
-		welp::xdim<Ty, dim>& operator=(welp::xdim<Ty, dim>&& rhs) noexcept = default;
+		welp::xdim_const_ref<Ty, dim>& operator=(welp::xdim_const_ref<Ty, dim>&& rhs) noexcept = default;
 		~xdim_const_ref() = default;
 
 	private:
