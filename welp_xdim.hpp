@@ -95,7 +95,7 @@ namespace welp
 		inline welp::xdim_layout layout() const noexcept { return _layout; }
 		inline void clear() noexcept;
 
-		inline void set_data(Ty* new_data_ptr) noexcept { data_ptr = new_data_ptr; };
+		inline void set_data(Ty* new_data_ptr) noexcept { data_ptr = new_data_ptr; end_ptr = data_ptr + _total_size; };
 		inline const Ty* data() const noexcept { return data_ptr; }
 		inline Ty* data() noexcept { return data_ptr; }
 
@@ -142,7 +142,7 @@ namespace welp
 		inline welp::xdim_layout layout() const noexcept { return _layout; }
 		inline void clear() noexcept;
 
-		inline void set_data(const Ty* new_data_ptr) noexcept { data_ptr = new_data_ptr; };
+		inline void set_data(const Ty* new_data_ptr) noexcept { data_ptr = new_data_ptr; end_ptr = data_ptr + _total_size; };
 		inline const Ty* data() const noexcept { return data_ptr; }
 
 		inline const Ty* begin() const noexcept { return data_ptr; }
