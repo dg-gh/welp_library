@@ -1,4 +1,4 @@
-// welp_xdim.hpp - last update : 12 / 02 / 2021
+// welp_xdim.hpp - last update : 15 / 02 / 2021
 // License <http://unlicense.org/> (statement below at the end of the file)
 
 
@@ -79,7 +79,7 @@ namespace welp
 		template <class ... _index_pack> inline void resize_right(_index_pack&& ... indices);
 	};
 
-	template <class Ty, std::size_t dim> class xdim_ref
+	template <class Ty, std::size_t dim> class xdim_view
 	{
 
 	public:
@@ -107,13 +107,13 @@ namespace welp
 		inline const Ty* cend() const noexcept { return end_ptr; }
 
 
-		xdim_ref() = default;
-		template <class ... _index_pack> xdim_ref(Ty* new_data_ptr, welp::xdim_layout memory_layout, _index_pack&& ... indices);
-		xdim_ref(const welp::xdim_ref<Ty, dim>& rhs) noexcept = default;
-		welp::xdim_ref<Ty, dim>& operator=(const welp::xdim_ref<Ty, dim>& rhs) noexcept = default;
-		xdim_ref(welp::xdim_ref<Ty, dim>&& rhs) noexcept = default;
-		welp::xdim_ref<Ty, dim>& operator=(welp::xdim_ref<Ty, dim>&& rhs) noexcept = default;
-		~xdim_ref() = default;
+		xdim_view() = default;
+		template <class ... _index_pack> xdim_view(Ty* new_data_ptr, welp::xdim_layout memory_layout, _index_pack&& ... indices);
+		xdim_view(const welp::xdim_view<Ty, dim>& rhs) noexcept = default;
+		welp::xdim_view<Ty, dim>& operator=(const welp::xdim_view<Ty, dim>& rhs) noexcept = default;
+		xdim_view(welp::xdim_view<Ty, dim>&& rhs) noexcept = default;
+		welp::xdim_view<Ty, dim>& operator=(welp::xdim_view<Ty, dim>&& rhs) noexcept = default;
+		~xdim_view() = default;
 
 	private:
 
@@ -128,7 +128,7 @@ namespace welp
 		template <class ... _index_pack> inline void resize_right(_index_pack&& ... indices);
 	};
 
-	template <class Ty, std::size_t dim> class xdim_const_ref
+	template <class Ty, std::size_t dim> class xdim_view_const
 	{
 
 	public:
@@ -151,13 +151,13 @@ namespace welp
 		inline const Ty* cend() const noexcept { return end_ptr; }
 
 
-		xdim_const_ref() = default;
-		template <class ... _index_pack> xdim_const_ref(const Ty* new_data_ptr, welp::xdim_layout memory_layout, _index_pack&& ... indices);
-		xdim_const_ref(const welp::xdim_const_ref<Ty, dim>& rhs) noexcept = default;
-		welp::xdim_const_ref<Ty, dim>& operator=(const welp::xdim_const_ref<Ty, dim>& rhs) noexcept = default;
-		xdim_const_ref(welp::xdim_const_ref<Ty, dim>&& rhs) noexcept = default;
-		welp::xdim_const_ref<Ty, dim>& operator=(welp::xdim_const_ref<Ty, dim>&& rhs) noexcept = default;
-		~xdim_const_ref() = default;
+		xdim_view_const() = default;
+		template <class ... _index_pack> xdim_view_const(const Ty* new_data_ptr, welp::xdim_layout memory_layout, _index_pack&& ... indices);
+		xdim_view_const(const welp::xdim_view_const<Ty, dim>& rhs) noexcept = default;
+		welp::xdim_view_const<Ty, dim>& operator=(const welp::xdim_view_const<Ty, dim>& rhs) noexcept = default;
+		xdim_view_const(welp::xdim_view_const<Ty, dim>&& rhs) noexcept = default;
+		welp::xdim_view_const<Ty, dim>& operator=(welp::xdim_view_const<Ty, dim>&& rhs) noexcept = default;
+		~xdim_view_const() = default;
 
 	private:
 
@@ -459,7 +459,7 @@ welp::xdim<Ty, dim, _Allocator>::~xdim()
 
 
 template <class Ty, std::size_t dim>
-inline const Ty& welp::xdim_ref<Ty, dim>::operator[](std::size_t offset) const noexcept
+inline const Ty& welp::xdim_view<Ty, dim>::operator[](std::size_t offset) const noexcept
 {
 #ifdef WELP_XDIM_DEBUG_MODE
 	assert(offset < total_size);
@@ -468,7 +468,7 @@ inline const Ty& welp::xdim_ref<Ty, dim>::operator[](std::size_t offset) const n
 }
 
 template <class Ty, std::size_t dim>
-inline Ty& welp::xdim_ref<Ty, dim>::operator[](std::size_t offset) noexcept
+inline Ty& welp::xdim_view<Ty, dim>::operator[](std::size_t offset) noexcept
 {
 #ifdef WELP_XDIM_DEBUG_MODE
 	assert(offset < total_size);
@@ -477,7 +477,7 @@ inline Ty& welp::xdim_ref<Ty, dim>::operator[](std::size_t offset) noexcept
 }
 
 template <class Ty, std::size_t dim> template <class ... _index_pack>
-inline const Ty& welp::xdim_ref<Ty, dim>::operator()(_index_pack&& ... indices) const noexcept
+inline const Ty& welp::xdim_view<Ty, dim>::operator()(_index_pack&& ... indices) const noexcept
 {
 	std::size_t _indices[dim] = { static_cast<std::size_t>(std::forward<_index_pack>(indices))... };
 #ifdef WELP_XDIM_DEBUG_MODE
@@ -493,7 +493,7 @@ inline const Ty& welp::xdim_ref<Ty, dim>::operator()(_index_pack&& ... indices) 
 }
 
 template <class Ty, std::size_t dim> template <class ... _index_pack>
-inline Ty& welp::xdim_ref<Ty, dim>::operator()(_index_pack&& ... indices) noexcept
+inline Ty& welp::xdim_view<Ty, dim>::operator()(_index_pack&& ... indices) noexcept
 {
 	std::size_t _indices[dim] = { static_cast<std::size_t>(std::forward<_index_pack>(indices))... };
 #ifdef WELP_XDIM_DEBUG_MODE
@@ -509,7 +509,7 @@ inline Ty& welp::xdim_ref<Ty, dim>::operator()(_index_pack&& ... indices) noexce
 }
 
 template <class Ty, std::size_t dim> template <class ... _index_pack>
-void welp::xdim_ref<Ty, dim>::resize(welp::xdim_layout memory_layout, _index_pack&& ... indices)
+void welp::xdim_view<Ty, dim>::resize(welp::xdim_layout memory_layout, _index_pack&& ... indices)
 {
 	switch (memory_layout)
 	{
@@ -528,7 +528,7 @@ void welp::xdim_ref<Ty, dim>::resize(welp::xdim_layout memory_layout, _index_pac
 }
 
 template <class Ty, std::size_t dim> template <class ... _index_pack>
-inline void welp::xdim_ref<Ty, dim>::resize_left(_index_pack&& ... indices)
+inline void welp::xdim_view<Ty, dim>::resize_left(_index_pack&& ... indices)
 {
 #ifdef WELP_XDIM_DEBUG_MODE
 	assert(sizeof...(indices) == dim);
@@ -557,7 +557,7 @@ inline void welp::xdim_ref<Ty, dim>::resize_left(_index_pack&& ... indices)
 }
 
 template <class Ty, std::size_t dim> template <class ... _index_pack>
-inline void welp::xdim_ref<Ty, dim>::resize_right(_index_pack&& ... indices)
+inline void welp::xdim_view<Ty, dim>::resize_right(_index_pack&& ... indices)
 {
 #ifdef WELP_XDIM_DEBUG_MODE
 	assert(sizeof...(indices) == dim);
@@ -585,14 +585,14 @@ inline void welp::xdim_ref<Ty, dim>::resize_right(_index_pack&& ... indices)
 }
 
 template <class Ty, std::size_t dim>
-inline void welp::xdim_ref<Ty, dim>::clear() noexcept
+inline void welp::xdim_view<Ty, dim>::clear() noexcept
 {
-	std::memset(this, 0, sizeof(welp::xdim_ref<Ty, dim>));
+	std::memset(this, 0, sizeof(welp::xdim_view<Ty, dim>));
 	_layout = welp::xdim_undef;
 }
 
 template <class Ty, std::size_t dim> template <class ... _index_pack>
-welp::xdim_ref<Ty, dim>::xdim_ref(Ty* new_data_ptr, const welp::xdim_layout memory_layout, _index_pack&& ... indices)
+welp::xdim_view<Ty, dim>::xdim_view(Ty* new_data_ptr, const welp::xdim_layout memory_layout, _index_pack&& ... indices)
 {
 	data_ptr = new_data_ptr;
 
@@ -614,7 +614,7 @@ welp::xdim_ref<Ty, dim>::xdim_ref(Ty* new_data_ptr, const welp::xdim_layout memo
 
 
 template <class Ty, std::size_t dim>
-inline const Ty& welp::xdim_const_ref<Ty, dim>::operator[](std::size_t offset) const noexcept
+inline const Ty& welp::xdim_view_const<Ty, dim>::operator[](std::size_t offset) const noexcept
 {
 #ifdef WELP_XDIM_DEBUG_MODE
 	assert(offset < total_size);
@@ -623,7 +623,7 @@ inline const Ty& welp::xdim_const_ref<Ty, dim>::operator[](std::size_t offset) c
 }
 
 template <class Ty, std::size_t dim> template <class ... _index_pack>
-inline const Ty& welp::xdim_const_ref<Ty, dim>::operator()(_index_pack&& ... indices) const noexcept
+inline const Ty& welp::xdim_view_const<Ty, dim>::operator()(_index_pack&& ... indices) const noexcept
 {
 	std::size_t _indices[dim] = { static_cast<std::size_t>(std::forward<_index_pack>(indices))... };
 #ifdef WELP_XDIM_DEBUG_MODE
@@ -639,7 +639,7 @@ inline const Ty& welp::xdim_const_ref<Ty, dim>::operator()(_index_pack&& ... ind
 }
 
 template <class Ty, std::size_t dim> template <class ... _index_pack>
-void welp::xdim_const_ref<Ty, dim>::resize(welp::xdim_layout memory_layout, _index_pack&& ... indices)
+void welp::xdim_view_const<Ty, dim>::resize(welp::xdim_layout memory_layout, _index_pack&& ... indices)
 {
 	switch (memory_layout)
 	{
@@ -658,7 +658,7 @@ void welp::xdim_const_ref<Ty, dim>::resize(welp::xdim_layout memory_layout, _ind
 }
 
 template <class Ty, std::size_t dim> template <class ... _index_pack>
-inline void welp::xdim_const_ref<Ty, dim>::resize_left(_index_pack&& ... indices)
+inline void welp::xdim_view_const<Ty, dim>::resize_left(_index_pack&& ... indices)
 {
 #ifdef WELP_XDIM_DEBUG_MODE
 	assert(sizeof...(indices) == dim);
@@ -687,7 +687,7 @@ inline void welp::xdim_const_ref<Ty, dim>::resize_left(_index_pack&& ... indices
 }
 
 template <class Ty, std::size_t dim> template <class ... _index_pack>
-inline void welp::xdim_const_ref<Ty, dim>::resize_right(_index_pack&& ... indices)
+inline void welp::xdim_view_const<Ty, dim>::resize_right(_index_pack&& ... indices)
 {
 #ifdef WELP_XDIM_DEBUG_MODE
 	assert(sizeof...(indices) == dim);
@@ -715,14 +715,14 @@ inline void welp::xdim_const_ref<Ty, dim>::resize_right(_index_pack&& ... indice
 }
 
 template <class Ty, std::size_t dim>
-inline void welp::xdim_const_ref<Ty, dim>::clear() noexcept
+inline void welp::xdim_view_const<Ty, dim>::clear() noexcept
 {
-	std::memset(this, 0, sizeof(welp::xdim_const_ref<Ty, dim>));
+	std::memset(this, 0, sizeof(welp::xdim_view_const<Ty, dim>));
 	_layout = welp::xdim_undef;
 }
 
 template <class Ty, std::size_t dim> template <class ... _index_pack>
-welp::xdim_const_ref<Ty, dim>::xdim_const_ref(const Ty* new_data_ptr, const welp::xdim_layout memory_layout, _index_pack&& ... indices)
+welp::xdim_view_const<Ty, dim>::xdim_view_const(const Ty* new_data_ptr, const welp::xdim_layout memory_layout, _index_pack&& ... indices)
 {
 	data_ptr = new_data_ptr;
 
