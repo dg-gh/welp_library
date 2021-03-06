@@ -9284,7 +9284,6 @@ namespace welp
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += Bc;
-									vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += Bc;
 									vacc0 = _mm256_sub_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
 									vacc1 = _mm256_sub_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
 									vacc2 = _mm256_sub_epi32(vacc2, _mm256_mullo_epi32(_mm256_set1_epi32(*pA2++), vregB));
