@@ -5395,12 +5395,12 @@ namespace welp
 									vacc2 = _mm256_loadu_ps(pC + 2 * Bc); vacc3 = _mm256_loadu_ps(pC + 3 * Bc);
 									vacc4 = _mm256_loadu_ps(pC + 4 * Bc); vacc5 = _mm256_loadu_ps(pC + 5 * Bc);
 									vacc6 = _mm256_loadu_ps(pC + 6 * Bc); vacc7 = _mm256_loadu_ps(pC + 7 * Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 									for (k = kOut; k < kmax; k++)
 									{
 										vregB = _mm256_loadu_ps(pB); pB += Bc;
@@ -5431,12 +5431,12 @@ namespace welp
 									vacc2 = _mm256_loadu_ps(pC + 2 * Bc); vacc3 = _mm256_loadu_ps(pC + 3 * Bc);
 									vacc4 = _mm256_loadu_ps(pC + 4 * Bc); vacc5 = _mm256_loadu_ps(pC + 5 * Bc);
 									vacc6 = _mm256_loadu_ps(pC + 6 * Bc); vacc7 = _mm256_loadu_ps(pC + 7 * Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 									for (k = kOut; k < kmax; k++)
 									{
 										vregB = _mm256_loadu_ps(pB); pB += Bc;
@@ -5486,12 +5486,12 @@ namespace welp
 								pA0 = (pfA + kOut) + (Ac * M);
 
 								vacc0 = _mm256_loadu_ps(pC);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_ps(pB); pB += Bc;
@@ -5508,12 +5508,12 @@ namespace welp
 								pA0 = (pfA + kOut) + (Ac * M);
 
 								vacc0 = _mm256_loadu_ps(pC);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_ps(pB); pB += Bc;
@@ -5541,12 +5541,12 @@ namespace welp
 								pA0 = (pfA + kOut) + (Ac * M); pA1 = pA0 + Ac;
 
 								vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_ps(pB); pB += Bc;
@@ -5564,12 +5564,12 @@ namespace welp
 								pA0 = (pfA + kOut) + (Ac * M); pA1 = pA0 + Ac;
 
 								vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_ps(pB); pB += Bc;
@@ -5600,12 +5600,12 @@ namespace welp
 
 								vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + Bc);
 								vacc2 = _mm256_loadu_ps(pC + 2 * Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_ps(pB); pB += Bc;
@@ -5626,12 +5626,12 @@ namespace welp
 
 								vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + Bc);
 								vacc2 = _mm256_loadu_ps(pC + 2 * Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_ps(pB); pB += Bc;
@@ -5664,12 +5664,12 @@ namespace welp
 
 								vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + Bc);
 								vacc2 = _mm256_loadu_ps(pC + 2 * Bc); vacc3 = _mm256_loadu_ps(pC + 3 * Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_ps(pB); pB += Bc;
@@ -5691,12 +5691,12 @@ namespace welp
 
 								vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + Bc);
 								vacc2 = _mm256_loadu_ps(pC + 2 * Bc); vacc3 = _mm256_loadu_ps(pC + 3 * Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_ps(pB); pB += Bc;
@@ -5733,12 +5733,12 @@ namespace welp
 								vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + Bc);
 								vacc2 = _mm256_loadu_ps(pC + 2 * Bc); vacc3 = _mm256_loadu_ps(pC + 3 * Bc);
 								vacc4 = _mm256_loadu_ps(pC + 4 * Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_ps(pB); pB += Bc;
@@ -5764,12 +5764,12 @@ namespace welp
 								vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + Bc);
 								vacc2 = _mm256_loadu_ps(pC + 2 * Bc); vacc3 = _mm256_loadu_ps(pC + 3 * Bc);
 								vacc4 = _mm256_loadu_ps(pC + 4 * Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_ps(pB); pB += Bc;
@@ -5808,12 +5808,12 @@ namespace welp
 								vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + Bc);
 								vacc2 = _mm256_loadu_ps(pC + 2 * Bc); vacc3 = _mm256_loadu_ps(pC + 3 * Bc);
 								vacc4 = _mm256_loadu_ps(pC + 4 * Bc); vacc5 = _mm256_loadu_ps(pC + 5 * Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_ps(pB); pB += Bc;
@@ -5840,12 +5840,12 @@ namespace welp
 								vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + Bc);
 								vacc2 = _mm256_loadu_ps(pC + 2 * Bc); vacc3 = _mm256_loadu_ps(pC + 3 * Bc);
 								vacc4 = _mm256_loadu_ps(pC + 4 * Bc); vacc5 = _mm256_loadu_ps(pC + 5 * Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_ps(pB); pB += Bc;
@@ -5887,12 +5887,12 @@ namespace welp
 								vacc2 = _mm256_loadu_ps(pC + 2 * Bc); vacc3 = _mm256_loadu_ps(pC + 3 * Bc);
 								vacc4 = _mm256_loadu_ps(pC + 4 * Bc); vacc5 = _mm256_loadu_ps(pC + 5 * Bc);
 								vacc6 = _mm256_loadu_ps(pC + 6 * Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_ps(pB); pB += Bc;
@@ -5922,12 +5922,12 @@ namespace welp
 								vacc2 = _mm256_loadu_ps(pC + 2 * Bc); vacc3 = _mm256_loadu_ps(pC + 3 * Bc);
 								vacc4 = _mm256_loadu_ps(pC + 4 * Bc); vacc5 = _mm256_loadu_ps(pC + 5 * Bc);
 								vacc6 = _mm256_loadu_ps(pC + 6 * Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_ps(pB); pB += Bc;
@@ -6386,12 +6386,12 @@ namespace welp
 									vacc2 = _mm256_loadu_ps(pC + 2 * Bc); vacc3 = _mm256_loadu_ps(pC + 3 * Bc);
 									vacc4 = _mm256_loadu_ps(pC + 4 * Bc); vacc5 = _mm256_loadu_ps(pC + 5 * Bc);
 									vacc6 = _mm256_loadu_ps(pC + 6 * Bc); vacc7 = _mm256_loadu_ps(pC + 7 * Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 									for (k = kOut; k < kmax; k++)
 									{
 										vregB = _mm256_loadu_ps(pB); pB += Bc;
@@ -6422,12 +6422,12 @@ namespace welp
 									vacc2 = _mm256_loadu_ps(pC + 2 * Bc); vacc3 = _mm256_loadu_ps(pC + 3 * Bc);
 									vacc4 = _mm256_loadu_ps(pC + 4 * Bc); vacc5 = _mm256_loadu_ps(pC + 5 * Bc);
 									vacc6 = _mm256_loadu_ps(pC + 6 * Bc); vacc7 = _mm256_loadu_ps(pC + 7 * Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 									for (k = kOut; k < kmax; k++)
 									{
 										vregB = _mm256_loadu_ps(pB); pB += Bc;
@@ -6477,12 +6477,12 @@ namespace welp
 								pA0 = (pfA + kOut) + (Ac * M);
 
 								vacc0 = _mm256_loadu_ps(pC);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_ps(pB); pB += Bc;
@@ -6499,12 +6499,12 @@ namespace welp
 								pA0 = (pfA + kOut) + (Ac * M);
 
 								vacc0 = _mm256_loadu_ps(pC);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_ps(pB); pB += Bc;
@@ -6532,12 +6532,12 @@ namespace welp
 								pA0 = (pfA + kOut) + (Ac * M); pA1 = pA0 + Ac;
 
 								vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_ps(pB); pB += Bc;
@@ -6555,12 +6555,12 @@ namespace welp
 								pA0 = (pfA + kOut) + (Ac * M); pA1 = pA0 + Ac;
 
 								vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_ps(pB); pB += Bc;
@@ -6591,12 +6591,12 @@ namespace welp
 
 								vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + Bc);
 								vacc2 = _mm256_loadu_ps(pC + 2 * Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_ps(pB); pB += Bc;
@@ -6617,12 +6617,12 @@ namespace welp
 
 								vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + Bc);
 								vacc2 = _mm256_loadu_ps(pC + 2 * Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_ps(pB); pB += Bc;
@@ -6655,12 +6655,12 @@ namespace welp
 
 								vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + Bc);
 								vacc2 = _mm256_loadu_ps(pC + 2 * Bc); vacc3 = _mm256_loadu_ps(pC + 3 * Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_ps(pB); pB += Bc;
@@ -6682,12 +6682,12 @@ namespace welp
 
 								vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + Bc);
 								vacc2 = _mm256_loadu_ps(pC + 2 * Bc); vacc3 = _mm256_loadu_ps(pC + 3 * Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_ps(pB); pB += Bc;
@@ -6724,12 +6724,12 @@ namespace welp
 								vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + Bc);
 								vacc2 = _mm256_loadu_ps(pC + 2 * Bc); vacc3 = _mm256_loadu_ps(pC + 3 * Bc);
 								vacc4 = _mm256_loadu_ps(pC + 4 * Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_ps(pB); pB += Bc;
@@ -6755,12 +6755,12 @@ namespace welp
 								vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + Bc);
 								vacc2 = _mm256_loadu_ps(pC + 2 * Bc); vacc3 = _mm256_loadu_ps(pC + 3 * Bc);
 								vacc4 = _mm256_loadu_ps(pC + 4 * Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_ps(pB); pB += Bc;
@@ -6799,12 +6799,12 @@ namespace welp
 								vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + Bc);
 								vacc2 = _mm256_loadu_ps(pC + 2 * Bc); vacc3 = _mm256_loadu_ps(pC + 3 * Bc);
 								vacc4 = _mm256_loadu_ps(pC + 4 * Bc); vacc5 = _mm256_loadu_ps(pC + 5 * Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_ps(pB); pB += Bc;
@@ -6831,12 +6831,12 @@ namespace welp
 								vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + Bc);
 								vacc2 = _mm256_loadu_ps(pC + 2 * Bc); vacc3 = _mm256_loadu_ps(pC + 3 * Bc);
 								vacc4 = _mm256_loadu_ps(pC + 4 * Bc); vacc5 = _mm256_loadu_ps(pC + 5 * Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_ps(pB); pB += Bc;
@@ -6878,12 +6878,12 @@ namespace welp
 								vacc2 = _mm256_loadu_ps(pC + 2 * Bc); vacc3 = _mm256_loadu_ps(pC + 3 * Bc);
 								vacc4 = _mm256_loadu_ps(pC + 4 * Bc); vacc5 = _mm256_loadu_ps(pC + 5 * Bc);
 								vacc6 = _mm256_loadu_ps(pC + 6 * Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_ps(pB); pB += Bc;
@@ -6913,12 +6913,12 @@ namespace welp
 								vacc2 = _mm256_loadu_ps(pC + 2 * Bc); vacc3 = _mm256_loadu_ps(pC + 3 * Bc);
 								vacc4 = _mm256_loadu_ps(pC + 4 * Bc); vacc5 = _mm256_loadu_ps(pC + 5 * Bc);
 								vacc6 = _mm256_loadu_ps(pC + 6 * Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_ps(pB); pB += Bc;
@@ -8069,12 +8069,12 @@ namespace welp
 									vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * Bc)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * Bc));
 									vacc4 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 4 * Bc)); vacc5 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 5 * Bc));
 									vacc6 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 6 * Bc)); vacc7 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 7 * Bc));
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 									for (k = kOut; k < kmax; k++)
 									{
 										vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += Bc;
@@ -8105,12 +8105,12 @@ namespace welp
 									vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * Bc)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * Bc));
 									vacc4 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 4 * Bc)); vacc5 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 5 * Bc));
 									vacc6 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 6 * Bc)); vacc7 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 7 * Bc));
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 									for (k = kOut; k < kmax; k++)
 									{
 										vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += Bc;
@@ -8160,12 +8160,12 @@ namespace welp
 								pA0 = (pfA + kOut) + (Ac * M);
 
 								vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC));
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += Bc;
@@ -8182,12 +8182,12 @@ namespace welp
 								pA0 = (pfA + kOut) + (Ac * M);
 
 								vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC));
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += Bc;
@@ -8215,12 +8215,12 @@ namespace welp
 								pA0 = (pfA + kOut) + (Ac * M); pA1 = pA0 + Ac;
 
 								vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + Bc));
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += Bc;
@@ -8238,12 +8238,12 @@ namespace welp
 								pA0 = (pfA + kOut) + (Ac * M); pA1 = pA0 + Ac;
 
 								vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + Bc));
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += Bc;
@@ -8274,12 +8274,12 @@ namespace welp
 
 								vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + Bc));
 								vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * Bc));
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += Bc;
@@ -8300,12 +8300,12 @@ namespace welp
 
 								vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + Bc));
 								vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * Bc));
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += Bc;
@@ -8338,12 +8338,12 @@ namespace welp
 
 								vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + Bc));
 								vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * Bc)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * Bc));
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += Bc;
@@ -8365,12 +8365,12 @@ namespace welp
 
 								vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + Bc));
 								vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * Bc)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * Bc));
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += Bc;
@@ -8407,12 +8407,12 @@ namespace welp
 								vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + Bc));
 								vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * Bc)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * Bc));
 								vacc4 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 4 * Bc));
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += Bc;
@@ -8438,12 +8438,12 @@ namespace welp
 								vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + Bc));
 								vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * Bc)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * Bc));
 								vacc4 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 4 * Bc));
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += Bc;
@@ -8482,12 +8482,12 @@ namespace welp
 								vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + Bc));
 								vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * Bc)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * Bc));
 								vacc4 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 4 * Bc)); vacc5 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 5 * Bc));
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += Bc;
@@ -8514,12 +8514,12 @@ namespace welp
 								vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + Bc));
 								vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * Bc)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * Bc));
 								vacc4 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 4 * Bc)); vacc5 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 5 * Bc));
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += Bc;
@@ -8561,12 +8561,12 @@ namespace welp
 								vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * Bc)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * Bc));
 								vacc4 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 4 * Bc)); vacc5 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 5 * Bc));
 								vacc6 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 6 * Bc));
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += Bc;
@@ -8596,12 +8596,12 @@ namespace welp
 								vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * Bc)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * Bc));
 								vacc4 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 4 * Bc)); vacc5 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 5 * Bc));
 								vacc6 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 6 * Bc));
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += Bc;
@@ -9070,12 +9070,12 @@ namespace welp
 									vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * Bc)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * Bc));
 									vacc4 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 4 * Bc)); vacc5 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 5 * Bc));
 									vacc6 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 6 * Bc)); vacc7 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 7 * Bc));
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 									for (k = kOut; k < kmax; k++)
 									{
 										vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += Bc;
@@ -9106,12 +9106,12 @@ namespace welp
 									vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * Bc)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * Bc));
 									vacc4 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 4 * Bc)); vacc5 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 5 * Bc));
 									vacc6 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 6 * Bc)); vacc7 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 7 * Bc));
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 									for (k = kOut; k < kmax; k++)
 									{
 										vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += Bc;
@@ -9161,12 +9161,12 @@ namespace welp
 								pA0 = (pfA + kOut) + (Ac * M);
 
 								vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC));
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += Bc;
@@ -9183,12 +9183,12 @@ namespace welp
 								pA0 = (pfA + kOut) + (Ac * M);
 
 								vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC));
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += Bc;
@@ -9216,12 +9216,12 @@ namespace welp
 								pA0 = (pfA + kOut) + (Ac * M); pA1 = pA0 + Ac;
 
 								vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + Bc));
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += Bc;
@@ -9239,12 +9239,12 @@ namespace welp
 								pA0 = (pfA + kOut) + (Ac * M); pA1 = pA0 + Ac;
 
 								vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + Bc));
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += Bc;
@@ -9275,12 +9275,12 @@ namespace welp
 
 								vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + Bc));
 								vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * Bc));
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += Bc;
@@ -9301,12 +9301,12 @@ namespace welp
 
 								vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + Bc));
 								vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * Bc));
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += Bc;
@@ -9339,12 +9339,12 @@ namespace welp
 
 								vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + Bc));
 								vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * Bc)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * Bc));
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += Bc;
@@ -9366,12 +9366,12 @@ namespace welp
 
 								vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + Bc));
 								vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * Bc)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * Bc));
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += Bc;
@@ -9408,12 +9408,12 @@ namespace welp
 								vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + Bc));
 								vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * Bc)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * Bc));
 								vacc4 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 4 * Bc));
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += Bc;
@@ -9439,12 +9439,12 @@ namespace welp
 								vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + Bc));
 								vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * Bc)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * Bc));
 								vacc4 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 4 * Bc));
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += Bc;
@@ -9483,12 +9483,12 @@ namespace welp
 								vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + Bc));
 								vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * Bc)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * Bc));
 								vacc4 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 4 * Bc)); vacc5 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 5 * Bc));
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += Bc;
@@ -9515,12 +9515,12 @@ namespace welp
 								vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + Bc));
 								vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * Bc)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * Bc));
 								vacc4 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 4 * Bc)); vacc5 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 5 * Bc));
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += Bc;
@@ -9562,12 +9562,12 @@ namespace welp
 								vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * Bc)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * Bc));
 								vacc4 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 4 * Bc)); vacc5 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 5 * Bc));
 								vacc6 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 6 * Bc));
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += Bc;
@@ -9597,12 +9597,12 @@ namespace welp
 								vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * Bc)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * Bc));
 								vacc4 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 4 * Bc)); vacc5 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 5 * Bc));
 								vacc6 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 6 * Bc));
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += Bc;
@@ -10560,12 +10560,12 @@ namespace welp
 									vacc2 = _mm256_loadu_pd(pC + 2 * Bc); vacc3 = _mm256_loadu_pd(pC + 3 * Bc);
 									vacc4 = _mm256_loadu_pd(pC + 4 * Bc); vacc5 = _mm256_loadu_pd(pC + 5 * Bc);
 									vacc6 = _mm256_loadu_pd(pC + 6 * Bc); vacc7 = _mm256_loadu_pd(pC + 7 * Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 									for (k = kOut; k < kmax; k++)
 									{
 										vregB = _mm256_loadu_pd(pB); pB += Bc;
@@ -10596,12 +10596,12 @@ namespace welp
 									vacc2 = _mm256_loadu_pd(pC + 2 * Bc); vacc3 = _mm256_loadu_pd(pC + 3 * Bc);
 									vacc4 = _mm256_loadu_pd(pC + 4 * Bc); vacc5 = _mm256_loadu_pd(pC + 5 * Bc);
 									vacc6 = _mm256_loadu_pd(pC + 6 * Bc); vacc7 = _mm256_loadu_pd(pC + 7 * Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 									for (k = kOut; k < kmax; k++)
 									{
 										vregB = _mm256_loadu_pd(pB); pB += Bc;
@@ -10652,12 +10652,12 @@ namespace welp
 								pA0 = (pfA + kOut) + (Ac * M);
 
 								vacc0 = _mm256_loadu_pd(pC);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_pd(pB); pB += Bc;
@@ -10674,12 +10674,12 @@ namespace welp
 								pA0 = (pfA + kOut) + (Ac * M);
 
 								vacc0 = _mm256_loadu_pd(pC);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_pd(pB); pB += Bc;
@@ -10707,12 +10707,12 @@ namespace welp
 								pA0 = (pfA + kOut) + (Ac * M); pA1 = pA0 + Ac;
 
 								vacc0 = _mm256_loadu_pd(pC); vacc1 = _mm256_loadu_pd(pC + Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_pd(pB); pB += Bc;
@@ -10730,12 +10730,12 @@ namespace welp
 								pA0 = (pfA + kOut) + (Ac * M); pA1 = pA0 + Ac;
 
 								vacc0 = _mm256_loadu_pd(pC); vacc1 = _mm256_loadu_pd(pC + Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_pd(pB); pB += Bc;
@@ -10766,12 +10766,12 @@ namespace welp
 
 								vacc0 = _mm256_loadu_pd(pC); vacc1 = _mm256_loadu_pd(pC + Bc);
 								vacc2 = _mm256_loadu_pd(pC + 2 * Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_pd(pB); pB += Bc;
@@ -10792,12 +10792,12 @@ namespace welp
 
 								vacc0 = _mm256_loadu_pd(pC); vacc1 = _mm256_loadu_pd(pC + Bc);
 								vacc2 = _mm256_loadu_pd(pC + 2 * Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_pd(pB); pB += Bc;
@@ -10830,12 +10830,12 @@ namespace welp
 
 								vacc0 = _mm256_loadu_pd(pC); vacc1 = _mm256_loadu_pd(pC + Bc);
 								vacc2 = _mm256_loadu_pd(pC + 2 * Bc); vacc3 = _mm256_loadu_pd(pC + 3 * Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_pd(pB); pB += Bc;
@@ -10857,12 +10857,12 @@ namespace welp
 
 								vacc0 = _mm256_loadu_pd(pC); vacc1 = _mm256_loadu_pd(pC + Bc);
 								vacc2 = _mm256_loadu_pd(pC + 2 * Bc); vacc3 = _mm256_loadu_pd(pC + 3 * Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_pd(pB); pB += Bc;
@@ -10899,12 +10899,12 @@ namespace welp
 								vacc0 = _mm256_loadu_pd(pC); vacc1 = _mm256_loadu_pd(pC + Bc);
 								vacc2 = _mm256_loadu_pd(pC + 2 * Bc); vacc3 = _mm256_loadu_pd(pC + 3 * Bc);
 								vacc4 = _mm256_loadu_pd(pC + 4 * Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_pd(pB); pB += Bc;
@@ -10930,12 +10930,12 @@ namespace welp
 								vacc0 = _mm256_loadu_pd(pC); vacc1 = _mm256_loadu_pd(pC + Bc);
 								vacc2 = _mm256_loadu_pd(pC + 2 * Bc); vacc3 = _mm256_loadu_pd(pC + 3 * Bc);
 								vacc4 = _mm256_loadu_pd(pC + 4 * Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_pd(pB); pB += Bc;
@@ -10974,12 +10974,12 @@ namespace welp
 								vacc0 = _mm256_loadu_pd(pC); vacc1 = _mm256_loadu_pd(pC + Bc);
 								vacc2 = _mm256_loadu_pd(pC + 2 * Bc); vacc3 = _mm256_loadu_pd(pC + 3 * Bc);
 								vacc4 = _mm256_loadu_pd(pC + 4 * Bc); vacc5 = _mm256_loadu_pd(pC + 5 * Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_pd(pB); pB += Bc;
@@ -11006,12 +11006,12 @@ namespace welp
 								vacc0 = _mm256_loadu_pd(pC); vacc1 = _mm256_loadu_pd(pC + Bc);
 								vacc2 = _mm256_loadu_pd(pC + 2 * Bc); vacc3 = _mm256_loadu_pd(pC + 3 * Bc);
 								vacc4 = _mm256_loadu_pd(pC + 4 * Bc); vacc5 = _mm256_loadu_pd(pC + 5 * Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_pd(pB); pB += Bc;
@@ -11053,12 +11053,12 @@ namespace welp
 								vacc2 = _mm256_loadu_pd(pC + 2 * Bc); vacc3 = _mm256_loadu_pd(pC + 3 * Bc);
 								vacc4 = _mm256_loadu_pd(pC + 4 * Bc); vacc5 = _mm256_loadu_pd(pC + 5 * Bc);
 								vacc6 = _mm256_loadu_pd(pC + 6 * Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_pd(pB); pB += Bc;
@@ -11088,12 +11088,12 @@ namespace welp
 								vacc2 = _mm256_loadu_pd(pC + 2 * Bc); vacc3 = _mm256_loadu_pd(pC + 3 * Bc);
 								vacc4 = _mm256_loadu_pd(pC + 4 * Bc); vacc5 = _mm256_loadu_pd(pC + 5 * Bc);
 								vacc6 = _mm256_loadu_pd(pC + 6 * Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_pd(pB); pB += Bc;
@@ -11558,12 +11558,12 @@ namespace welp
 									vacc2 = _mm256_loadu_pd(pC + 2 * Bc); vacc3 = _mm256_loadu_pd(pC + 3 * Bc);
 									vacc4 = _mm256_loadu_pd(pC + 4 * Bc); vacc5 = _mm256_loadu_pd(pC + 5 * Bc);
 									vacc6 = _mm256_loadu_pd(pC + 6 * Bc); vacc7 = _mm256_loadu_pd(pC + 7 * Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 									for (k = kOut; k < kmax; k++)
 									{
 										vregB = _mm256_loadu_pd(pB); pB += Bc;
@@ -11593,12 +11593,12 @@ namespace welp
 									vacc2 = _mm256_loadu_pd(pC + 2 * Bc); vacc3 = _mm256_loadu_pd(pC + 3 * Bc);
 									vacc4 = _mm256_loadu_pd(pC + 4 * Bc); vacc5 = _mm256_loadu_pd(pC + 5 * Bc);
 									vacc6 = _mm256_loadu_pd(pC + 6 * Bc); vacc7 = _mm256_loadu_pd(pC + 7 * Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 									for (k = kOut; k < kmax; k++)
 									{
 										vregB = _mm256_loadu_pd(pB); pB += Bc;
@@ -11648,12 +11648,12 @@ namespace welp
 								pA0 = (pfA + kOut) + (Ac * M);
 
 								vacc0 = _mm256_loadu_pd(pC);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_pd(pB); pB += Bc;
@@ -11669,12 +11669,12 @@ namespace welp
 								pA0 = (pfA + kOut) + (Ac * M);
 
 								vacc0 = _mm256_loadu_pd(pC);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_pd(pB); pB += Bc;
@@ -11701,12 +11701,12 @@ namespace welp
 								pA0 = (pfA + kOut) + (Ac * M); pA1 = pA0 + Ac;
 
 								vacc0 = _mm256_loadu_pd(pC); vacc1 = _mm256_loadu_pd(pC + Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_pd(pB); pB += Bc;
@@ -11723,12 +11723,12 @@ namespace welp
 								pA0 = (pfA + kOut) + (Ac * M); pA1 = pA0 + Ac;
 
 								vacc0 = _mm256_loadu_pd(pC); vacc1 = _mm256_loadu_pd(pC + Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_pd(pB); pB += Bc;
@@ -11758,12 +11758,12 @@ namespace welp
 
 								vacc0 = _mm256_loadu_pd(pC); vacc1 = _mm256_loadu_pd(pC + Bc);
 								vacc2 = _mm256_loadu_pd(pC + 2 * Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_pd(pB); pB += Bc;
@@ -11783,12 +11783,12 @@ namespace welp
 
 								vacc0 = _mm256_loadu_pd(pC); vacc1 = _mm256_loadu_pd(pC + Bc);
 								vacc2 = _mm256_loadu_pd(pC + 2 * Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_pd(pB); pB += Bc;
@@ -11820,12 +11820,12 @@ namespace welp
 
 								vacc0 = _mm256_loadu_pd(pC); vacc1 = _mm256_loadu_pd(pC + Bc);
 								vacc2 = _mm256_loadu_pd(pC + 2 * Bc); vacc3 = _mm256_loadu_pd(pC + 3 * Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_pd(pB); pB += Bc;
@@ -11846,12 +11846,12 @@ namespace welp
 
 								vacc0 = _mm256_loadu_pd(pC); vacc1 = _mm256_loadu_pd(pC + Bc);
 								vacc2 = _mm256_loadu_pd(pC + 2 * Bc); vacc3 = _mm256_loadu_pd(pC + 3 * Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_pd(pB); pB += Bc;
@@ -11887,12 +11887,12 @@ namespace welp
 								vacc0 = _mm256_loadu_pd(pC); vacc1 = _mm256_loadu_pd(pC + Bc);
 								vacc2 = _mm256_loadu_pd(pC + 2 * Bc); vacc3 = _mm256_loadu_pd(pC + 3 * Bc);
 								vacc4 = _mm256_loadu_pd(pC + 4 * Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_pd(pB); pB += Bc;
@@ -11917,12 +11917,12 @@ namespace welp
 								vacc0 = _mm256_loadu_pd(pC); vacc1 = _mm256_loadu_pd(pC + Bc);
 								vacc2 = _mm256_loadu_pd(pC + 2 * Bc); vacc3 = _mm256_loadu_pd(pC + 3 * Bc);
 								vacc4 = _mm256_loadu_pd(pC + 4 * Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_pd(pB); pB += Bc;
@@ -11960,12 +11960,12 @@ namespace welp
 								vacc0 = _mm256_loadu_pd(pC); vacc1 = _mm256_loadu_pd(pC + Bc);
 								vacc2 = _mm256_loadu_pd(pC + 2 * Bc); vacc3 = _mm256_loadu_pd(pC + 3 * Bc);
 								vacc4 = _mm256_loadu_pd(pC + 4 * Bc); vacc5 = _mm256_loadu_pd(pC + 5 * Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_pd(pB); pB += Bc;
@@ -11991,12 +11991,12 @@ namespace welp
 								vacc0 = _mm256_loadu_pd(pC); vacc1 = _mm256_loadu_pd(pC + Bc);
 								vacc2 = _mm256_loadu_pd(pC + 2 * Bc); vacc3 = _mm256_loadu_pd(pC + 3 * Bc);
 								vacc4 = _mm256_loadu_pd(pC + 4 * Bc); vacc5 = _mm256_loadu_pd(pC + 5 * Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_pd(pB); pB += Bc;
@@ -12037,12 +12037,12 @@ namespace welp
 								vacc2 = _mm256_loadu_pd(pC + 2 * Bc); vacc3 = _mm256_loadu_pd(pC + 3 * Bc);
 								vacc4 = _mm256_loadu_pd(pC + 4 * Bc); vacc5 = _mm256_loadu_pd(pC + 5 * Bc);
 								vacc6 = _mm256_loadu_pd(pC + 6 * Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_pd(pB); pB += Bc;
@@ -12071,12 +12071,12 @@ namespace welp
 								vacc2 = _mm256_loadu_pd(pC + 2 * Bc); vacc3 = _mm256_loadu_pd(pC + 3 * Bc);
 								vacc4 = _mm256_loadu_pd(pC + 4 * Bc); vacc5 = _mm256_loadu_pd(pC + 5 * Bc);
 								vacc6 = _mm256_loadu_pd(pC + 6 * Bc);
-#ifdef WELP_MATRIX_UNROLL_WITH_CLANG
+#ifdef __clang__
 #pragma unroll 8
-#endif //WELP_MATRIX_UNROLL_WITH_CLANG
-#ifdef WELP_MATRIX_UNROLL_WITH_GCC
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
 #pragma GCC unroll 8
-#endif// WELP_MATRIX_UNROLL_WITH_GCC
+#endif // defined __GNUC__ && !defined __clang__
 								for (k = kOut; k < kmax; k++)
 								{
 									vregB = _mm256_loadu_pd(pB); pB += Bc;
