@@ -8,6 +8,8 @@
 
 ////// INCLUDES //////
 
+#define WELP_DATE_TIME_INCLUDE_ALL
+
 #if defined(WELP_DATE_TIME_INCLUDE_ALL) || defined(WELP_ALWAYS_INCLUDE_ALL)
 
 #ifndef WELP_TIMER_INCLUDE_CTIME
@@ -179,8 +181,6 @@ namespace welp
 		int _hour = 0;
 		int _minute = 0;
 		int _second = 0;
-
-		int _days_of_overflow = 0;
 
 		int _seconds_from_midnight = 0;
 		int _step_size = 0;
@@ -822,58 +822,60 @@ welp::time& welp::time::set_time_now_gm()
 
 inline welp::time& welp::time::forward_hms(int hours_forward, int minutes_forward, int seconds_forward) noexcept
 {
+	int days_of_overflow;
 	_seconds_from_midnight += 3600 * hours_forward + 60 * minutes_forward + seconds_forward;
-	if (0 <= _seconds_from_midnight && _seconds_from_midnight < 86400) { _days_of_overflow = 0; }
+	if (0 <= _seconds_from_midnight && _seconds_from_midnight < 86400) { days_of_overflow = 0; }
 	else if (_seconds_from_midnight < 0)
 	{
-		_days_of_overflow = (_seconds_from_midnight / 86400) - 1;
-		_seconds_from_midnight -= 86400 * _days_of_overflow;
+		days_of_overflow = (_seconds_from_midnight / 86400) - 1;
+		_seconds_from_midnight -= 86400 * days_of_overflow;
 	}
 	else
 	{
-		_days_of_overflow = _seconds_from_midnight / 86400;
-		_seconds_from_midnight -= 86400 * _days_of_overflow;
+		days_of_overflow = _seconds_from_midnight / 86400;
+		_seconds_from_midnight -= 86400 * days_of_overflow;
 	}
 	_hour = _seconds_from_midnight / 3600;
 	_minute = (_seconds_from_midnight - 3600 * _hour) / 60;
 	_second = (_seconds_from_midnight - 3600 * _hour - 60 * _minute);
 
-	if ((_days_of_overflow > 0) && (date_ptr != nullptr))
+	if ((days_of_overflow > 0) && (date_ptr != nullptr))
 	{
-		for (; _days_of_overflow > 0; _days_of_overflow--) { ++(*date_ptr); }
+		for (; days_of_overflow > 0; days_of_overflow--) { ++(*date_ptr); }
 	}
-	else if ((_days_of_overflow < 0) && (date_ptr != nullptr))
+	else if ((days_of_overflow < 0) && (date_ptr != nullptr))
 	{
-		for (; _days_of_overflow < 0; _days_of_overflow++) { --(*date_ptr); }
+		for (; days_of_overflow < 0; days_of_overflow++) { --(*date_ptr); }
 	}
 
 	return *this;
 }
 inline welp::time& welp::time::operator++() noexcept
 {
+	int days_of_overflow;
 	_seconds_from_midnight += _step_size;
-	if (0 <= _seconds_from_midnight && _seconds_from_midnight < 86400) { _days_of_overflow = 0; }
+	if (0 <= _seconds_from_midnight && _seconds_from_midnight < 86400) { days_of_overflow = 0; }
 	else if (_seconds_from_midnight < 0)
 	{
-		_days_of_overflow = (_seconds_from_midnight / 86400) - 1;
-		_seconds_from_midnight -= 86400 * _days_of_overflow;
+		days_of_overflow = (_seconds_from_midnight / 86400) - 1;
+		_seconds_from_midnight -= 86400 * days_of_overflow;
 	}
 	else
 	{
-		_days_of_overflow = _seconds_from_midnight / 86400;
-		_seconds_from_midnight -= 86400 * _days_of_overflow;
+		days_of_overflow = _seconds_from_midnight / 86400;
+		_seconds_from_midnight -= 86400 * days_of_overflow;
 	}
 	_hour = _seconds_from_midnight / 3600;
 	_minute = (_seconds_from_midnight - 3600 * _hour) / 60;
 	_second = (_seconds_from_midnight - 3600 * _hour - 60 * _minute);
 
-	if ((_days_of_overflow > 0) && (date_ptr != nullptr))
+	if ((days_of_overflow > 0) && (date_ptr != nullptr))
 	{
-		for (; _days_of_overflow > 0; _days_of_overflow--) { ++(*date_ptr); }
+		for (; days_of_overflow > 0; days_of_overflow--) { ++(*date_ptr); }
 	}
-	else if ((_days_of_overflow < 0) && (date_ptr != nullptr))
+	else if ((days_of_overflow < 0) && (date_ptr != nullptr))
 	{
-		for (; _days_of_overflow < 0; _days_of_overflow++) { --(*date_ptr); }
+		for (; days_of_overflow < 0; days_of_overflow++) { --(*date_ptr); }
 	}
 
 	return *this;
@@ -882,87 +884,90 @@ inline welp::time welp::time::operator++(int) noexcept
 {
 	welp::time temp = *this;
 
+	int days_of_overflow;
 	_seconds_from_midnight += _step_size;
-	if (0 <= _seconds_from_midnight && _seconds_from_midnight < 86400) { _days_of_overflow = 0; }
+	if (0 <= _seconds_from_midnight && _seconds_from_midnight < 86400) { days_of_overflow = 0; }
 	else if (_seconds_from_midnight < 0)
 	{
-		_days_of_overflow = (_seconds_from_midnight / 86400) - 1;
-		_seconds_from_midnight -= 86400 * _days_of_overflow;
+		days_of_overflow = (_seconds_from_midnight / 86400) - 1;
+		_seconds_from_midnight -= 86400 * days_of_overflow;
 	}
 	else
 	{
-		_days_of_overflow = _seconds_from_midnight / 86400;
-		_seconds_from_midnight -= 86400 * _days_of_overflow;
+		days_of_overflow = _seconds_from_midnight / 86400;
+		_seconds_from_midnight -= 86400 * days_of_overflow;
 	}
 	_hour = _seconds_from_midnight / 3600;
 	_minute = (_seconds_from_midnight - 3600 * _hour) / 60;
 	_second = (_seconds_from_midnight - 3600 * _hour - 60 * _minute);
 
-	if ((_days_of_overflow > 0) && (date_ptr != nullptr))
+	if ((days_of_overflow > 0) && (date_ptr != nullptr))
 	{
-		for (; _days_of_overflow > 0; _days_of_overflow--) { ++(*date_ptr); }
+		for (; days_of_overflow > 0; days_of_overflow--) { ++(*date_ptr); }
 	}
-	else if ((_days_of_overflow < 0) && (date_ptr != nullptr))
+	else if ((days_of_overflow < 0) && (date_ptr != nullptr))
 	{
-		for (; _days_of_overflow < 0; _days_of_overflow++) { --(*date_ptr); }
+		for (; days_of_overflow < 0; days_of_overflow++) { --(*date_ptr); }
 	}
 
 	return temp;
 }
 inline welp::time& welp::time::operator+=(int n) noexcept
 {
+	int days_of_overflow;
 	_seconds_from_midnight += n * _step_size;
-	if (0 <= _seconds_from_midnight && _seconds_from_midnight < 86400) { _days_of_overflow = 0; }
+	if (0 <= _seconds_from_midnight && _seconds_from_midnight < 86400) { days_of_overflow = 0; }
 	else if (_seconds_from_midnight < 0)
 	{
-		_days_of_overflow = (_seconds_from_midnight / 86400) - 1;
-		_seconds_from_midnight -= 86400 * _days_of_overflow;
+		days_of_overflow = (_seconds_from_midnight / 86400) - 1;
+		_seconds_from_midnight -= 86400 * days_of_overflow;
 	}
 	else
 	{
-		_days_of_overflow = _seconds_from_midnight / 86400;
-		_seconds_from_midnight -= 86400 * _days_of_overflow;
+		days_of_overflow = _seconds_from_midnight / 86400;
+		_seconds_from_midnight -= 86400 * days_of_overflow;
 	}
 	_hour = _seconds_from_midnight / 3600;
 	_minute = (_seconds_from_midnight - 3600 * _hour) / 60;
 	_second = (_seconds_from_midnight - 3600 * _hour - 60 * _minute);
 
-	if ((_days_of_overflow > 0) && (date_ptr != nullptr))
+	if ((days_of_overflow > 0) && (date_ptr != nullptr))
 	{
-		for (; _days_of_overflow > 0; _days_of_overflow--) { ++(*date_ptr); }
+		for (; days_of_overflow > 0; days_of_overflow--) { ++(*date_ptr); }
 	}
-	else if ((_days_of_overflow < 0) && (date_ptr != nullptr))
+	else if ((days_of_overflow < 0) && (date_ptr != nullptr))
 	{
-		for (; _days_of_overflow < 0; _days_of_overflow++) { --(*date_ptr); }
+		for (; days_of_overflow < 0; days_of_overflow++) { --(*date_ptr); }
 	}
 
 	return *this;
 }
 inline welp::time& welp::time::operator--() noexcept
 {
+	int days_of_overflow;
 	_seconds_from_midnight -= _step_size;
-	if (0 <= _seconds_from_midnight && _seconds_from_midnight < 86400) { _days_of_overflow = 0; }
+	if (0 <= _seconds_from_midnight && _seconds_from_midnight < 86400) { days_of_overflow = 0; }
 	else if (_seconds_from_midnight < 0)
 	{
-		_days_of_overflow = (_seconds_from_midnight / 86400) - 1;
-		_seconds_from_midnight -= 86400 * _days_of_overflow;
+		days_of_overflow = (_seconds_from_midnight / 86400) - 1;
+		_seconds_from_midnight -= 86400 * days_of_overflow;
 	}
 	else
 	{
-		_days_of_overflow = _seconds_from_midnight / 86400;
-		_seconds_from_midnight -= 86400 * _days_of_overflow;
+		days_of_overflow = _seconds_from_midnight / 86400;
+		_seconds_from_midnight -= 86400 * days_of_overflow;
 	}
 	_hour = _seconds_from_midnight / 3600;
 	_minute = (_seconds_from_midnight - 3600 * _hour) / 60;
 	_second = (_seconds_from_midnight - 3600 * _hour - 60 * _minute);
 
-	if ((_days_of_overflow > 0) && (date_ptr != nullptr))
+	if ((days_of_overflow > 0) && (date_ptr != nullptr))
 	{
-		for (; _days_of_overflow > 0; _days_of_overflow--) { ++(*date_ptr); }
+		for (; days_of_overflow > 0; days_of_overflow--) { ++(*date_ptr); }
 	}
-	else if ((_days_of_overflow < 0) && (date_ptr != nullptr))
+	else if ((days_of_overflow < 0) && (date_ptr != nullptr))
 	{
-		for (; _days_of_overflow < 0; _days_of_overflow++) { --(*date_ptr); }
+		for (; days_of_overflow < 0; days_of_overflow++) { --(*date_ptr); }
 	}
 
 	return *this;
@@ -971,58 +976,60 @@ inline welp::time welp::time::operator--(int) noexcept
 {
 	welp::time temp = *this;
 
+	int days_of_overflow;
 	_seconds_from_midnight -= _step_size;
-	if (0 <= _seconds_from_midnight && _seconds_from_midnight < 86400) { _days_of_overflow = 0; }
+	if (0 <= _seconds_from_midnight && _seconds_from_midnight < 86400) { days_of_overflow = 0; }
 	else if (_seconds_from_midnight < 0)
 	{
-		_days_of_overflow = (_seconds_from_midnight / 86400) - 1;
-		_seconds_from_midnight -= 86400 * _days_of_overflow;
+		days_of_overflow = (_seconds_from_midnight / 86400) - 1;
+		_seconds_from_midnight -= 86400 * days_of_overflow;
 	}
 	else
 	{
-		_days_of_overflow = _seconds_from_midnight / 86400;
-		_seconds_from_midnight -= 86400 * _days_of_overflow;
+		days_of_overflow = _seconds_from_midnight / 86400;
+		_seconds_from_midnight -= 86400 * days_of_overflow;
 	}
 	_hour = _seconds_from_midnight / 3600;
 	_minute = (_seconds_from_midnight - 3600 * _hour) / 60;
 	_second = (_seconds_from_midnight - 3600 * _hour - 60 * _minute);
 
-	if ((_days_of_overflow > 0) && (date_ptr != nullptr))
+	if ((days_of_overflow > 0) && (date_ptr != nullptr))
 	{
-		for (; _days_of_overflow > 0; _days_of_overflow--) { ++(*date_ptr); }
+		for (; days_of_overflow > 0; days_of_overflow--) { ++(*date_ptr); }
 	}
-	else if ((_days_of_overflow < 0) && (date_ptr != nullptr))
+	else if ((days_of_overflow < 0) && (date_ptr != nullptr))
 	{
-		for (; _days_of_overflow < 0; _days_of_overflow++) { --(*date_ptr); }
+		for (; days_of_overflow < 0; days_of_overflow++) { --(*date_ptr); }
 	}
 
 	return temp;
 }
 inline welp::time& welp::time::operator-=(int n) noexcept
 {
+	int days_of_overflow;
 	_seconds_from_midnight -= n * _step_size;
-	if (0 <= _seconds_from_midnight && _seconds_from_midnight < 86400) { _days_of_overflow = 0; }
+	if (0 <= _seconds_from_midnight && _seconds_from_midnight < 86400) { days_of_overflow = 0; }
 	else if (_seconds_from_midnight < 0)
 	{
-		_days_of_overflow = (_seconds_from_midnight / 86400) - 1;
-		_seconds_from_midnight -= 86400 * _days_of_overflow;
+		days_of_overflow = (_seconds_from_midnight / 86400) - 1;
+		_seconds_from_midnight -= 86400 * days_of_overflow;
 	}
 	else
 	{
-		_days_of_overflow = _seconds_from_midnight / 86400;
-		_seconds_from_midnight -= 86400 * _days_of_overflow;
+		days_of_overflow = _seconds_from_midnight / 86400;
+		_seconds_from_midnight -= 86400 * days_of_overflow;
 	}
 	_hour = _seconds_from_midnight / 3600;
 	_minute = (_seconds_from_midnight - 3600 * _hour) / 60;
 	_second = (_seconds_from_midnight - 3600 * _hour - 60 * _minute);
 
-	if ((_days_of_overflow > 0) && (date_ptr != nullptr))
+	if ((days_of_overflow > 0) && (date_ptr != nullptr))
 	{
-		for (; _days_of_overflow > 0; _days_of_overflow--) { ++(*date_ptr); }
+		for (; days_of_overflow > 0; days_of_overflow--) { ++(*date_ptr); }
 	}
-	else if ((_days_of_overflow < 0) && (date_ptr != nullptr))
+	else if ((days_of_overflow < 0) && (date_ptr != nullptr))
 	{
-		for (; _days_of_overflow < 0; _days_of_overflow++) { --(*date_ptr); }
+		for (; days_of_overflow < 0; days_of_overflow++) { --(*date_ptr); }
 	}
 
 	return *this;
