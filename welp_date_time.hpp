@@ -460,7 +460,8 @@ welp::date& welp::date::set_date_now_local()
 	_month = time_data->tm_mon + 1;
 	_year = time_data->tm_year + 1900;
 
-	_day_of_the_week = time_data->tm_wday + 1;
+	_day_of_the_week = time_data->tm_wday;
+	if (_day_of_the_week == 0) { _day_of_the_week = 7; }
 
 	return *this;
 }
@@ -473,7 +474,8 @@ welp::date& welp::date::set_date_now_gm()
 	_month = time_data->tm_mon + 1;
 	_year = time_data->tm_year + 1900;
 
-	_day_of_the_week = time_data->tm_wday + 1;
+	_day_of_the_week = time_data->tm_wday;
+	if (_day_of_the_week == 0) { _day_of_the_week = 7; }
 
 	return *this;
 }
