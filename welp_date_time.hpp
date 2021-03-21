@@ -8,8 +8,6 @@
 
 ////// INCLUDES //////
 
-#define WELP_DATE_TIME_INCLUDE_ALL
-
 #if defined(WELP_DATE_TIME_INCLUDE_ALL) || defined(WELP_ALWAYS_INCLUDE_ALL)
 
 #ifndef WELP_TIMER_INCLUDE_CTIME
