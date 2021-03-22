@@ -10,33 +10,33 @@
 
 #if defined(WELP_DATE_TIME_INCLUDE_ALL) || defined(WELP_ALWAYS_INCLUDE_ALL)
 
-#ifndef WELP_TIMER_INCLUDE_CTIME
-#define WELP_TIMER_INCLUDE_CTIME
+#ifndef WELP_DATE_TIME_INCLUDE_CTIME
+#define WELP_DATE_TIME_INCLUDE_CTIME
 #endif
-#ifndef WELP_TIMER_INCLUDE_CHRONO
-#define WELP_TIMER_INCLUDE_CHRONO
+#ifndef WELP_DATE_TIME_INCLUDE_CHRONO
+#define WELP_DATE_TIME_INCLUDE_CHRONO
 #endif
-#ifndef WELP_TIMER_INCLUDE_STRING
-#define WELP_TIMER_INCLUDE_STRING
+#ifndef WELP_DATE_TIME_INCLUDE_STRING
+#define WELP_DATE_TIME_INCLUDE_STRING
 #endif
 
 #endif // WELP_DATE_TIME_INCLUDE_ALL
 
 
-#ifdef WELP_TIMER_INCLUDE_CTIME
+#ifdef WELP_DATE_TIME_INCLUDE_CTIME
 #ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
 #endif // _CRT_SECURE_NO_WARNINGS
 #include <ctime>
-#endif // WELP_TIMER_INCLUDE_CTIME
+#endif // WELP_DATE_TIME_INCLUDE_CTIME
 
-#ifdef WELP_TIMER_INCLUDE_CHRONO
+#ifdef WELP_DATE_TIME_INCLUDE_CHRONO
 #include <chrono>
-#endif // WELP_TIMER_INCLUDE_CHRONO
+#endif // WELP_DATE_TIME_INCLUDE_CHRONO
 
-#ifdef WELP_TIMER_INCLUDE_STRING
+#ifdef WELP_DATE_TIME_INCLUDE_STRING
 #include <string>
-#endif // WELP_TIMER_INCLUDE_STRING
+#endif // WELP_DATE_TIME_INCLUDE_STRING
 
 
 ////// DESCRIPTIONS //////
@@ -52,30 +52,30 @@ namespace welp
 		inline int month() const noexcept;
 		inline int year() const noexcept;
 
-#ifdef WELP_TIMER_INCLUDE_STRING
+#ifdef WELP_DATE_TIME_INCLUDE_STRING
 		std::string get_date_dmy(char delim) const;
 		std::string get_date_mdy(char delim) const;
 		std::string get_date_ymd(char delim) const;
 		template <class _month_function> std::string get_date_text(char delim, _month_function month_func) const;
-#endif // WELP_TIMER_INCLUDE_STRING
+#endif // WELP_DATE_TIME_INCLUDE_STRING
 
 		inline int get_day_of_the_week() const noexcept;
-#ifdef WELP_TIMER_INCLUDE_STRING
+#ifdef WELP_DATE_TIME_INCLUDE_STRING
 		template <class _day_function> std::string get_day_of_the_week_text(_day_function day_func) const;
-#endif // WELP_TIMER_INCLUDE_STRING
+#endif // WELP_DATE_TIME_INCLUDE_STRING
 
 		welp::date& set_date_numbers_dmy(int __day, int __month, int __year) noexcept;
-#ifdef WELP_TIMER_INCLUDE_STRING
+#ifdef WELP_DATE_TIME_INCLUDE_STRING
 		welp::date& set_date_dmy(const std::string& str, char delim);
 		welp::date& set_date_mdy(const std::string& str, char delim);
 		welp::date& set_date_ymd(const std::string& str, char delim);
 		template <class _month_function> welp::date& set_date_text(const std::string& str, char delim, _month_function month_func);
-#endif // WELP_TIMER_INCLUDE_STRING
+#endif // WELP_DATE_TIME_INCLUDE_STRING
 
-#if defined(WELP_TIMER_INCLUDE_CTIME) && defined(WELP_TIMER_INCLUDE_CHRONO)
+#if defined(WELP_DATE_TIME_INCLUDE_CTIME) && defined(WELP_DATE_TIME_INCLUDE_CHRONO)
 		welp::date& set_date_now_local();
 		welp::date& set_date_now_gm();
-#endif // WELP_TIMER_INCLUDE_CTIME && WELP_TIMER_INCLUDE_CHRONO
+#endif // WELP_DATE_TIME_INCLUDE_CTIME && WELP_DATE_TIME_INCLUDE_CHRONO
 
 		welp::date& operator++() noexcept;
 		welp::date operator++(int) noexcept;
@@ -117,26 +117,26 @@ namespace welp
 		inline int minute() const noexcept;
 		inline int second() const noexcept;
 
-#ifdef WELP_TIMER_INCLUDE_STRING
+#ifdef WELP_DATE_TIME_INCLUDE_STRING
 		std::string get_time_hms(char delim) const;
 		std::string get_time_hm(char delim) const;
-#endif // WELP_TIMER_INCLUDE_STRING
+#endif // WELP_DATE_TIME_INCLUDE_STRING
 
 		welp::time& set_time(int __hour, int __minute, int __second) noexcept;
-#ifdef WELP_TIMER_INCLUDE_STRING
+#ifdef WELP_DATE_TIME_INCLUDE_STRING
 		welp::time& set_time_hms(const std::string& str, char delim);
 		welp::time& set_time_hm(const std::string& str, char delim);
-#endif // WELP_TIMER_INCLUDE_STRING
+#endif // WELP_DATE_TIME_INCLUDE_STRING
 
 		welp::time& set_stepsize(int hours_forward, int minutes_forward, int seconds_forward) noexcept;
 
 		welp::time& tie_to_date(const welp::date* date_obj_ptr) noexcept;
 		welp::time& tie_to_date() noexcept;
 
-#if defined(WELP_TIMER_INCLUDE_CTIME) && defined(WELP_TIMER_INCLUDE_CHRONO)
+#if defined(WELP_DATE_TIME_INCLUDE_CTIME) && defined(WELP_DATE_TIME_INCLUDE_CHRONO)
 		welp::time& set_time_now_local();
 		welp::time& set_time_now_gm();
-#endif // WELP_TIMER_INCLUDE_CTIME && WELP_TIMER_INCLUDE_CHRONO
+#endif // WELP_DATE_TIME_INCLUDE_CTIME && WELP_DATE_TIME_INCLUDE_CHRONO
 
 		inline welp::time& forward_hms(int hours_forward, int minutes_forward, int seconds_forward) noexcept;
 		inline welp::time& operator++() noexcept;
@@ -186,7 +186,7 @@ inline int welp::date::day() const noexcept { return _day; }
 inline int welp::date::month() const noexcept { return _month; }
 inline int welp::date::year() const noexcept { return _year; }
 
-#ifdef WELP_TIMER_INCLUDE_STRING
+#ifdef WELP_DATE_TIME_INCLUDE_STRING
 std::string welp::date::get_date_dmy(char delim) const
 {
 	if (_day < 10)
@@ -264,15 +264,15 @@ template <class _month_function> std::string welp::date::get_date_text(char deli
 		return string_date;
 	}
 }
-#endif // WELP_TIMER_INCLUDE_STRING
+#endif // WELP_DATE_TIME_INCLUDE_STRING
 
 inline int welp::date::get_day_of_the_week() const noexcept { return _day_of_the_week; }
-#ifdef WELP_TIMER_INCLUDE_STRING
+#ifdef WELP_DATE_TIME_INCLUDE_STRING
 template <class _day_function> std::string  welp::date::get_day_of_the_week_text(_day_function day_func) const
 {
 	return day_func(_day_of_the_week);
 }
-#endif // WELP_TIMER_INCLUDE_STRING
+#endif // WELP_DATE_TIME_INCLUDE_STRING
 
 welp::date& welp::date::set_date_numbers_dmy(int __day, int __month, int __year) noexcept
 {
@@ -302,7 +302,7 @@ welp::date& welp::date::set_date_numbers_dmy(int __day, int __month, int __year)
 
 	return *this;
 }
-#ifdef WELP_TIMER_INCLUDE_STRING
+#ifdef WELP_DATE_TIME_INCLUDE_STRING
 welp::date& welp::date::set_date_dmy(const std::string& str, char delim)
 {
 	std::size_t delim1 = str.find_first_of(delim);
@@ -439,9 +439,9 @@ template <class _month_function> welp::date& welp::date::set_date_text(const std
 
 	return *this;
 }
-#endif // WELP_TIMER_INCLUDE_STRING
+#endif // WELP_DATE_TIME_INCLUDE_STRING
 
-#if defined(WELP_TIMER_INCLUDE_CTIME) && defined(WELP_TIMER_INCLUDE_CHRONO)
+#if defined(WELP_DATE_TIME_INCLUDE_CTIME) && defined(WELP_DATE_TIME_INCLUDE_CHRONO)
 welp::date& welp::date::set_date_now_local()
 {
 	std::time_t system_clock_time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
@@ -470,7 +470,7 @@ welp::date& welp::date::set_date_now_gm()
 
 	return *this;
 }
-#endif // WELP_TIMER_INCLUDE_CTIME && WELP_TIMER_INCLUDE_CHRONO
+#endif // WELP_DATE_TIME_INCLUDE_CTIME && WELP_DATE_TIME_INCLUDE_CHRONO
 
 welp::date& welp::date::operator++() noexcept
 {
@@ -679,7 +679,7 @@ inline int welp::time::hour() const noexcept { return _hour; }
 inline int welp::time::minute() const noexcept { return _minute; }
 inline int welp::time::second() const noexcept { return _second; }
 
-#ifdef WELP_TIMER_INCLUDE_STRING
+#ifdef WELP_DATE_TIME_INCLUDE_STRING
 std::string welp::time::get_time_hms(char delim) const
 {
 	if (_hour < 10)
@@ -724,7 +724,7 @@ std::string welp::time::get_time_hm(char delim) const
 		return string_time;
 	}
 }
-#endif // WELP_TIMER_INCLUDE_STRING
+#endif // WELP_DATE_TIME_INCLUDE_STRING
 
 welp::time& welp::time::set_time(int __hour, int __minute, int __second) noexcept
 {
@@ -735,7 +735,7 @@ welp::time& welp::time::set_time(int __hour, int __minute, int __second) noexcep
 	_seconds_from_midnight = 3600 * _hour + 60 * _minute + _second;
 	return *this;
 }
-#ifdef WELP_TIMER_INCLUDE_STRING
+#ifdef WELP_DATE_TIME_INCLUDE_STRING
 welp::time& welp::time::set_time_hms(const std::string& str, char delim)
 {
 	std::size_t delim1 = str.find_first_of(delim);
@@ -757,7 +757,7 @@ welp::time& welp::time::set_time_hm(const std::string& str, char delim)
 	_seconds_from_midnight = 3600 * _hour + 60 * _minute;
 	return *this;
 }
-#endif // WELP_TIMER_INCLUDE_STRING
+#endif // WELP_DATE_TIME_INCLUDE_STRING
 
 welp::time& welp::time::set_stepsize(int hours_forward, int minutes_forward, int seconds_forward) noexcept
 {
@@ -774,7 +774,7 @@ welp::time& welp::time::tie_to_date() noexcept
 	date_ptr = nullptr; return *this;
 }
 
-#if defined(WELP_TIMER_INCLUDE_CTIME) && defined(WELP_TIMER_INCLUDE_CHRONO)
+#if defined(WELP_DATE_TIME_INCLUDE_CTIME) && defined(WELP_DATE_TIME_INCLUDE_CHRONO)
 welp::time& welp::time::set_time_now_local()
 {
 	std::time_t system_clock_time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
@@ -809,7 +809,7 @@ welp::time& welp::time::set_time_now_gm()
 	}
 	return *this;
 }
-#endif // WELP_TIMER_INCLUDE_CTIME && WELP_TIMER_INCLUDE_CHRONO
+#endif // WELP_DATE_TIME_INCLUDE_CTIME && WELP_DATE_TIME_INCLUDE_CHRONO
 
 inline welp::time& welp::time::forward_hms(int hours_forward, int minutes_forward, int seconds_forward) noexcept
 {
