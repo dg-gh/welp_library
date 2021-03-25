@@ -1,9 +1,10 @@
-// welp_matrix.hpp - last update : 06 / 02 / 2021
+// welp_matrix.hpp - last update : 25 / 03 / 2021
 // License <http://unlicense.org/> (statement below at the end of the file)
 
 
 #ifndef WELP_MATRIX_HPP
 #define WELP_MATRIX_HPP
+
 
 ////////////////////////   I N C L U D E S   ////////////////////////
 
@@ -1082,7 +1083,7 @@ namespace welp
 		template <class _string_Allocator = std::allocator<char>,
 			class _Allocator = WELP_MATRIX_DEFAULT_ALLOCATOR<std::basic_string<char, std::char_traits<char>, _string_Allocator>>>
 			welp::matrix<std::basic_string<char, std::char_traits<char>, _string_Allocator>, _Allocator> load(
-				const std::string& filename, std::size_t rows_max, std::size_t rows_skipped, bool shrink_to_fit);
+				const std::string& filename, std::size_t rows_max, std::size_t rows_skipped);
 
 #ifdef WELP_MATRIX_INCLUDE_ALGORITHM
 		// loads matrix from filename, with rows_max as the maximal amount of rows, skips the first rows_skipped rows at the beginning of the file,
@@ -1090,7 +1091,7 @@ namespace welp
 		template <class _string_Allocator = std::allocator<char>,
 			class _Allocator = WELP_MATRIX_DEFAULT_ALLOCATOR<std::basic_string<char, std::char_traits<char>, _string_Allocator>>>
 			welp::matrix<std::basic_string<char, std::char_traits<char>, _string_Allocator>, _Allocator> load(
-				const std::string& filename, std::size_t rows_max, std::size_t rows_skipped, char delim, bool shrink_to_fit);
+				const std::string& filename, std::size_t rows_max, std::size_t rows_skipped, char delim);
 
 		// loads matrix from filename, with rows_max as the maximal amount of rows, skips the first rows_skipped rows at the beginning of the file,
 		// delim as the delimiter, shrink_to_fit set to true will resize the memory capacity of the matrix to fit the data,
@@ -1098,7 +1099,7 @@ namespace welp
 		template <typename Ty, class _string_Allocator = std::allocator<char>,
 			class _Allocator = WELP_MATRIX_DEFAULT_ALLOCATOR<Ty>, class function_f> welp::matrix<Ty, _Allocator> load(
 				const std::string& filename, std::size_t rows_max, std::size_t rows_skipped,
-				char delim, bool shrink_to_fit, function_f f);
+				char delim, function_f f);
 #endif // WELP_MATRIX_INCLUDE_ALGORITHM
 
 		// writes A as file filename with delim as the delimiter
@@ -13475,7 +13476,7 @@ template <typename Ty, class _Allocator> void welp::_matrix_container<Ty, _Alloc
 		this->destroy_all();
 		this->deallocate(data_ptr, storage_capacity);
 	}
-	
+
 	data_ptr = nullptr;
 	end_ptr = nullptr;
 	rows = 0;
@@ -15927,7 +15928,7 @@ namespace welp
 	{
 		template <class _string_Allocator, class _Allocator>
 		welp::matrix<std::basic_string<char, std::char_traits<char>, _string_Allocator>, _Allocator> load(
-			const std::string& filename, std::size_t rows_max, std::size_t rows_skipped, bool shrink_to_fit)
+			const std::string& filename, std::size_t rows_max, std::size_t rows_skipped)
 		{
 			welp::matrix<std::basic_string<char, std::char_traits<char>, _string_Allocator>, _Allocator> C(rows_max, 1);
 			std::ifstream loadmat;
@@ -15950,7 +15951,6 @@ namespace welp
 					Cr++;
 				}
 				C.resize(Cr, 1);
-				if (shrink_to_fit) { C.shrink_to_fit(); }
 			}
 			else { C.clear(); }
 			loadmat.close();
@@ -15960,7 +15960,7 @@ namespace welp
 #ifdef WELP_MATRIX_INCLUDE_ALGORITHM
 		template <class _string_Allocator, class _Allocator>
 		welp::matrix<std::basic_string<char, std::char_traits<char>, _string_Allocator>, _Allocator> load(
-			const std::string& filename, std::size_t rows_max, std::size_t rows_skipped, char delim, bool shrink_to_fit)
+			const std::string& filename, std::size_t rows_max, std::size_t rows_skipped, char delim)
 		{
 			welp::matrix<std::basic_string<char, std::char_traits<char>, _string_Allocator>, _Allocator> C;
 			std::ifstream loadmat;
@@ -16025,7 +16025,6 @@ namespace welp
 					}
 				}
 				C.resize(Cr, C.c());
-				if (shrink_to_fit) { C.shrink_to_fit(); }
 			}
 			else { C.clear(); }
 			loadmat.close();
@@ -16033,7 +16032,7 @@ namespace welp
 		}
 
 		template <typename Ty, class _string_Allocator, class _Allocator, class function_f>
-		welp::matrix<Ty, _Allocator> load(const std::string& filename, std::size_t rows_max, std::size_t rows_skipped, char delim, bool shrink_to_fit, function_f f)
+		welp::matrix<Ty, _Allocator> load(const std::string& filename, std::size_t rows_max, std::size_t rows_skipped, char delim, function_f f)
 		{
 			welp::matrix<Ty, _Allocator> C;
 			std::ifstream loadmat;
@@ -16098,7 +16097,6 @@ namespace welp
 					}
 				}
 				C.resize(Cr, C.c());
-				if (shrink_to_fit) { C.shrink_to_fit(); }
 			}
 			else { C.clear(); }
 			loadmat.close();
