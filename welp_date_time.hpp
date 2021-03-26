@@ -77,6 +77,8 @@ namespace welp
 		welp::date& set_date_now_gm();
 #endif // WELP_DATE_TIME_INCLUDE_CTIME && WELP_DATE_TIME_INCLUDE_CHRONO
 
+		welp::date& forward_years(int n) noexcept;
+		
 		welp::date& operator++() noexcept;
 		welp::date operator++(int) noexcept;
 		welp::date& operator+=(int n) noexcept;
@@ -471,6 +473,33 @@ welp::date& welp::date::set_date_now_gm()
 	return *this;
 }
 #endif // WELP_DATE_TIME_INCLUDE_CTIME && WELP_DATE_TIME_INCLUDE_CHRONO
+
+welp::date& welp::date::forward_years(int n) noexcept
+{
+	_year += n;
+
+	int m = _month;
+	int J;
+	int K;
+	if (m < 3)
+	{
+		m += 12;
+		J = (_year - 1) / 100;
+		K = (_year - 1) % 100;
+	}
+	else
+	{
+		J = _year / 100;
+		K = _year % 100;
+	}
+	int q = _day;
+
+	int h = (q + (13 * (m + 1)) / 5 + K + K / 4 + J / 4 + 5 * J);
+
+	_day_of_the_week = (h + 5) % 7 + 1;
+
+	return *this;
+}
 
 welp::date& welp::date::operator++() noexcept
 {
