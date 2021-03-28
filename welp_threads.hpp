@@ -235,6 +235,48 @@ namespace welp
 		void record_write_sub(std::ofstream& rec_write);
 #endif // WELP_THREADS_DEBUG_MODE
 	};
+	
+	class thread
+	{
+
+	public:
+
+		inline bool ready() const noexcept;
+		template <class function_Ty> bool async_task(function_Ty func);
+
+		thread() = default;
+		thread(const welp::thread&) = delete;
+		welp::thread& operator=(const welp::thread&) = delete;
+		thread(welp::thread&&) = delete;
+		welp::thread& operator=(welp::thread&&) = delete;
+
+		~thread();
+		
+	private:
+
+		std::function<void(void)> current_task;
+		std::atomic_flag _go_on_clear;
+		std::atomic<bool> _ready{ true };
+		std::atomic<bool> _finish{ false };
+		std::thread _thread = std::thread([&]()
+			{
+				_go_on_clear.test_and_set();
+				_ready.store(true);
+
+				while (true)
+				{
+					while (_go_on_clear.test_and_set()) {}
+					current_task();
+
+					if (_finish.load())
+					{
+						return;
+					}
+
+					_ready.store(true);
+				}
+			});
+	};
 }
 
 
@@ -1390,6 +1432,36 @@ bool welp::threads<_Allocator>::force_priority_async_task_sub(welp::async_task_r
 	{
 		box._task_denied.store(true);
 		return false;
+	}
+}
+
+template <class function_Ty>
+bool welp::thread::async_task(function_Ty func)
+{
+	if (_ready.load())
+	{
+		_ready.store(false);
+		current_task = std::move(func);
+		_go_on_clear.clear();
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+inline bool welp::thread::ready() const noexcept
+{
+	return _ready.load();
+}
+
+welp::thread::~thread()
+{
+	_finish.store(true);
+	if (_thread.joinable())
+	{
+		_thread.join();
 	}
 }
 
