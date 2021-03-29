@@ -357,7 +357,7 @@ namespace welp
 		storage_cell* data_ptr = nullptr;
 		std::size_t max_number_of_cells = 0;
 
-		mutex_Ty buffer_mutex;
+		mutable mutex_Ty buffer_mutex;
 
 		class storage_cell
 		{
