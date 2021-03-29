@@ -381,7 +381,7 @@ namespace welp
 		std::size_t _size = 0;
 		std::size_t _capacity = 0;
 
-		mutex_Ty buffer_mutex;
+		mutable mutex_Ty buffer_mutex;
 
 		void delete_buffer_sub() noexcept;
 
