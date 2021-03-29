@@ -187,7 +187,7 @@ namespace welp
 	private:
 
 		std::condition_variable task_condition_var;
-		std::mutex task_mutex;
+		mutable std::mutex task_mutex;
 
 		std::thread* threads_data_ptr = nullptr;
 		std::size_t _number_of_threads = 0;
