@@ -250,7 +250,7 @@ namespace welp
 		bool record_on = false;
 #endif // WELP_MULTIPOOL_DEBUG_MODE
 
-		mutex_Ty resource_mutex;
+		mutable mutex_Ty resource_mutex;
 
 	public:
 
