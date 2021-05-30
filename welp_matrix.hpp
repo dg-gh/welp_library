@@ -85,10 +85,8 @@
 #include <algorithm>
 #endif // WELP_MATRIX_INCLUDE_ALGORITHM
 
-////////////////////////   O P T I O N S   ////////////////////////
 
-// #define WELP_MATRIX_UNROLL_WITH_CLANG will make Clang compilers unroll loops in matrix multiplication
-// #define WELP_MATRIX_UNROLL_WITH_GCC will make GCC compilers unroll loops in matrix multiplication
+////////////////////////   O P T I O N S   ////////////////////////
 
 // #define WELP_MATRIX_DEFAULT_ALLOCATOR defines the name of the allocator used by default
 #ifndef WELP_MATRIX_DEFAULT_ALLOCATOR
