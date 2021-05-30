@@ -13357,7 +13357,7 @@ template <typename Ty, class _Allocator> template <class _Allocator_v, class _Al
 	assert(this->r() == v.size());
 	assert(this->c() == w.size());
 #endif // WELP_MATRIX_DEBUG_MODE
-	welp::matrix_subroutines::pmxm(this->data(), v.data(), w.data(), this->r(), this->c(), 1);
+	welp::matrix_subroutines::pvxv(this->data(), v.data(), w.data(), this->r(), this->c(), 0);
 	return *this;
 }
 template <typename Ty, class _Allocator> template <class _Allocator_v, class _Allocator_w> welp::matrix<Ty, _Allocator>& welp::matrix<Ty, _Allocator>::p_vxv(const welp::matrix<Ty, _Allocator_v> & v, const welp::matrix<Ty, _Allocator_w> & w) noexcept
@@ -13369,7 +13369,7 @@ template <typename Ty, class _Allocator> template <class _Allocator_v, class _Al
 	assert(this->r() == v.size());
 	assert(this->c() == w.size());
 #endif // WELP_MATRIX_DEBUG_MODE
-	welp::matrix_subroutines::p_mxm(this->data(), v.data(), w.data(), this->r(), this->c(), 1);
+	welp::matrix_subroutines::p_vxv(this->data(), v.data(), w.data(), this->r(), this->c(), 0);
 	return *this;
 }
 template <typename Ty, class _Allocator> welp::matrix<Ty, _Allocator>& welp::matrix<Ty, _Allocator>::pdiag(Ty x) noexcept
