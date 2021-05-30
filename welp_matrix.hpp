@@ -1985,6 +1985,747 @@ namespace welp
 
 			return acc0 + acc1;
 		}
+		
+		template <typename Ty> void pmxv(Ty* const pfC, const Ty* const pfA, const Ty* const pfB,
+			const std::size_t Ar, const std::size_t Ac, const std::size_t skipA) noexcept
+		{
+			Ty acc0; Ty acc1; Ty acc2; Ty acc3; Ty regB;
+			std::size_t jump = Ac + skipA;
+			const Ty* pA0 = pfA;
+			const Ty* pA1 = pfA + jump;
+			const Ty* pA2 = pfA + 2 * jump;
+			const Ty* pA3 = pfA + 3 * jump;
+			const Ty* pB; Ty* pC = pfC;
+			std::size_t N = Ar - (Ar & 3);
+			jump = 3 * Ac + 4 * skipA;
+
+			std::size_t i, k;
+
+			// major upper part of A
+			for (i = N; i > 0; i -= 4)
+			{
+				acc0 = static_cast<Ty>(0);
+				acc1 = static_cast<Ty>(0);
+				acc2 = static_cast<Ty>(0);
+				acc3 = static_cast<Ty>(0);
+				pB = pfB;
+
+				for (k = Ac; k > 0; k--)
+				{
+					regB = *pB++;
+					acc0 += (*pA0++) * regB;
+					acc1 += (*pA1++) * regB;
+					acc2 += (*pA2++) * regB;
+					acc3 += (*pA3++) * regB;
+				}
+				*pC += acc0;
+				*(pC + 1) += acc1;
+				*(pC + 2) += acc2;
+				*(pC + 3) += acc3;
+				pC += 4;
+
+				pA0 += jump;
+				pA1 += jump;
+				pA2 += jump;
+				pA3 += jump;
+			}
+
+			// bottom fringe of A
+			switch (Ar & 3)
+			{
+
+			case 0:
+				break;
+
+			case 1:
+				acc0 = static_cast<Ty>(0);
+				pB = pfB;
+
+				for (k = Ac; k > 0; k--)
+				{
+					acc0 += (*pA0++) * (*pB++);
+				}
+				*pC += acc0;
+				break;
+
+			case 2:
+				acc0 = static_cast<Ty>(0);
+				acc1 = static_cast<Ty>(0);
+				pB = pfB;
+
+				for (k = Ac; k > 0; k--)
+				{
+					regB = *pB++;
+					acc0 += (*pA0++) * regB;
+					acc1 += (*pA1++) * regB;
+				}
+				*pC += acc0;
+				*(pC + 1) += acc1;
+				break;
+
+			case 3:
+				acc0 = static_cast<Ty>(0);
+				acc1 = static_cast<Ty>(0);
+				acc2 = static_cast<Ty>(0);
+				pB = pfB;
+
+				for (k = Ac; k > 0; k--)
+				{
+					regB = *pB++;
+					acc0 += (*pA0++) * regB;
+					acc1 += (*pA1++) * regB;
+					acc2 += (*pA2++) * regB;
+				}
+				*pC += acc0;
+				*(pC + 1) += acc1;
+				*(pC + 2) += acc2;
+				break;
+			}
+		}
+		template <typename Ty> void p_mxv(Ty* const pfC, const Ty* const pfA, const Ty* const pfB,
+			const std::size_t Ar, const std::size_t Ac, const std::size_t skipA) noexcept
+
+		{
+			Ty acc0; Ty acc1; Ty acc2; Ty acc3; Ty regB;
+			std::size_t jump = Ac + skipA;
+			const Ty* pA0 = pfA;
+			const Ty* pA1 = pfA + jump;
+			const Ty* pA2 = pfA + 2 * jump;
+			const Ty* pA3 = pfA + 3 * jump;
+			const Ty* pB; Ty* pC = pfC;
+			std::size_t N = Ar - (Ar & 3);
+			jump = 3 * Ac + 4 * skipA;
+
+			std::size_t i, k;
+
+			// major upper part of A
+			for (i = N; i > 0; i -= 4)
+			{
+				acc0 = static_cast<Ty>(0);
+				acc1 = static_cast<Ty>(0);
+				acc2 = static_cast<Ty>(0);
+				acc3 = static_cast<Ty>(0);
+				pB = pfB;
+
+				for (k = Ac; k > 0; k--)
+				{
+					regB = *pB++;
+					acc0 += (*pA0++) * regB;
+					acc1 += (*pA1++) * regB;
+					acc2 += (*pA2++) * regB;
+					acc3 += (*pA3++) * regB;
+				}
+				*pC -= acc0;
+				*(pC + 1) -= acc1;
+				*(pC + 2) -= acc2;
+				*(pC + 3) -= acc3;
+				pC += 4;
+
+				pA0 += jump;
+				pA1 += jump;
+				pA2 += jump;
+				pA3 += jump;
+			}
+
+			// bottom fringe of A
+			switch (Ar & 3)
+			{
+
+			case 0:
+				break;
+
+			case 1:
+				acc0 = static_cast<Ty>(0);
+				pB = pfB;
+
+				for (k = Ac; k > 0; k--)
+				{
+					acc0 += (*pA0++) * (*pB++);
+				}
+				*pC -= acc0;
+				break;
+
+			case 2:
+				acc0 = static_cast<Ty>(0);
+				acc1 = static_cast<Ty>(0);
+				pB = pfB;
+
+				for (k = Ac; k > 0; k--)
+				{
+					regB = *pB++;
+					acc0 += (*pA0++) * regB;
+					acc1 += (*pA1++) * regB;
+				}
+				*pC -= acc0;
+				*(pC + 1) -= acc1;
+				break;
+
+			case 3:
+				acc0 = static_cast<Ty>(0);
+				acc1 = static_cast<Ty>(0);
+				acc2 = static_cast<Ty>(0);
+				pB = pfB;
+
+				for (k = Ac; k > 0; k--)
+				{
+					regB = *pB++;
+					acc0 += (*pA0++) * regB;
+					acc1 += (*pA1++) * regB;
+					acc2 += (*pA2++) * regB;
+				}
+				*pC -= acc0;
+				*(pC + 1) -= acc1;
+				*(pC + 2) -= acc2;
+				break;
+			}
+		}
+		template <typename Ty> void pvxm(Ty* const pfC, const Ty* const pfA, const Ty* const pfB,
+			const std::size_t Br, const std::size_t Bc, const std::size_t skipB) noexcept
+		{
+			Ty regA0; Ty regA1; Ty regA2; Ty regA3;
+			std::size_t jump = Bc + skipB;
+			const Ty* pA = pfA;
+			const Ty* pB0 = pfB;
+			const Ty* pB1 = pfB + jump;
+			const Ty* pB2 = pfB + 2 * jump;
+			const Ty* pB3 = pfB + 3 * jump;
+			Ty* pC;
+			std::size_t N = Br - (Br & 3);
+			jump = 3 * Bc + 4 * skipB;
+
+			std::size_t j, k;
+
+			// major upper part of B
+			for (k = N; k > 0; k -= 4)
+			{
+				pC = pfC;
+
+				regA0 = *pA;
+				regA1 = *(pA + 1);
+				regA2 = *(pA + 2);
+				regA3 = *(pA + 3);
+				pA += 4;
+				for (j = Bc; j > 0; j--)
+				{
+					*pC++ += (regA0 * (*pB0++) + regA1 * (*pB1++))
+						+ (regA2 * (*pB2++) + regA3 * (*pB3++));
+				}
+				pB0 += jump;
+				pB1 += jump;
+				pB2 += jump;
+				pB3 += jump;
+			}
+
+			// bottom fringe of B
+			switch (Br & 3)
+			{
+
+			case 0:
+				break;
+
+			case 1:
+				pC = pfC;
+				regA0 = *pA;
+
+				for (j = Bc; j > 0; j--)
+				{
+					*pC++ += regA0 * (*pB0++);
+				}
+				break;
+
+			case 2:
+				pC = pfC;
+				regA0 = *pA;
+				regA1 = *(pA + 1);
+
+				for (j = Bc; j > 0; j--)
+				{
+					*pC++ += regA0 * (*pB0++) + regA1 * (*pB1++);
+				}
+				break;
+
+			case 3:
+				pC = pfC;
+				regA0 = *pA;
+				regA1 = *(pA + 1);
+				regA2 = *(pA + 2);
+
+				for (j = Bc; j > 0; j--)
+				{
+					*pC++ += (regA0 * (*pB0++) + regA1 * (*pB1++)) + regA2 * (*pB2++);
+				}
+				break;
+			}
+		}
+		template <typename Ty> void p_vxm(Ty* const pfC, const Ty* const pfA, const Ty* const pfB,
+			const std::size_t Br, const std::size_t Bc, const std::size_t skipB) noexcept
+		{
+			Ty regA0; Ty regA1; Ty regA2; Ty regA3;
+			std::size_t jump = Bc + skipB;
+			const Ty* pA = pfA;
+			const Ty* pB0 = pfB;
+			const Ty* pB1 = pfB + jump;
+			const Ty* pB2 = pfB + 2 * jump;
+			const Ty* pB3 = pfB + 3 * jump;
+			Ty* pC;
+			std::size_t N = Ac - (Ac & 3);
+			jump = 3 * Bc + 4 * skipB;
+
+			std::size_t j, k;
+
+			// major upper part of B
+			for (k = N; k > 0; k -= 4)
+			{
+				pC = pfC;
+
+				regA0 = *pA;
+				regA1 = *(pA + 1);
+				regA2 = *(pA + 2);
+				regA3 = *(pA + 3);
+				pA += 4;
+				for (j = Bc; j > 0; j--)
+				{
+					*pC++ -= (regA0 * (*pB0++) + regA1 * (*pB1++))
+						+ (regA2 * (*pB2++) + regA3 * (*pB3++));
+				}
+				pB0 += jump;
+				pB1 += jump;
+				pB2 += jump;
+				pB3 += jump;
+			}
+
+			// bottom fringe of B
+			switch (Ac & 3)
+			{
+
+			case 0:
+				break;
+
+			case 1:
+				pC = pfC;
+				regA0 = *pA;
+
+				for (j = Bc; j > 0; j--)
+				{
+					*pC++ -= regA0 * (*pB0++);
+				}
+				break;
+
+			case 2:
+				pC = pfC;
+				regA0 = *pA;
+				regA1 = *(pA + 1);
+
+				for (j = Bc; j > 0; j--)
+				{
+					*pC++ -= regA0 * (*pB0++) + regA1 * (*pB1++);
+				}
+				break;
+
+			case 3:
+				pC = pfC;
+				regA0 = *pA;
+				regA1 = *(pA + 1);
+				regA2 = *(pA + 2);
+
+				for (j = Bc; j > 0; j--)
+				{
+					*pC++ -= (regA0 * (*pB0++) + regA1 * (*pB1++)) + regA2 * (*pB2++);
+				}
+				break;
+			}
+		}
+		template <typename Ty> void pvxv(Ty* const pfC, const Ty* const pfA, const Ty* const pfB,
+			const std::size_t Ar, const std::size_t Bc, const std::size_t skipC) noexcept
+		{
+			Ty regA0; Ty regA1; Ty regA2; Ty regA3; Ty regB;
+			std::size_t jump = Bc + skipC;
+			const Ty* pA = pfA;
+			const Ty* pB;
+			Ty* pC0 = pfC;
+			Ty* pC1 = pfC + jump;
+			Ty* pC2 = pfC + 2 * jump;
+			Ty* pC3 = pfC + 3 * jump;
+			std::size_t N = Ar - (Ar & 3);
+			jump = 3 * Bc + 4 * skipC;
+
+			std::size_t i, j;
+
+			// major upper part of C
+			for (i = N; i > 0; i -= 4)
+			{
+				pB = pfB;
+
+				regA0 = *pA;
+				regA1 = *(pA + 1);
+				regA2 = *(pA + 2);
+				regA3 = *(pA + 3);
+				pA += 4;
+				for (j = Bc; j > 0; j--)
+				{
+					regB = *pB++;
+					*pC0++ += regA0 * regB;
+					*pC1++ += regA1 * regB;
+					*pC2++ += regA2 * regB;
+					*pC3++ += regA3 * regB;
+				}
+				pC0 += jump;
+				pC1 += jump;
+				pC2 += jump;
+				pC3 += jump;
+			}
+
+			// bottom fringe of C
+			switch (Ar & 3)
+			{
+
+			case 0:
+				break;
+
+			case 1:
+				pB = pfB;
+
+				regA0 = *pA;
+				for (j = M; j > 0; j--)
+				{
+					*pC0++ += regA0 * (*pB++);
+				}
+				break;
+
+			case 2:
+				pB = pfB;
+
+				regA0 = *pA;
+				regA1 = *(pA + 1);
+				for (j = M; j > 0; j--)
+				{
+					regB = *pB++;
+					*pC0++ += regA0 * regB;
+					*pC1++ += regA1 * regB;
+				}
+				break;
+
+			case 3:
+				pB = pfB;
+
+				regA0 = *pA;
+				regA1 = *(pA + 1);
+				regA2 = *(pA + 2);
+				for (j = M; j > 0; j--)
+				{
+					regB = *pB++;
+					*pC0++ += regA0 * regB;
+					*pC1++ += regA1 * regB;
+					*pC2++ += regA2 * regB;
+				}
+				break;
+			}
+		}
+		template <typename Ty> void p_vxv(Ty* const pfC, const Ty* const pfA, const Ty* const pfB,
+			const std::size_t Ar, const std::size_t Bc, const std::size_t skipC) noexcept
+		{
+			Ty regA0; Ty regA1; Ty regA2; Ty regA3; Ty regB;
+			std::size_t jump = Bc + skipC;
+			const Ty* pA = pfA;
+			const Ty* pB;
+			Ty* pC0 = pfC;
+			Ty* pC1 = pfC + jump;
+			Ty* pC2 = pfC + 2 * jump;
+			Ty* pC3 = pfC + 3 * jump;
+			std::size_t N = Ar - (Ar & 3);
+			jump = 3 * Bc + 4 * skipC;
+
+			std::size_t i, j;
+
+			// major upper part of C
+			for (i = N; i > 0; i -= 4)
+			{
+				pB = pfB;
+
+				regA0 = *pA;
+				regA1 = *(pA + 1);
+				regA2 = *(pA + 2);
+				regA3 = *(pA + 3);
+				pA += 4;
+				for (j = Bc; j > 0; j--)
+				{
+					regB = *pB++;
+					*pC0++ -= regA0 * regB;
+					*pC1++ -= regA1 * regB;
+					*pC2++ -= regA2 * regB;
+					*pC3++ -= regA3 * regB;
+				}
+				pC0 += jump;
+				pC1 += jump;
+				pC2 += jump;
+				pC3 += jump;
+			}
+
+			// bottom fringe of C
+			switch (Ar & 3)
+			{
+
+			case 0:
+				break;
+
+			case 1:
+				pB = pfB;
+
+				regA0 = *pA;
+				for (j = M; j > 0; j--)
+				{
+					*pC0++ -= regA0 * (*pB++);
+				}
+				break;
+
+			case 2:
+				pB = pfB;
+
+				regA0 = *pA;
+				regA1 = *(pA + 1);
+				for (j = M; j > 0; j--)
+				{
+					regB = *pB++;
+					*pC0++ -= regA0 * regB;
+					*pC1++ -= regA1 * regB;
+				}
+				break;
+
+			case 3:
+				pB = pfB;
+
+				regA0 = *pA;
+				regA1 = *(pA + 1);
+				regA2 = *(pA + 2);
+				for (j = M; j > 0; j--)
+				{
+					regB = *pB++;
+					*pC0++ -= regA0 * regB;
+					*pC1++ -= regA1 * regB;
+					*pC2++ -= regA2 * regB;
+				}
+				break;
+			}
+		}
+
+		template <typename Ty> void pmxm(Ty* const pfC, const Ty* const pfA, const Ty* const pfB,
+			const std::size_t Ar, const std::size_t Bc, const std::size_t Ac,
+			const std::size_t skipC, const std::size_t skipA, const std::size_t skipB) noexcept
+		{
+			Ty regA0; Ty regA1; Ty regA2; Ty regA3; Ty regB;
+			const Ty* pA; const Ty* pB; Ty* pC0; Ty* pC1; Ty* pC2; Ty* pC3;
+			std::size_t jumpA = Ac + skipA;
+			std::size_t jumpB = Bc + skipB;
+			std::size_t jumpC = Bc + skipC;
+			std::size_t N = Ar - (Ar & 3);
+
+			std::size_t i, j, k;
+
+			// major upper part of C
+			for (i = 0; i < N; i += 4)
+			{
+				for (k = 0; k < Ac; k++)
+				{
+					pB = pfB + (jumpB * k);
+
+					pC0 = pfC + (jumpC * i);
+					pC1 = pC0 + jumpC;
+					pC2 = pC0 + 2 * jumpC;
+					pC3 = pC0 + 3 * jumpC;
+
+					pA = (pfA + k) + (jumpA * i);
+					regA0 = *pA;
+					regA1 = *(pA + jumpA);
+					regA2 = *(pA + 2 * jumpA);
+					regA3 = *(pA + 3 * jumpA);
+
+					for (j = Bc; j > 0; j--)
+					{
+						regB = *pB++;
+						*pC0++ += regA0 * regB;
+						*pC1++ += regA1 * regB;
+						*pC2++ += regA2 * regB;
+						*pC3++ += regA3 * regB;
+					}
+				}
+			}
+
+			// bottom fringe of C
+			switch (Ar & 3)
+			{
+
+			case 0:
+				break;
+
+			case 1:
+				for (k = 0; k < Ac; k++)
+				{
+					pB = pfB + (jumpB * k);
+					pC0 = pfC + (jumpC * N);
+					regA0 = *((pfA + k) + (jumpA * N));
+
+					for (j = Bc; j > 0; j--)
+					{
+						*pC0++ += regA0 * (*pB++);
+					}
+				}
+				break;
+
+			case 2:
+				for (k = 0; k < Ac; k++)
+				{
+					pB = pfB + (jumpB * k);
+
+					pC0 = pfC + (jumpC * N);
+					pC1 = pC0 + jumpC;
+
+					pA = (pfA + k) + (jumpA * N);
+					regA0 = *pA;
+					regA1 = *(pA + jumpA);
+
+					for (j = Bc; j > 0; j--)
+					{
+						regB = *pB++;
+						*pC0++ += regA0 * regB;
+						*pC1++ += regA1 * regB;
+					}
+				}
+				break;
+
+			case 3:
+				for (k = 0; k < Ac; k++)
+				{
+					pB = pfB + (jumpB * k);
+
+					pC0 = pfC + (jumpC * N);
+					pC1 = pC0 + jumpC;
+					pC2 = pC0 + 2 * jumpC;
+
+					pA = (pfA + k) + (jumpA * N);
+					regA0 = *pA;
+					regA1 = *(pA + jumpA);
+					regA2 = *(pA + 2 * jumpA);
+
+					for (j = Bc; j > 0; j--)
+					{
+						regB = *pB++;
+						*pC0++ += regA0 * regB;
+						*pC1++ += regA1 * regB;
+						*pC2++ += regA2 * regB;
+					}
+				}
+				break;
+			}
+		}
+		template <typename Ty> void p_mxm(Ty* const pfC, const Ty* const pfA, const Ty* const pfB,
+			const std::size_t Ar, const std::size_t Bc, const std::size_t Ac,
+			const std::size_t skipC, const std::size_t skipA, const std::size_t skipB) noexcept
+		{
+			Ty regA0; Ty regA1; Ty regA2; Ty regA3; Ty regB;
+			const Ty* pA; const Ty* pB; Ty* pC0; Ty* pC1; Ty* pC2; Ty* pC3;
+			std::size_t jumpA = Ac + skipA;
+			std::size_t jumpB = Bc + skipB;
+			std::size_t jumpC = Bc + skipC;
+			std::size_t N = Ar - (Ar & 3);
+
+			std::size_t i, j, k;
+
+			// major upper part of C
+			for (i = 0; i < N; i += 4)
+			{
+				for (k = 0; k < Ac; k++)
+				{
+					pB = pfB + (jumpB * k);
+
+					pC0 = pfC + (jumpC * i);
+					pC1 = pC0 + jumpC;
+					pC2 = pC0 + 2 * jumpC;
+					pC3 = pC0 + 3 * jumpC;
+
+					pA = pfA + (jumpA * i);
+					regA0 = *pA;
+					regA1 = *(pA + jumpA);
+					regA2 = *(pA + 2 * jumpA);
+					regA3 = *(pA + 3 * jumpA);
+
+					for (j = Bc; j > 0; j--)
+					{
+						regB = *pB++;
+						*pC0++ -= regA0 * regB;
+						*pC1++ -= regA1 * regB;
+						*pC2++ -= regA2 * regB;
+						*pC3++ -= regA3 * regB;
+					}
+				}
+			}
+
+			// bottom fringe of C
+			switch (Ar & 3)
+			{
+
+			case 0:
+				break;
+
+			case 1:
+				for (k = 0; k < Ac; k++)
+				{
+					pB = pfB + (jumpB * k);
+					pC0 = pfC + (jumpC * N);
+					regA0 = *((pfA + k) + (jumpA * N));
+
+					for (j = Bc; j > 0; j--)
+					{
+						*pC0++ -= regA0 * (*pB++);
+					}
+				}
+				break;
+
+			case 2:
+				for (k = 0; k < Ac; k++)
+				{
+					pB = pfB + (jumpB * k);
+
+					pC0 = pfC + (jumpC * N);
+					pC1 = pC0 + jumpC;
+
+					pA = (pfA + k) + (jumpA * N);
+					regA0 = *pA;
+					regA1 = *(pA + jumpA);
+
+					for (j = Bc; j > 0; j--)
+					{
+						regB = *pB++;
+						*pC0++ -= regA0 * regB;
+						*pC1++ -= regA1 * regB;
+					}
+				}
+				break;
+
+			case 3:
+				for (k = 0; k < Ac; k++)
+				{
+					pB = pfB + (jumpB * k);
+
+					pC0 = pfC + (jumpC * N);
+					pC1 = pC0 + jumpC;
+					pC2 = pC0 + 2 * jumpC;
+
+					pA = (pfA + k) + (jumpA * N);
+					regA0 = *pA;
+					regA1 = *(pA + jumpA;
+					regA2 = *(pA + 2 * jumpA);
+
+					for (j = Bc; j > 0; j--)
+					{
+						regB = *pB++;
+						*pC0++ -= regA0 * regB;
+						*pC1++ -= regA1 * regB;
+						*pC2++ -= regA2 * regB;
+					}
+				}
+				break;
+			}
+		}
 		template <typename Ty> void pmxm(Ty* const pfC, const Ty* const pfA, const Ty* const pfB,
 			const std::size_t Ar, const std::size_t Bc, const std::size_t Ac) noexcept
 		{
