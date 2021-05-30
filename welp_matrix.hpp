@@ -5706,6 +5706,3265 @@ namespace welp
 				break;
 			}
 		}
+		
+		inline void pmxv(float* const pfC, const float* const pfA, const float* const pfB,
+			const std::size_t Ar, const std::size_t Ac, const std::size_t skipA) noexcept
+		{
+			float acc0; float acc1; float acc2; float acc3; float regB;
+			std::size_t jump = Ac + skipA;
+			const float* pA0 = pfA;
+			const float* pA1 = pfA + jump;
+			const float* pA2 = pfA + 2 * jump;
+			const float* pA3 = pfA + 3 * jump;
+			const float* pB; float* pC = pfC;
+			std::size_t N = Ar - (Ar & 3);
+			std::size_t M = Ac - (Ac & 7);
+			jump = 3 * Ac + 4 * skipA;
+
+			std::size_t i, k;
+
+			__m256 vacc0; __m256 vacc1; __m256 vacc2; __m256 vacc3; __m256 vB;
+			union { __m256 v; float arr[8]; } varr;
+
+			// major upper part of A
+			for (i = N; i > 0; i -= 4)
+			{
+				acc0 = 0.0f; acc1 = 0.0f; acc2 = 0.0f; acc3 = 0.0f;
+				vacc0 = _mm256_setzero_ps();
+				vacc1 = _mm256_setzero_ps();
+				vacc2 = _mm256_setzero_ps();
+				vacc3 = _mm256_setzero_ps();
+				pB = pfB;
+
+				for (k = M; k > 0; k -= 8)
+				{
+					vB = _mm256_loadu_ps(pB); pB += 8;
+					vacc0 = _mm256_fmadd_ps(_mm256_loadu_ps(pA0), vB, vacc0); pA0 += 8;
+					vacc1 = _mm256_fmadd_ps(_mm256_loadu_ps(pA1), vB, vacc1); pA1 += 8;
+					vacc2 = _mm256_fmadd_ps(_mm256_loadu_ps(pA2), vB, vacc2); pA2 += 8;
+					vacc3 = _mm256_fmadd_ps(_mm256_loadu_ps(pA3), vB, vacc3); pA3 += 8;
+				}
+				for (k = Ac & 7; k > 0; k--)
+				{
+					regB = *pB++;
+					acc0 += (*pA0++) * regB;
+					acc1 += (*pA1++) * regB;
+					acc2 += (*pA2++) * regB;
+					acc3 += (*pA3++) * regB;
+				}
+				vacc0 = _mm256_hadd_ps(vacc0, vacc0); varr.v = _mm256_hadd_ps(vacc0, vacc0);
+				*pC += acc0 + varr.arr[0] + varr.arr[4];
+				vacc1 = _mm256_hadd_ps(vacc1, vacc1); varr.v = _mm256_hadd_ps(vacc1, vacc1);
+				*(pC + 1) += acc1 + varr.arr[0] + varr.arr[4];
+				vacc2 = _mm256_hadd_ps(vacc2, vacc2); varr.v = _mm256_hadd_ps(vacc2, vacc2);
+				*(pC + 2) += acc2 + varr.arr[0] + varr.arr[4];
+				vacc3 = _mm256_hadd_ps(vacc3, vacc3); varr.v = _mm256_hadd_ps(vacc3, vacc3);
+				*(pC + 3) += acc3 + varr.arr[0] + varr.arr[4];
+				pC += 4;
+
+				pA0 += jump;
+				pA1 += jump;
+				pA2 += jump;
+				pA3 += jump;
+			}
+
+			// bottom fringe of A
+			switch (Ar & 3)
+			{
+
+			case 0:
+				break;
+
+			case 1:
+				acc0 = 0.0f;
+				vacc0 = _mm256_setzero_ps();
+				pB = pfB;
+
+				for (k = M; k > 0; k -= 8)
+				{
+					vacc0 = _mm256_fmadd_ps(_mm256_loadu_ps(pA0), _mm256_loadu_ps(pB), vacc0);
+					pA0 += 8; pB += 8;
+				}
+				for (k = Ac & 7; k > 0; k--)
+				{
+					regB = *pB++;
+					acc0 += (*pA0++) * regB;
+				}
+				vacc0 = _mm256_hadd_ps(vacc0, vacc0); varr.v = _mm256_hadd_ps(vacc0, vacc0);
+				*pC += acc0 + varr.arr[0] + varr.arr[4];
+				break;
+
+			case 2:
+				acc0 = 0.0f; acc1 = 0.0f;
+				vacc0 = _mm256_setzero_ps();
+				vacc1 = _mm256_setzero_ps();
+				pB = pfB;
+
+				for (k = M; k > 0; k -= 8)
+				{
+					vB = _mm256_loadu_ps(pB); pB += 8;
+					vacc0 = _mm256_fmadd_ps(_mm256_loadu_ps(pA0), vB, vacc0); pA0 += 8;
+					vacc1 = _mm256_fmadd_ps(_mm256_loadu_ps(pA1), vB, vacc1); pA1 += 8;
+				}
+				for (k = Ac & 7; k > 0; k--)
+				{
+					regB = *pB++;
+					acc0 += (*pA0++) * regB;
+					acc1 += (*pA1++) * regB;
+				}
+				vacc0 = _mm256_hadd_ps(vacc0, vacc0); varr.v = _mm256_hadd_ps(vacc0, vacc0);
+				*pC += acc0 + varr.arr[0] + varr.arr[4];
+				vacc1 = _mm256_hadd_ps(vacc1, vacc1); varr.v = _mm256_hadd_ps(vacc1, vacc1);
+				*(pC + 1) += acc1 + varr.arr[0] + varr.arr[4];
+				break;
+
+			case 3:
+				acc0 = 0.0f; acc1 = 0.0f; acc2 = 0.0f;
+				vacc0 = _mm256_setzero_ps();
+				vacc1 = _mm256_setzero_ps();
+				vacc2 = _mm256_setzero_ps();
+				pB = pfB;
+
+				for (k = M; k > 0; k -= 8)
+				{
+					vB = _mm256_loadu_ps(pB); pB += 8;
+					vacc0 = _mm256_fmadd_ps(_mm256_loadu_ps(pA0), vB, vacc0); pA0 += 8;
+					vacc1 = _mm256_fmadd_ps(_mm256_loadu_ps(pA1), vB, vacc1); pA1 += 8;
+					vacc2 = _mm256_fmadd_ps(_mm256_loadu_ps(pA2), vB, vacc2); pA2 += 8;
+				}
+				for (k = Ac & 7; k > 0; k--)
+				{
+					regB = *pB++;
+					acc0 += (*pA0++) * regB;
+					acc1 += (*pA1++) * regB;
+					acc2 += (*pA2++) * regB;
+				}
+				vacc0 = _mm256_hadd_ps(vacc0, vacc0); varr.v = _mm256_hadd_ps(vacc0, vacc0);
+				*pC += acc0 + varr.arr[0] + varr.arr[4];
+				vacc1 = _mm256_hadd_ps(vacc1, vacc1); varr.v = _mm256_hadd_ps(vacc1, vacc1);
+				*(pC + 1) += acc1 + varr.arr[0] + varr.arr[4];
+				vacc2 = _mm256_hadd_ps(vacc2, vacc2); varr.v = _mm256_hadd_ps(vacc2, vacc2);
+				*(pC + 2) += acc2 + varr.arr[0] + varr.arr[4];
+				break;
+			}
+		}
+		inline void p_mxv(float* const pfC, const float* const pfA, const float* const pfB,
+			const std::size_t Ar, const std::size_t Ac, const std::size_t skipA) noexcept
+		{
+			float acc0; float acc1; float acc2; float acc3; float regB;
+			std::size_t jump = Ac + skipA;
+			const float* pA0 = pfA;
+			const float* pA1 = pfA + jump;
+			const float* pA2 = pfA + 2 * jump;
+			const float* pA3 = pfA + 3 * jump;
+			const float* pB; float* pC = pfC;
+			std::size_t N = Ar - (Ar & 3);
+			std::size_t M = Ac - (Ac & 7);
+			jump = 3 * Ac + 4 * skipA;
+
+			std::size_t i, k;
+
+			__m256 vacc0; __m256 vacc1; __m256 vacc2; __m256 vacc3; __m256 vB;
+			union { __m256 v; float arr[8]; } varr;
+
+			// major upper part of A
+			for (i = N; i > 0; i -= 4)
+			{
+				acc0 = 0.0f; acc1 = 0.0f; acc2 = 0.0f; acc3 = 0.0f;
+				vacc0 = _mm256_setzero_ps();
+				vacc1 = _mm256_setzero_ps();
+				vacc2 = _mm256_setzero_ps();
+				vacc3 = _mm256_setzero_ps();
+				pB = pfB;
+
+				for (k = M; k > 0; k -= 8)
+				{
+					vB = _mm256_loadu_ps(pB); pB += 8;
+					vacc0 = _mm256_fmadd_ps(_mm256_loadu_ps(pA0), vB, vacc0); pA0 += 8;
+					vacc1 = _mm256_fmadd_ps(_mm256_loadu_ps(pA1), vB, vacc1); pA1 += 8;
+					vacc2 = _mm256_fmadd_ps(_mm256_loadu_ps(pA2), vB, vacc2); pA2 += 8;
+					vacc3 = _mm256_fmadd_ps(_mm256_loadu_ps(pA3), vB, vacc3); pA3 += 8;
+				}
+				for (k = Ac & 7; k > 0; k--)
+				{
+					regB = *pB++;
+					acc0 += (*pA0++) * regB;
+					acc1 += (*pA1++) * regB;
+					acc2 += (*pA2++) * regB;
+					acc3 += (*pA3++) * regB;
+				}
+				vacc0 = _mm256_hadd_ps(vacc0, vacc0); varr.v = _mm256_hadd_ps(vacc0, vacc0);
+				*pC -= acc0 + varr.arr[0] + varr.arr[4];
+				vacc1 = _mm256_hadd_ps(vacc1, vacc1); varr.v = _mm256_hadd_ps(vacc1, vacc1);
+				*(pC + 1) -= acc1 + varr.arr[0] + varr.arr[4];
+				vacc2 = _mm256_hadd_ps(vacc2, vacc2); varr.v = _mm256_hadd_ps(vacc2, vacc2);
+				*(pC + 2) -= acc2 + varr.arr[0] + varr.arr[4];
+				vacc3 = _mm256_hadd_ps(vacc3, vacc3); varr.v = _mm256_hadd_ps(vacc3, vacc3);
+				*(pC + 3) -= acc3 + varr.arr[0] + varr.arr[4];
+				pC += 4;
+
+				pA0 += jump;
+				pA1 += jump;
+				pA2 += jump;
+				pA3 += jump;
+			}
+
+			// bottom fringe of A
+			switch (Ar & 3)
+			{
+
+			case 0:
+				break;
+
+			case 1:
+				acc0 = 0.0f;
+				vacc0 = _mm256_setzero_ps();
+				pB = pfB;
+
+				for (k = M; k > 0; k -= 8)
+				{
+					vacc0 = _mm256_fmadd_ps(_mm256_loadu_ps(pA0), _mm256_loadu_ps(pB), vacc0);
+					pA0 += 8; pB += 8;
+				}
+				for (k = Ac & 7; k > 0; k--)
+				{
+					regB = *pB++;
+					acc0 += (*pA0++) * regB;
+				}
+				vacc0 = _mm256_hadd_ps(vacc0, vacc0); varr.v = _mm256_hadd_ps(vacc0, vacc0);
+				*pC -= acc0 + varr.arr[0] + varr.arr[4];
+				break;
+
+			case 2:
+				acc0 = 0.0f; acc1 = 0.0f;
+				vacc0 = _mm256_setzero_ps();
+				vacc1 = _mm256_setzero_ps();
+				pB = pfB;
+
+				for (k = M; k > 0; k -= 8)
+				{
+					vB = _mm256_loadu_ps(pB); pB += 8;
+					vacc0 = _mm256_fmadd_ps(_mm256_loadu_ps(pA0), vB, vacc0); pA0 += 8;
+					vacc1 = _mm256_fmadd_ps(_mm256_loadu_ps(pA1), vB, vacc1); pA1 += 8;
+				}
+				for (k = Ac & 7; k > 0; k--)
+				{
+					regB = *pB++;
+					acc0 += (*pA0++) * regB;
+					acc1 += (*pA1++) * regB;
+				}
+				vacc0 = _mm256_hadd_ps(vacc0, vacc0); varr.v = _mm256_hadd_ps(vacc0, vacc0);
+				*pC -= acc0 + varr.arr[0] + varr.arr[4];
+				vacc1 = _mm256_hadd_ps(vacc1, vacc1); varr.v = _mm256_hadd_ps(vacc1, vacc1);
+				*(pC + 1) -= acc1 + varr.arr[0] + varr.arr[4];
+				break;
+
+			case 3:
+				acc0 = 0.0f; acc1 = 0.0f; acc2 = 0.0f;
+				vacc0 = _mm256_setzero_ps();
+				vacc1 = _mm256_setzero_ps();
+				vacc2 = _mm256_setzero_ps();
+				pB = pfB;
+
+				for (k = M; k > 0; k -= 8)
+				{
+					vB = _mm256_loadu_ps(pB); pB += 8;
+					vacc0 = _mm256_fmadd_ps(_mm256_loadu_ps(pA0), vB, vacc0); pA0 += 8;
+					vacc1 = _mm256_fmadd_ps(_mm256_loadu_ps(pA1), vB, vacc1); pA1 += 8;
+					vacc2 = _mm256_fmadd_ps(_mm256_loadu_ps(pA2), vB, vacc2); pA2 += 8;
+				}
+				for (k = Ac & 7; k > 0; k--)
+				{
+					regB = *pB++;
+					acc0 += (*pA0++) * regB;
+					acc1 += (*pA1++) * regB;
+					acc2 += (*pA2++) * regB;
+				}
+				vacc0 = _mm256_hadd_ps(vacc0, vacc0); varr.v = _mm256_hadd_ps(vacc0, vacc0);
+				*pC -= acc0 + varr.arr[0] + varr.arr[4];
+				vacc1 = _mm256_hadd_ps(vacc1, vacc1); varr.v = _mm256_hadd_ps(vacc1, vacc1);
+				*(pC + 1) -= acc1 + varr.arr[0] + varr.arr[4];
+				vacc2 = _mm256_hadd_ps(vacc2, vacc2); varr.v = _mm256_hadd_ps(vacc2, vacc2);
+				*(pC + 2) -= acc2 + varr.arr[0] + varr.arr[4];
+				break;
+			}
+		}
+		inline void pvxm(float* const pfC, const float* const pfA, const float* const pfB,
+			const std::size_t Br, const std::size_t Bc, const std::size_t skipB) noexcept
+		{
+			float regA0; float regA1; float regA2; float regA3;
+			std::size_t jump = Bc + skipB;
+			const float* pA = pfA;
+			const float* pB0 = pfB;
+			const float* pB1 = pfB + jump;
+			const float* pB2 = pfB + 2 * jump;
+			const float* pB3 = pfB + 3 * jump;
+			float* pC;
+			std::size_t N = Br - (Br & 3);
+			std::size_t M = Bc - (Bc & 7);
+			jump = 3 * Bc + 4 * skipB;
+
+			std::size_t j, k;
+
+			__m256 vregA0; __m256 vregA1; __m256 vregA2; __m256 vregA3; __m256 vregC;
+
+			// major upper part of B
+			for (k = N; k > 0; k -= 4)
+			{
+				pC = pfC;
+
+				vregA0 = _mm256_broadcast_ss(pA);
+				vregA1 = _mm256_broadcast_ss(pA + 1);
+				vregA2 = _mm256_broadcast_ss(pA + 2);
+				vregA3 = _mm256_broadcast_ss(pA + 3);
+
+				for (j = M; j > 0; j -= 8)
+				{
+					vregC = _mm256_loadu_ps(pC);
+					vregC = _mm256_fmadd_ps(vregA0, _mm256_loadu_ps(pB0), vregC); pB0 += 8;
+					vregC = _mm256_fmadd_ps(vregA1, _mm256_loadu_ps(pB1), vregC); pB1 += 8;
+					vregC = _mm256_fmadd_ps(vregA2, _mm256_loadu_ps(pB2), vregC); pB2 += 8;
+					vregC = _mm256_fmadd_ps(vregA3, _mm256_loadu_ps(pB3), vregC); pB3 += 8;
+					_mm256_storeu_ps(pC, vregC); pC += 8;
+				}
+				regA0 = *pA;
+				regA1 = *(pA + 1);
+				regA2 = *(pA + 2);
+				regA3 = *(pA + 3);
+				pA += 4;
+				for (j = Bc - M; j > 0; j--)
+				{
+					*pC++ += (regA0 * (*pB0++) + regA1 * (*pB1++))
+						+ (regA2 * (*pB2++) + regA3 * (*pB3++));
+				}
+				pB0 += jump;
+				pB1 += jump;
+				pB2 += jump;
+				pB3 += jump;
+			}
+
+			// bottom fringe of B
+			switch (Br & 3)
+			{
+
+			case 0:
+				break;
+
+			case 1:
+				pC = pfC;
+				vregA0 = _mm256_broadcast_ss(pA);
+
+				for (j = M; j > 0; j -= 8)
+				{
+					_mm256_storeu_ps(pC, _mm256_fmadd_ps(vregA0,
+						_mm256_loadu_ps(pB0), _mm256_loadu_ps(pC)));
+					pB0 += 8; pC += 8;
+				}
+				regA0 = *pA;
+				for (j = Bc - M; j > 0; j--)
+				{
+					*pC++ += regA0 * (*pB0++);
+				}
+				break;
+
+			case 2:
+				pC = pfC;
+				vregA0 = _mm256_broadcast_ss(pA);
+				vregA1 = _mm256_broadcast_ss(pA + 1);
+
+				for (j = M; j > 0; j -= 8)
+				{
+					vregC = _mm256_loadu_ps(pC);
+					vregC = _mm256_fmadd_ps(vregA0, _mm256_loadu_ps(pB0), vregC); pB0 += 8;
+					vregC = _mm256_fmadd_ps(vregA1, _mm256_loadu_ps(pB1), vregC); pB1 += 8;
+					_mm256_storeu_ps(pC, vregC); pC += 8;
+				}
+				regA0 = *pA;
+				regA1 = *(pA + 1);
+				for (j = Bc - M; j > 0; j--)
+				{
+					*pC++ += regA0 * (*pB0++) + regA1 * (*pB1++);
+				}
+				break;
+
+			case 3:
+				pC = pfC;
+				vregA0 = _mm256_broadcast_ss(pA);
+				vregA1 = _mm256_broadcast_ss(pA + 1);
+				vregA2 = _mm256_broadcast_ss(pA + 2);
+
+				for (j = M; j > 0; j -= 8)
+				{
+					vregC = _mm256_loadu_ps(pC);
+					vregC = _mm256_fmadd_ps(vregA0, _mm256_loadu_ps(pB0), vregC); pB0 += 8;
+					vregC = _mm256_fmadd_ps(vregA1, _mm256_loadu_ps(pB1), vregC); pB1 += 8;
+					vregC = _mm256_fmadd_ps(vregA2, _mm256_loadu_ps(pB2), vregC); pB2 += 8;
+					_mm256_storeu_ps(pC, vregC); pC += 8;
+				}
+				regA0 = *pA;
+				regA1 = *(pA + 1);
+				regA2 = *(pA + 2);
+				for (j = Bc - M; j > 0; j--)
+				{
+					*pC++ += (regA0 * (*pB0++) + regA1 * (*pB1++)) + regA2 * (*pB2++);
+				}
+				break;
+			}
+		}
+		inline void p_vxm(float* const pfC, const float* const pfA, const float* const pfB,
+			const std::size_t Br, const std::size_t Bc, const std::size_t skipB) noexcept
+		{
+			float regA0; float regA1; float regA2; float regA3;
+			std::size_t jump = Bc + skipB;
+			const float* pA = pfA;
+			const float* pB0 = pfB;
+			const float* pB1 = pB0 + jump;
+			const float* pB2 = pB0 + 2 * jump;
+			const float* pB3 = pB0 + 3 * jump;
+			float* pC;
+			std::size_t N = Br - (Br & 3);
+			std::size_t M = Bc - (Bc & 7);
+			jump = 3 * Bc + 4 * skipB;
+
+			std::size_t j, k;
+
+			__m256 vregA0; __m256 vregA1; __m256 vregA2; __m256 vregA3; __m256 vregC;
+
+			// major upper part of B
+			for (k = N; k > 0; k -= 4)
+			{
+				pC = pfC;
+
+				vregA0 = _mm256_broadcast_ss(pA);
+				vregA1 = _mm256_broadcast_ss(pA + 1);
+				vregA2 = _mm256_broadcast_ss(pA + 2);
+				vregA3 = _mm256_broadcast_ss(pA + 3);
+
+				for (j = M; j > 0; j -= 8)
+				{
+					vregC = _mm256_loadu_ps(pC);
+					vregC = _mm256_fnmadd_ps(vregA0, _mm256_loadu_ps(pB0), vregC); pB0 += 8;
+					vregC = _mm256_fnmadd_ps(vregA1, _mm256_loadu_ps(pB1), vregC); pB1 += 8;
+					vregC = _mm256_fnmadd_ps(vregA2, _mm256_loadu_ps(pB2), vregC); pB2 += 8;
+					vregC = _mm256_fnmadd_ps(vregA3, _mm256_loadu_ps(pB3), vregC); pB3 += 8;
+					_mm256_storeu_ps(pC, vregC); pC += 8;
+				}
+				regA0 = *pA;
+				regA1 = *(pA + 1);
+				regA2 = *(pA + 2);
+				regA3 = *(pA + 3);
+				pA += 4;
+				for (j = Bc - M; j > 0; j--)
+				{
+					*pC++ -= (regA0 * (*pB0++) + regA1 * (*pB1++))
+						+ (regA2 * (*pB2++) + regA3 * (*pB3++));
+				}
+				pB0 += jump;
+				pB1 += jump;
+				pB2 += jump;
+				pB3 += jump;
+			}
+
+			// bottom fringe of B
+			switch (Br & 3)
+			{
+
+			case 0:
+				break;
+
+			case 1:
+				pC = pfC;
+				vregA0 = _mm256_broadcast_ss(pA);
+
+				for (j = M; j > 0; j -= 8)
+				{
+					_mm256_storeu_ps(pC, _mm256_fnmadd_ps(vregA0,
+						_mm256_loadu_ps(pB0), _mm256_loadu_ps(pC)));
+					pB0 += 8; pC += 8;
+				}
+				regA0 = *pA;
+				for (j = Bc - M; j > 0; j--)
+				{
+					*pC++ -= regA0 * (*pB0++);
+				}
+				break;
+
+			case 2:
+				pC = pfC;
+				vregA0 = _mm256_broadcast_ss(pA);
+				vregA1 = _mm256_broadcast_ss(pA + 1);
+
+				for (j = M; j > 0; j -= 8)
+				{
+					vregC = _mm256_loadu_ps(pC);
+					vregC = _mm256_fnmadd_ps(vregA0, _mm256_loadu_ps(pB0), vregC); pB0 += 8;
+					vregC = _mm256_fnmadd_ps(vregA1, _mm256_loadu_ps(pB1), vregC); pB1 += 8;
+					_mm256_storeu_ps(pC, vregC); pC += 8;
+				}
+				regA0 = *pA;
+				regA1 = *(pA + 1);
+				for (j = Bc - M; j > 0; j--)
+				{
+					*pC++ -= regA0 * (*pB0++) + regA1 * (*pB1++);
+				}
+				break;
+
+			case 3:
+				pC = pfC;
+				vregA0 = _mm256_broadcast_ss(pA);
+				vregA1 = _mm256_broadcast_ss(pA + 1);
+				vregA2 = _mm256_broadcast_ss(pA + 2);
+
+				for (j = M; j > 0; j -= 8)
+				{
+					vregC = _mm256_loadu_ps(pC);
+					vregC = _mm256_fnmadd_ps(vregA0, _mm256_loadu_ps(pB0), vregC); pB0 += 8;
+					vregC = _mm256_fnmadd_ps(vregA1, _mm256_loadu_ps(pB1), vregC); pB1 += 8;
+					vregC = _mm256_fnmadd_ps(vregA2, _mm256_loadu_ps(pB2), vregC); pB2 += 8;
+					_mm256_storeu_ps(pC, vregC); pC += 8;
+				}
+				regA0 = *pA;
+				regA1 = *(pA + 1);
+				regA2 = *(pA + 2);
+				for (j = Bc - M; j > 0; j--)
+				{
+					*pC++ -= (regA0 * (*pB0++) + regA1 * (*pB1++)) + regA2 * (*pB2++);
+				}
+				break;
+			}
+		}
+		inline void pvxv(float* const pfC, const float* const pfA, const float* const pfB,
+			const std::size_t Ar, const std::size_t Bc, const std::size_t skipC) noexcept
+		{
+			float regA0; float regA1; float regA2; float regA3; float regB;
+			std::size_t jump = Bc + skipC;
+			const float* pA = pfA;
+			const float* pB;
+			float* pC0 = pfC;
+			float* pC1 = pfC + jump;
+			float* pC2 = pfC + 2 * jump;
+			float* pC3 = pfC + 3 * jump;
+			std::size_t N = Ar - (Ar & 3);
+			std::size_t M = Bc - (Bc & 7);
+			jump = 3 * Bc + 4 * skipC;
+
+			std::size_t i, j;
+
+			__m256 vregA0; __m256 vregA1; __m256 vregA2; __m256 vregA3; __m256 vregB;
+
+			// major upper part of C
+			for (i = N; i > 0; i -= 4)
+			{
+				pB = pfB;
+				vregA0 = _mm256_broadcast_ss(pA);
+				vregA1 = _mm256_broadcast_ss(pA + 1);
+				vregA2 = _mm256_broadcast_ss(pA + 2);
+				vregA3 = _mm256_broadcast_ss(pA + 3);
+				for (j = M; j > 0; j -= 8)
+				{
+					vregB = _mm256_loadu_ps(pB); pB += 8;
+					_mm256_storeu_ps(pC0, _mm256_fmadd_ps(vregA0, vregB, _mm256_loadu_ps(pC0))); pC0 += 8;
+					_mm256_storeu_ps(pC1, _mm256_fmadd_ps(vregA1, vregB, _mm256_loadu_ps(pC1))); pC1 += 8;
+					_mm256_storeu_ps(pC2, _mm256_fmadd_ps(vregA2, vregB, _mm256_loadu_ps(pC2))); pC2 += 8;
+					_mm256_storeu_ps(pC3, _mm256_fmadd_ps(vregA3, vregB, _mm256_loadu_ps(pC3))); pC3 += 8;
+				}
+				regA0 = *pA;
+				regA1 = *(pA + 1);
+				regA2 = *(pA + 2);
+				regA3 = *(pA + 3);
+				pA += 4;
+				for (j = Bc - M; j > 0; j--)
+				{
+					regB = *pB++;
+					*pC0++ += regA0 * regB;
+					*pC1++ += regA1 * regB;
+					*pC2++ += regA2 * regB;
+					*pC3++ += regA3 * regB;
+				}
+				pC0 += jump;
+				pC1 += jump;
+				pC2 += jump;
+				pC3 += jump;
+			}
+
+			// bottom fringe of C
+			switch (Ar & 3)
+			{
+
+			case 0:
+				break;
+
+			case 1:
+				pB = pfB;
+				vregA0 = _mm256_broadcast_ss(pA);
+				for (j = M; j > 0; j -= 8)
+				{
+					_mm256_storeu_ps(pC0, _mm256_fmadd_ps(vregA0, _mm256_loadu_ps(pB), _mm256_loadu_ps(pC0)));
+					pB += 8; pC0 += 8;
+				}
+				regA0 = *pA;
+				for (j = Bc - M; j > 0; j--)
+				{
+					*pC0++ += regA0 * (*pB++);
+				}
+				break;
+
+			case 2:
+				pB = pfB;
+				vregA0 = _mm256_broadcast_ss(pA);
+				vregA1 = _mm256_broadcast_ss(pA + 1);
+				for (j = M; j > 0; j -= 8)
+				{
+					vregB = _mm256_loadu_ps(pB); pB += 8;
+					_mm256_storeu_ps(pC0, _mm256_fmadd_ps(vregA0, vregB, _mm256_loadu_ps(pC0))); pC0 += 8;
+					_mm256_storeu_ps(pC1, _mm256_fmadd_ps(vregA1, vregB, _mm256_loadu_ps(pC1))); pC1 += 8;
+				}
+				regA0 = *pA;
+				regA1 = *(pA + 1);
+				for (j = Bc - M; j > 0; j--)
+				{
+					regB = *pB++;
+					*pC0++ += regA0 * regB;
+					*pC1++ += regA1 * regB;
+				}
+				break;
+
+			case 3:
+				pB = pfB;
+				vregA0 = _mm256_broadcast_ss(pA);
+				vregA1 = _mm256_broadcast_ss(pA + 1);
+				vregA2 = _mm256_broadcast_ss(pA + 2);
+				for (j = M; j > 0; j -= 8)
+				{
+					vregB = _mm256_loadu_ps(pB); pB += 8;
+					_mm256_storeu_ps(pC0, _mm256_fmadd_ps(vregA0, vregB, _mm256_loadu_ps(pC0))); pC0 += 8;
+					_mm256_storeu_ps(pC1, _mm256_fmadd_ps(vregA1, vregB, _mm256_loadu_ps(pC1))); pC1 += 8;
+					_mm256_storeu_ps(pC2, _mm256_fmadd_ps(vregA2, vregB, _mm256_loadu_ps(pC2))); pC2 += 8;
+				}
+				regA0 = *pA;
+				regA1 = *(pA + 1);
+				regA2 = *(pA + 2);
+				for (j = Bc - M; j > 0; j--)
+				{
+					regB = *pB++;
+					*pC0++ += regA0 * regB;
+					*pC1++ += regA1 * regB;
+					*pC2++ += regA2 * regB;
+				}
+				break;
+			}
+		}
+		inline void p_vxv(float* const pfC, const float* const pfA, const float* const pfB,
+			const std::size_t Ar, const std::size_t Bc, const std::size_t skipC) noexcept
+		{
+			float regA0; float regA1; float regA2; float regA3; float regB;
+			std::size_t jump = Bc + skipC;
+			const float* pA = pfA;
+			const float* pB;
+			float* pC0 = pfC;
+			float* pC1 = pfC + jump;
+			float* pC2 = pfC + 2 * jump;
+			float* pC3 = pfC + 3 * jump;
+			std::size_t N = Ar - (Ar & 3);
+			std::size_t M = Bc - (Bc & 7);
+			jump = 3 * Bc + 4 * skipC;
+
+			std::size_t i, j;
+
+			__m256 vregA0; __m256 vregA1; __m256 vregA2; __m256 vregA3; __m256 vregB;
+
+			// major upper part of C
+			for (i = N; i > 0; i -= 4)
+			{
+				pB = pfB;
+				vregA0 = _mm256_broadcast_ss(pA);
+				vregA1 = _mm256_broadcast_ss(pA + 1);
+				vregA2 = _mm256_broadcast_ss(pA + 2);
+				vregA3 = _mm256_broadcast_ss(pA + 3);
+				for (j = M; j > 0; j -= 8)
+				{
+					vregB = _mm256_loadu_ps(pB); pB += 8;
+					_mm256_storeu_ps(pC0, _mm256_fnmadd_ps(vregA0, vregB, _mm256_loadu_ps(pC0))); pC0 += 8;
+					_mm256_storeu_ps(pC1, _mm256_fnmadd_ps(vregA1, vregB, _mm256_loadu_ps(pC1))); pC1 += 8;
+					_mm256_storeu_ps(pC2, _mm256_fnmadd_ps(vregA2, vregB, _mm256_loadu_ps(pC2))); pC2 += 8;
+					_mm256_storeu_ps(pC3, _mm256_fnmadd_ps(vregA3, vregB, _mm256_loadu_ps(pC3))); pC3 += 8;
+				}
+				regA0 = *pA;
+				regA1 = *(pA + 1);
+				regA2 = *(pA + 2);
+				regA3 = *(pA + 3);
+				pA += 4;
+				for (j = Bc - M; j > 0; j--)
+				{
+					regB = *pB++;
+					*pC0++ -= regA0 * regB;
+					*pC1++ -= regA1 * regB;
+					*pC2++ -= regA2 * regB;
+					*pC3++ -= regA3 * regB;
+				}
+				pC0 += jump;
+				pC1 += jump;
+				pC2 += jump;
+				pC3 += jump;
+			}
+
+			// bottom fringe of C
+			switch (Ar & 3)
+			{
+
+			case 0:
+				break;
+
+			case 1:
+				pB = pfB;
+				vregA0 = _mm256_broadcast_ss(pA);
+				for (j = M; j > 0; j -= 8)
+				{
+					_mm256_storeu_ps(pC0, _mm256_fnmadd_ps(vregA0, _mm256_loadu_ps(pB), _mm256_loadu_ps(pC0)));
+					pB += 8; pC0 += 8;
+				}
+				regA0 = *pA;
+				for (j = Bc - M; j > 0; j--)
+				{
+					*pC0++ -= regA0 * (*pB++);
+				}
+				break;
+
+			case 2:
+				pB = pfB;
+				vregA0 = _mm256_broadcast_ss(pA);
+				vregA1 = _mm256_broadcast_ss(pA + 1);
+				for (j = M; j > 0; j -= 8)
+				{
+					vregB = _mm256_loadu_ps(pB); pB += 8;
+					_mm256_storeu_ps(pC0, _mm256_fnmadd_ps(vregA0, vregB, _mm256_loadu_ps(pC0))); pC0 += 8;
+					_mm256_storeu_ps(pC1, _mm256_fnmadd_ps(vregA1, vregB, _mm256_loadu_ps(pC1))); pC1 += 8;
+				}
+				regA0 = *pA;
+				regA1 = *(pA + 1);
+				for (j = Bc - M; j > 0; j--)
+				{
+					regB = *pB++;
+					*pC0++ -= regA0 * regB;
+					*pC1++ -= regA1 * regB;
+				}
+				break;
+
+			case 3:
+				pB = pfB;
+				vregA0 = _mm256_broadcast_ss(pA);
+				vregA1 = _mm256_broadcast_ss(pA + 1);
+				vregA2 = _mm256_broadcast_ss(pA + 2);
+				for (j = M; j > 0; j -= 8)
+				{
+					vregB = _mm256_loadu_ps(pB); pB += 8;
+					_mm256_storeu_ps(pC0, _mm256_fnmadd_ps(vregA0, vregB, _mm256_loadu_ps(pC0))); pC0 += 8;
+					_mm256_storeu_ps(pC1, _mm256_fnmadd_ps(vregA1, vregB, _mm256_loadu_ps(pC1))); pC1 += 8;
+					_mm256_storeu_ps(pC2, _mm256_fnmadd_ps(vregA2, vregB, _mm256_loadu_ps(pC2))); pC2 += 8;
+				}
+				regA0 = *pA;
+				regA1 = *(pA + 1);
+				regA2 = *(pA + 2);
+				for (j = Bc - M; j > 0; j--)
+				{
+					regB = *pB++;
+					*pC0++ -= regA0 * regB;
+					*pC1++ -= regA1 * regB;
+					*pC2++ -= regA2 * regB;
+				}
+				break;
+			}
+		}
+
+		void pmxm(float* const pfC, const float* const pfA, const float* const pfB,
+			const std::size_t Ar, const std::size_t Bc, const std::size_t Ac,
+			const std::size_t skipC, const std::size_t skipA, const std::size_t skipB) noexcept
+		{
+			const float* pB; float* pC;
+
+			const float* pA0; const float* pA1; const float* pA2; const float* pA3;
+			const float* pA4; const float* pA5; const float* pA6; const float* pA7;
+
+			float temp[8];
+
+			std::size_t jumpA = Ac + skipA;
+			std::size_t jumpB = Bc + skipB;
+			std::size_t jumpC = Bc + skipC;
+			std::size_t M = Ar - (Ar & 7);
+			std::size_t N = Bc - (Bc & 7);
+			std::size_t r = (Bc & 7) * sizeof(float);
+
+			std::size_t i, j, k, iOut, jOut, kOut, imax, jmax, kmax;
+
+			__m256 vacc0; __m256 vacc1; __m256 vacc2; __m256 vacc3;
+			__m256 vacc4; __m256 vacc5; __m256 vacc6; __m256 vacc7;
+			__m256 vregB;
+
+			// major upper part of C
+			for (iOut = 0; iOut < Ar; iOut += WELP_MATRIX_AVX_ps_mm_Ti)
+			{
+				imax = (iOut + WELP_MATRIX_AVX_ps_mm_Ti < Ar) ? iOut + WELP_MATRIX_AVX_ps_mm_Ti : M;
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (i = iOut; i < imax; i += 8)
+						{
+							for (j = jOut; j < jmax; j += 8)
+							{
+								pB = (pfB + j) + (jumpB * kOut);
+								pC = (pfC + j) + (jumpC * i);
+
+								pA0 = (pfA + kOut) + (jumpA * i); pA1 = pA0 + jumpA;
+								pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+								pA4 = pA0 + 4 * jumpA; pA5 = pA0 + 5 * jumpA;
+								pA6 = pA0 + 6 * jumpA; pA7 = pA0 + 7 * jumpA;
+
+								vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+								vacc2 = _mm256_loadu_ps(pC + 2 * jumpC); vacc3 = _mm256_loadu_ps(pC + 3 * jumpC);
+								vacc4 = _mm256_loadu_ps(pC + 4 * jumpC); vacc5 = _mm256_loadu_ps(pC + 5 * jumpC);
+								vacc6 = _mm256_loadu_ps(pC + 6 * jumpC); vacc7 = _mm256_loadu_ps(pC + 7 * jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+								for (k = kOut; k < kmax; k++)
+								{
+									vregB = _mm256_loadu_ps(pB); pB += jumpB;
+									vacc0 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+									vacc1 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+									vacc2 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA2++), vregB, vacc2);
+									vacc3 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA3++), vregB, vacc3);
+									vacc4 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA4++), vregB, vacc4);
+									vacc5 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA5++), vregB, vacc5);
+									vacc6 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA6++), vregB, vacc6);
+									vacc7 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA7++), vregB, vacc7);
+								}
+
+								_mm256_storeu_ps(pC, vacc0); _mm256_storeu_ps(pC + jumpC, vacc1);
+								_mm256_storeu_ps(pC + 2 * jumpC, vacc2); _mm256_storeu_ps(pC + 3 * jumpC, vacc3);
+								_mm256_storeu_ps(pC + 4 * jumpC, vacc4); _mm256_storeu_ps(pC + 5 * jumpC, vacc5);
+								_mm256_storeu_ps(pC + 6 * jumpC, vacc6); _mm256_storeu_ps(pC + 7 * jumpC, vacc7);
+							}
+							if ((jmax == N) && (r != 0))
+							{
+								pB = (pfB + N) + (jumpB * kOut);
+								pC = (pfC + N) + (jumpC * i);
+
+								pA0 = (pfA + kOut) + (jumpA * i); pA1 = pA0 + jumpA;
+								pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+								pA4 = pA0 + 4 * jumpA; pA5 = pA0 + 5 * jumpA;
+								pA6 = pA0 + 6 * jumpA; pA7 = pA0 + 7 * jumpA;
+
+								vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+								vacc2 = _mm256_loadu_ps(pC + 2 * jumpC); vacc3 = _mm256_loadu_ps(pC + 3 * jumpC);
+								vacc4 = _mm256_loadu_ps(pC + 4 * jumpC); vacc5 = _mm256_loadu_ps(pC + 5 * jumpC);
+								vacc6 = _mm256_loadu_ps(pC + 6 * jumpC); vacc7 = _mm256_loadu_ps(pC + 7 * jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+								for (k = kOut; k < kmax; k++)
+								{
+									vregB = _mm256_loadu_ps(pB); pB += jumpB;
+									vacc0 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+									vacc1 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+									vacc2 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA2++), vregB, vacc2);
+									vacc3 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA3++), vregB, vacc3);
+									vacc4 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA4++), vregB, vacc4);
+									vacc5 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA5++), vregB, vacc5);
+									vacc6 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA6++), vregB, vacc6);
+									vacc7 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA7++), vregB, vacc7);
+								}
+
+								_mm256_storeu_ps(static_cast<float*>(temp), vacc0); std::memcpy(pC, static_cast<float*>(temp), r);
+								_mm256_storeu_ps(static_cast<float*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<float*>(temp), r);
+								_mm256_storeu_ps(static_cast<float*>(temp), vacc2); std::memcpy(pC + 2 * jumpC, static_cast<float*>(temp), r);
+								_mm256_storeu_ps(static_cast<float*>(temp), vacc3); std::memcpy(pC + 3 * jumpC, static_cast<float*>(temp), r);
+								_mm256_storeu_ps(static_cast<float*>(temp), vacc4); std::memcpy(pC + 4 * jumpC, static_cast<float*>(temp), r);
+								_mm256_storeu_ps(static_cast<float*>(temp), vacc5); std::memcpy(pC + 5 * jumpC, static_cast<float*>(temp), r);
+								_mm256_storeu_ps(static_cast<float*>(temp), vacc6); std::memcpy(pC + 6 * jumpC, static_cast<float*>(temp), r);
+								_mm256_storeu_ps(static_cast<float*>(temp), vacc7); std::memcpy(pC + 7 * jumpC, static_cast<float*>(temp), r);
+							}
+						}
+					}
+				}
+			}
+
+			// bottom fringe of C
+			switch (Ar & 7)
+			{
+
+			case 0:
+				break;
+
+			case 1:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M);
+
+							vacc0 = _mm256_loadu_ps(pC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+							}
+
+							_mm256_storeu_ps(pC, vacc0);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M);
+
+							vacc0 = _mm256_loadu_ps(pC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+							}
+
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc0); std::memcpy(pC, static_cast<float*>(temp), r);
+						}
+					}
+				}
+				break;
+
+			case 2:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+
+							vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+								vacc1 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+							}
+
+							_mm256_storeu_ps(pC, vacc0); _mm256_storeu_ps(pC + jumpC, vacc1);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+
+							vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+								vacc1 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+							}
+
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc0); std::memcpy(pC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<float*>(temp), r);
+						}
+					}
+				}
+				break;
+
+			case 3:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA;
+
+							vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+							vacc2 = _mm256_loadu_ps(pC + 2 * jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+								vacc1 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+								vacc2 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA2++), vregB, vacc2);
+							}
+
+							_mm256_storeu_ps(pC, vacc0); _mm256_storeu_ps(pC + jumpC, vacc1);
+							_mm256_storeu_ps(pC + 2 * jumpC, vacc2);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA;
+
+							vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+							vacc2 = _mm256_loadu_ps(pC + 2 * jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+								vacc1 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+								vacc2 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA2++), vregB, vacc2);
+							}
+
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc0); std::memcpy(pC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc2); std::memcpy(pC + 2 * jumpC, static_cast<float*>(temp), r);
+						}
+					}
+				}
+				break;
+
+			case 4:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+
+							vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+							vacc2 = _mm256_loadu_ps(pC + 2 * jumpC); vacc3 = _mm256_loadu_ps(pC + 3 * jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+								vacc1 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+								vacc2 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA2++), vregB, vacc2);
+								vacc3 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA3++), vregB, vacc3);
+							}
+
+							_mm256_storeu_ps(pC, vacc0); _mm256_storeu_ps(pC + jumpC, vacc1);
+							_mm256_storeu_ps(pC + 2 * jumpC, vacc2); _mm256_storeu_ps(pC + 3 * jumpC, vacc3);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+
+							vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+							vacc2 = _mm256_loadu_ps(pC + 2 * jumpC); vacc3 = _mm256_loadu_ps(pC + 3 * jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+								vacc1 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+								vacc2 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA2++), vregB, vacc2);
+								vacc3 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA3++), vregB, vacc3);
+							}
+
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc0); std::memcpy(pC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc2); std::memcpy(pC + 2 * jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc3); std::memcpy(pC + 3 * jumpC, static_cast<float*>(temp), r);
+						}
+					}
+				}
+				break;
+
+			case 5:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+							pA4 = pA0 + 4 * jumpA;
+
+							vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+							vacc2 = _mm256_loadu_ps(pC + 2 * jumpC); vacc3 = _mm256_loadu_ps(pC + 3 * jumpC);
+							vacc4 = _mm256_loadu_ps(pC + 4 * jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+								vacc1 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+								vacc2 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA2++), vregB, vacc2);
+								vacc3 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA3++), vregB, vacc3);
+								vacc4 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA4++), vregB, vacc4);
+							}
+
+							_mm256_storeu_ps(pC, vacc0); _mm256_storeu_ps(pC + jumpC, vacc1);
+							_mm256_storeu_ps(pC + 2 * jumpC, vacc2); _mm256_storeu_ps(pC + 3 * jumpC, vacc3);
+							_mm256_storeu_ps(pC + 4 * jumpC, vacc4);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+							pA4 = pA0 + 4 * jumpA;
+
+							vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+							vacc2 = _mm256_loadu_ps(pC + 2 * jumpC); vacc3 = _mm256_loadu_ps(pC + 3 * jumpC);
+							vacc4 = _mm256_loadu_ps(pC + 4 * jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+								vacc1 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+								vacc2 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA2++), vregB, vacc2);
+								vacc3 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA3++), vregB, vacc3);
+								vacc4 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA4++), vregB, vacc4);
+							}
+
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc0); std::memcpy(pC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc2); std::memcpy(pC + 2 * jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc3); std::memcpy(pC + 3 * jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc4); std::memcpy(pC + 4 * jumpC, static_cast<float*>(temp), r);
+						}
+					}
+				}
+				break;
+
+			case 6:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+							pA4 = pA0 + 4 * jumpA; pA5 = pA0 + 5 * jumpA;
+
+							vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+							vacc2 = _mm256_loadu_ps(pC + 2 * jumpC); vacc3 = _mm256_loadu_ps(pC + 3 * jumpC);
+							vacc4 = _mm256_loadu_ps(pC + 4 * jumpC); vacc5 = _mm256_loadu_ps(pC + 5 * jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+								vacc1 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+								vacc2 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA2++), vregB, vacc2);
+								vacc3 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA3++), vregB, vacc3);
+								vacc4 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA4++), vregB, vacc4);
+								vacc5 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA5++), vregB, vacc5);
+							}
+
+							_mm256_storeu_ps(pC, vacc0); _mm256_storeu_ps(pC + jumpC, vacc1);
+							_mm256_storeu_ps(pC + 2 * jumpC, vacc2); _mm256_storeu_ps(pC + 3 * jumpC, vacc3);
+							_mm256_storeu_ps(pC + 4 * jumpC, vacc4); _mm256_storeu_ps(pC + 5 * jumpC, vacc5);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+							pA4 = pA0 + 4 * jumpA; pA5 = pA0 + 5 * jumpA;
+
+							vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+							vacc2 = _mm256_loadu_ps(pC + 2 * jumpC); vacc3 = _mm256_loadu_ps(pC + 3 * jumpC);
+							vacc4 = _mm256_loadu_ps(pC + 4 * jumpC); vacc5 = _mm256_loadu_ps(pC + 5 * jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+								vacc1 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+								vacc2 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA2++), vregB, vacc2);
+								vacc3 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA3++), vregB, vacc3);
+								vacc4 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA4++), vregB, vacc4);
+								vacc5 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA5++), vregB, vacc5);
+							}
+
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc0); std::memcpy(pC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc2); std::memcpy(pC + 2 * jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc3); std::memcpy(pC + 3 * jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc4); std::memcpy(pC + 4 * jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc5); std::memcpy(pC + 5 * jumpC, static_cast<float*>(temp), r);
+						}
+					}
+				}
+				break;
+
+			case 7:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+							pA4 = pA0 + 4 * jumpA; pA5 = pA0 + 5 * jumpA;
+							pA6 = pA0 + 6 * jumpA;
+
+							vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+							vacc2 = _mm256_loadu_ps(pC + 2 * jumpC); vacc3 = _mm256_loadu_ps(pC + 3 * jumpC);
+							vacc4 = _mm256_loadu_ps(pC + 4 * jumpC); vacc5 = _mm256_loadu_ps(pC + 5 * jumpC);
+							vacc6 = _mm256_loadu_ps(pC + 6 * jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+								vacc1 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+								vacc2 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA2++), vregB, vacc2);
+								vacc3 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA3++), vregB, vacc3);
+								vacc4 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA4++), vregB, vacc4);
+								vacc5 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA5++), vregB, vacc5);
+								vacc6 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA6++), vregB, vacc6);
+							}
+
+							_mm256_storeu_ps(pC, vacc0); _mm256_storeu_ps(pC + jumpC, vacc1);
+							_mm256_storeu_ps(pC + 2 * jumpC, vacc2); _mm256_storeu_ps(pC + 3 * jumpC, vacc3);
+							_mm256_storeu_ps(pC + 4 * jumpC, vacc4); _mm256_storeu_ps(pC + 5 * jumpC, vacc5);
+							_mm256_storeu_ps(pC + 6 * jumpC, vacc6);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+							pA4 = pA0 + 4 * jumpA; pA5 = pA0 + 5 * jumpA;
+							pA6 = pA0 + 6 * jumpA;
+
+							vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+							vacc2 = _mm256_loadu_ps(pC + 2 * jumpC); vacc3 = _mm256_loadu_ps(pC + 3 * jumpC);
+							vacc4 = _mm256_loadu_ps(pC + 4 * jumpC); vacc5 = _mm256_loadu_ps(pC + 5 * jumpC);
+							vacc6 = _mm256_loadu_ps(pC + 6 * jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+								vacc1 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+								vacc2 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA2++), vregB, vacc2);
+								vacc3 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA3++), vregB, vacc3);
+								vacc4 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA4++), vregB, vacc4);
+								vacc5 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA5++), vregB, vacc5);
+								vacc6 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA6++), vregB, vacc6);
+							}
+
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc0); std::memcpy(pC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc2); std::memcpy(pC + 2 * jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc3); std::memcpy(pC + 3 * jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc4); std::memcpy(pC + 4 * jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc5); std::memcpy(pC + 5 * jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc6); std::memcpy(pC + 6 * jumpC, static_cast<float*>(temp), r);
+						}
+					}
+				}
+				break;
+			}
+		}
+		void p_mxm(float* const pfC, const float* const pfA, const float* const pfB,
+			const std::size_t Ar, const std::size_t Bc, const std::size_t Ac,
+			const std::size_t skipC, const std::size_t skipA, const std::size_t skipB) noexcept
+		{
+			const float* pB; float* pC;
+
+			const float* pA0; const float* pA1; const float* pA2; const float* pA3;
+			const float* pA4; const float* pA5; const float* pA6; const float* pA7;
+
+			float temp[8];
+
+			std::size_t jumpA = Ac + skipA;
+			std::size_t jumpB = Bc + skipB;
+			std::size_t jumpC = Bc + skipC;
+			std::size_t M = Ar - (Ar & 7);
+			std::size_t N = Bc - (Bc & 7);
+			std::size_t r = (Bc & 7) * sizeof(float);
+
+			std::size_t i, j, k, iOut, jOut, kOut, imax, jmax, kmax;
+
+			__m256 vacc0; __m256 vacc1; __m256 vacc2; __m256 vacc3;
+			__m256 vacc4; __m256 vacc5; __m256 vacc6; __m256 vacc7;
+			__m256 vregB;
+
+			// major upper part of C
+			for (iOut = 0; iOut < Ar; iOut += WELP_MATRIX_AVX_ps_mm_Ti)
+			{
+				imax = (iOut + WELP_MATRIX_AVX_ps_mm_Ti < Ar) ? iOut + WELP_MATRIX_AVX_ps_mm_Ti : M;
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (i = iOut; i < imax; i += 8)
+						{
+							for (j = jOut; j < jmax; j += 8)
+							{
+								pB = (pfB + j) + (jumpB * kOut);
+								pC = (pfC + j) + (jumpC * i);
+
+								pA0 = (pfA + kOut) + (jumpA * i); pA1 = pA0 + jumpA;
+								pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+								pA4 = pA0 + 4 * jumpA; pA5 = pA0 + 5 * jumpA;
+								pA6 = pA0 + 6 * jumpA; pA7 = pA0 + 7 * jumpA;
+
+								vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+								vacc2 = _mm256_loadu_ps(pC + 2 * jumpC); vacc3 = _mm256_loadu_ps(pC + 3 * jumpC);
+								vacc4 = _mm256_loadu_ps(pC + 4 * jumpC); vacc5 = _mm256_loadu_ps(pC + 5 * jumpC);
+								vacc6 = _mm256_loadu_ps(pC + 6 * jumpC); vacc7 = _mm256_loadu_ps(pC + 7 * jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+								for (k = kOut; k < kmax; k++)
+								{
+									vregB = _mm256_loadu_ps(pB); pB += jumpB;
+									vacc0 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+									vacc1 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+									vacc2 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA2++), vregB, vacc2);
+									vacc3 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA3++), vregB, vacc3);
+									vacc4 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA4++), vregB, vacc4);
+									vacc5 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA5++), vregB, vacc5);
+									vacc6 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA6++), vregB, vacc6);
+									vacc7 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA7++), vregB, vacc7);
+								}
+
+								_mm256_storeu_ps(pC, vacc0); _mm256_storeu_ps(pC + jumpC, vacc1);
+								_mm256_storeu_ps(pC + 2 * jumpC, vacc2); _mm256_storeu_ps(pC + 3 * jumpC, vacc3);
+								_mm256_storeu_ps(pC + 4 * jumpC, vacc4); _mm256_storeu_ps(pC + 5 * jumpC, vacc5);
+								_mm256_storeu_ps(pC + 6 * jumpC, vacc6); _mm256_storeu_ps(pC + 7 * jumpC, vacc7);
+							}
+							if ((jmax == N) && (r != 0))
+							{
+								pB = (pfB + N) + (jumpB * kOut);
+								pC = (pfC + N) + (jumpC * i);
+
+								pA0 = (pfA + kOut) + (jumpA * i); pA1 = pA0 + jumpA;
+								pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+								pA4 = pA0 + 4 * jumpA; pA5 = pA0 + 5 * jumpA;
+								pA6 = pA0 + 6 * jumpA; pA7 = pA0 + 7 * jumpA;
+
+								vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+								vacc2 = _mm256_loadu_ps(pC + 2 * jumpC); vacc3 = _mm256_loadu_ps(pC + 3 * jumpC);
+								vacc4 = _mm256_loadu_ps(pC + 4 * jumpC); vacc5 = _mm256_loadu_ps(pC + 5 * jumpC);
+								vacc6 = _mm256_loadu_ps(pC + 6 * jumpC); vacc7 = _mm256_loadu_ps(pC + 7 * jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+								for (k = kOut; k < kmax; k++)
+								{
+									vregB = _mm256_loadu_ps(pB); pB += jumpB;
+									vacc0 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+									vacc1 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+									vacc2 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA2++), vregB, vacc2);
+									vacc3 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA3++), vregB, vacc3);
+									vacc4 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA4++), vregB, vacc4);
+									vacc5 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA5++), vregB, vacc5);
+									vacc6 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA6++), vregB, vacc6);
+									vacc7 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA7++), vregB, vacc7);
+								}
+
+								_mm256_storeu_ps(static_cast<float*>(temp), vacc0); std::memcpy(pC, static_cast<float*>(temp), r);
+								_mm256_storeu_ps(static_cast<float*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<float*>(temp), r);
+								_mm256_storeu_ps(static_cast<float*>(temp), vacc2); std::memcpy(pC + 2 * jumpC, static_cast<float*>(temp), r);
+								_mm256_storeu_ps(static_cast<float*>(temp), vacc3); std::memcpy(pC + 3 * jumpC, static_cast<float*>(temp), r);
+								_mm256_storeu_ps(static_cast<float*>(temp), vacc4); std::memcpy(pC + 4 * jumpC, static_cast<float*>(temp), r);
+								_mm256_storeu_ps(static_cast<float*>(temp), vacc5); std::memcpy(pC + 5 * jumpC, static_cast<float*>(temp), r);
+								_mm256_storeu_ps(static_cast<float*>(temp), vacc6); std::memcpy(pC + 6 * jumpC, static_cast<float*>(temp), r);
+								_mm256_storeu_ps(static_cast<float*>(temp), vacc7); std::memcpy(pC + 7 * jumpC, static_cast<float*>(temp), r);
+							}
+						}
+					}
+				}
+			}
+
+			// bottom fringe of C
+			switch (Ar & 7)
+			{
+
+			case 0:
+				break;
+
+			case 1:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M);
+
+							vacc0 = _mm256_loadu_ps(pC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+							}
+
+							_mm256_storeu_ps(pC, vacc0);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M);
+
+							vacc0 = _mm256_loadu_ps(pC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+							}
+
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc0); std::memcpy(pC, static_cast<float*>(temp), r);
+						}
+					}
+				}
+				break;
+
+			case 2:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+
+							vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+								vacc1 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+							}
+
+							_mm256_storeu_ps(pC, vacc0); _mm256_storeu_ps(pC + jumpC, vacc1);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+
+							vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+								vacc1 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+							}
+
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc0); std::memcpy(pC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<float*>(temp), r);
+						}
+					}
+				}
+				break;
+
+			case 3:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA;
+
+							vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+							vacc2 = _mm256_loadu_ps(pC + 2 * jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+								vacc1 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+								vacc2 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA2++), vregB, vacc2);
+							}
+
+							_mm256_storeu_ps(pC, vacc0); _mm256_storeu_ps(pC + jumpC, vacc1);
+							_mm256_storeu_ps(pC + 2 * jumpC, vacc2);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA;
+
+							vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+							vacc2 = _mm256_loadu_ps(pC + 2 * jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+								vacc1 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+								vacc2 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA2++), vregB, vacc2);
+							}
+
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc0); std::memcpy(pC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc2); std::memcpy(pC + 2 * jumpC, static_cast<float*>(temp), r);
+						}
+					}
+				}
+				break;
+
+			case 4:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+
+							vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+							vacc2 = _mm256_loadu_ps(pC + 2 * jumpC); vacc3 = _mm256_loadu_ps(pC + 3 * jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+								vacc1 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+								vacc2 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA2++), vregB, vacc2);
+								vacc3 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA3++), vregB, vacc3);
+							}
+
+							_mm256_storeu_ps(pC, vacc0); _mm256_storeu_ps(pC + jumpC, vacc1);
+							_mm256_storeu_ps(pC + 2 * jumpC, vacc2); _mm256_storeu_ps(pC + 3 * jumpC, vacc3);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+
+							vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+							vacc2 = _mm256_loadu_ps(pC + 2 * jumpC); vacc3 = _mm256_loadu_ps(pC + 3 * jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+								vacc1 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+								vacc2 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA2++), vregB, vacc2);
+								vacc3 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA3++), vregB, vacc3);
+							}
+
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc0); std::memcpy(pC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc2); std::memcpy(pC + 2 * jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc3); std::memcpy(pC + 3 * jumpC, static_cast<float*>(temp), r);
+						}
+					}
+				}
+				break;
+
+			case 5:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+							pA4 = pA0 + 4 * jumpA;
+
+							vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+							vacc2 = _mm256_loadu_ps(pC + 2 * jumpC); vacc3 = _mm256_loadu_ps(pC + 3 * jumpC);
+							vacc4 = _mm256_loadu_ps(pC + 4 * jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+								vacc1 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+								vacc2 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA2++), vregB, vacc2);
+								vacc3 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA3++), vregB, vacc3);
+								vacc4 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA4++), vregB, vacc4);
+							}
+
+							_mm256_storeu_ps(pC, vacc0); _mm256_storeu_ps(pC + jumpC, vacc1);
+							_mm256_storeu_ps(pC + 2 * jumpC, vacc2); _mm256_storeu_ps(pC + 3 * jumpC, vacc3);
+							_mm256_storeu_ps(pC + 4 * jumpC, vacc4);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+							pA4 = pA0 + 4 * jumpA;
+
+							vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+							vacc2 = _mm256_loadu_ps(pC + 2 * jumpC); vacc3 = _mm256_loadu_ps(pC + 3 * jumpC);
+							vacc4 = _mm256_loadu_ps(pC + 4 * jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+								vacc1 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+								vacc2 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA2++), vregB, vacc2);
+								vacc3 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA3++), vregB, vacc3);
+								vacc4 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA4++), vregB, vacc4);
+							}
+
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc0); std::memcpy(pC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc2); std::memcpy(pC + 2 * jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc3); std::memcpy(pC + 3 * jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc4); std::memcpy(pC + 4 * jumpC, static_cast<float*>(temp), r);
+						}
+					}
+				}
+				break;
+
+			case 6:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+							pA4 = pA0 + 4 * jumpA; pA5 = pA0 + 5 * jumpA;
+
+							vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+							vacc2 = _mm256_loadu_ps(pC + 2 * jumpC); vacc3 = _mm256_loadu_ps(pC + 3 * jumpC);
+							vacc4 = _mm256_loadu_ps(pC + 4 * jumpC); vacc5 = _mm256_loadu_ps(pC + 5 * jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+								vacc1 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+								vacc2 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA2++), vregB, vacc2);
+								vacc3 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA3++), vregB, vacc3);
+								vacc4 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA4++), vregB, vacc4);
+								vacc5 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA5++), vregB, vacc5);
+							}
+
+							_mm256_storeu_ps(pC, vacc0); _mm256_storeu_ps(pC + jumpC, vacc1);
+							_mm256_storeu_ps(pC + 2 * jumpC, vacc2); _mm256_storeu_ps(pC + 3 * jumpC, vacc3);
+							_mm256_storeu_ps(pC + 4 * jumpC, vacc4); _mm256_storeu_ps(pC + 5 * jumpC, vacc5);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+							pA4 = pA0 + 4 * jumpA; pA5 = pA0 + 5 * jumpA;
+
+							vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+							vacc2 = _mm256_loadu_ps(pC + 2 * jumpC); vacc3 = _mm256_loadu_ps(pC + 3 * jumpC);
+							vacc4 = _mm256_loadu_ps(pC + 4 * jumpC); vacc5 = _mm256_loadu_ps(pC + 5 * jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+								vacc1 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+								vacc2 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA2++), vregB, vacc2);
+								vacc3 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA3++), vregB, vacc3);
+								vacc4 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA4++), vregB, vacc4);
+								vacc5 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA5++), vregB, vacc5);
+							}
+
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc0); std::memcpy(pC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc2); std::memcpy(pC + 2 * jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc3); std::memcpy(pC + 3 * jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc4); std::memcpy(pC + 4 * jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc5); std::memcpy(pC + 5 * jumpC, static_cast<float*>(temp), r);
+						}
+					}
+				}
+				break;
+
+			case 7:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+							pA4 = pA0 + 4 * jumpA; pA5 = pA0 + 5 * jumpA;
+							pA6 = pA0 + 6 * jumpA;
+
+							vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+							vacc2 = _mm256_loadu_ps(pC + 2 * jumpC); vacc3 = _mm256_loadu_ps(pC + 3 * jumpC);
+							vacc4 = _mm256_loadu_ps(pC + 4 * jumpC); vacc5 = _mm256_loadu_ps(pC + 5 * jumpC);
+							vacc6 = _mm256_loadu_ps(pC + 6 * jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+								vacc1 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+								vacc2 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA2++), vregB, vacc2);
+								vacc3 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA3++), vregB, vacc3);
+								vacc4 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA4++), vregB, vacc4);
+								vacc5 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA5++), vregB, vacc5);
+								vacc6 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA6++), vregB, vacc6);
+							}
+
+							_mm256_storeu_ps(pC, vacc0); _mm256_storeu_ps(pC + jumpC, vacc1);
+							_mm256_storeu_ps(pC + 2 * jumpC, vacc2); _mm256_storeu_ps(pC + 3 * jumpC, vacc3);
+							_mm256_storeu_ps(pC + 4 * jumpC, vacc4); _mm256_storeu_ps(pC + 5 * jumpC, vacc5);
+							_mm256_storeu_ps(pC + 6 * jumpC, vacc6);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+							pA4 = pA0 + 4 * jumpA; pA5 = pA0 + 5 * jumpA;
+							pA6 = pA0 + 6 * jumpA;
+
+							vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+							vacc2 = _mm256_loadu_ps(pC + 2 * jumpC); vacc3 = _mm256_loadu_ps(pC + 3 * jumpC);
+							vacc4 = _mm256_loadu_ps(pC + 4 * jumpC); vacc5 = _mm256_loadu_ps(pC + 5 * jumpC);
+							vacc6 = _mm256_loadu_ps(pC + 6 * jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+								vacc1 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+								vacc2 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA2++), vregB, vacc2);
+								vacc3 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA3++), vregB, vacc3);
+								vacc4 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA4++), vregB, vacc4);
+								vacc5 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA5++), vregB, vacc5);
+								vacc6 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA6++), vregB, vacc6);
+							}
+
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc0); std::memcpy(pC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc2); std::memcpy(pC + 2 * jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc3); std::memcpy(pC + 3 * jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc4); std::memcpy(pC + 4 * jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc5); std::memcpy(pC + 5 * jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc6); std::memcpy(pC + 6 * jumpC, static_cast<float*>(temp), r);
+						}
+					}
+				}
+				break;
+			}
+		}
+
+		void pmxm(int* const pfC, const int* const pfA, const int* const pfB,
+			const std::size_t Ar, const std::size_t Bc, const std::size_t Ac,
+			const std::size_t skipC, const std::size_t skipA, const std::size_t skipB) noexcept
+		{
+			const int* pB; int* pC;
+
+			const int* pA0; const int* pA1; const int* pA2; const int* pA3;
+			const int* pA4; const int* pA5; const int* pA6; const int* pA7;
+
+			int temp[8];
+
+			std::size_t jumpA = Ac + skipA;
+			std::size_t jumpB = Bc + skipB;
+			std::size_t jumpC = Bc + skipC;
+			std::size_t M = Ar - (Ar & 7);
+			std::size_t N = Bc - (Bc & 7);
+			std::size_t r = (Bc & 7) * sizeof(int);
+
+			std::size_t i, j, k, iOut, jOut, kOut, imax, jmax, kmax;
+
+			__m256i vacc0; __m256i vacc1; __m256i vacc2; __m256i vacc3;
+			__m256i vacc4; __m256i vacc5; __m256i vacc6; __m256i vacc7;
+			__m256i vregB;
+
+			// major upper part of C
+			for (iOut = 0; iOut < Ar; iOut += WELP_MATRIX_AVX_ps_mm_Ti)
+			{
+				imax = (iOut + WELP_MATRIX_AVX_ps_mm_Ti < Ar) ? iOut + WELP_MATRIX_AVX_ps_mm_Ti : M;
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (i = iOut; i < imax; i += 8)
+						{
+							for (j = jOut; j < jmax; j += 8)
+							{
+								pB = (pfB + j) + (jumpB * kOut);
+								pC = (pfC + j) + (jumpC * i);
+
+								pA0 = (pfA + kOut) + (jumpA * i); pA1 = pA0 + jumpA;
+								pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+								pA4 = pA0 + 4 * jumpA; pA5 = pA0 + 5 * jumpA;
+								pA6 = pA0 + 6 * jumpA; pA7 = pA0 + 7 * jumpA;
+
+								vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+								vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC));
+								vacc4 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 4 * jumpC)); vacc5 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 5 * jumpC));
+								vacc6 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 6 * jumpC)); vacc7 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 7 * jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+								for (k = kOut; k < kmax; k++)
+								{
+									vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+									vacc0 = _mm256_add_epi32(_mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB), vacc0);
+									vacc1 = _mm256_add_epi32(_mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB), vacc1);
+									vacc2 = _mm256_add_epi32(_mm256_mullo_epi32(_mm256_set1_epi32(*pA2++), vregB), vacc2);
+									vacc3 = _mm256_add_epi32(_mm256_mullo_epi32(_mm256_set1_epi32(*pA3++), vregB), vacc3);
+									vacc4 = _mm256_add_epi32(_mm256_mullo_epi32(_mm256_set1_epi32(*pA4++), vregB), vacc4);
+									vacc5 = _mm256_add_epi32(_mm256_mullo_epi32(_mm256_set1_epi32(*pA5++), vregB), vacc5);
+									vacc6 = _mm256_add_epi32(_mm256_mullo_epi32(_mm256_set1_epi32(*pA6++), vregB), vacc6);
+									vacc7 = _mm256_add_epi32(_mm256_mullo_epi32(_mm256_set1_epi32(*pA7++), vregB), vacc7);
+								}
+
+								_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC), vacc0); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + jumpC), vacc1);
+								_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC), vacc2); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC), vacc3);
+								_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 4 * jumpC), vacc4); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 5 * jumpC), vacc5);
+								_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 6 * jumpC), vacc6); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 7 * jumpC), vacc7);
+							}
+							if ((jmax == N) && (r != 0))
+							{
+								pB = (pfB + N) + (jumpB * kOut);
+								pC = (pfC + N) + (jumpC * i);
+
+								pA0 = (pfA + kOut) + (jumpA * i); pA1 = pA0 + jumpA;
+								pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+								pA4 = pA0 + 4 * jumpA; pA5 = pA0 + 5 * jumpA;
+								pA6 = pA0 + 6 * jumpA; pA7 = pA0 + 7 * jumpA;
+
+								vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+								vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC));
+								vacc4 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 4 * jumpC)); vacc5 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 5 * jumpC));
+								vacc6 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 6 * jumpC)); vacc7 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 7 * jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+								for (k = kOut; k < kmax; k++)
+								{
+									vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+									vacc0 = _mm256_add_epi32(_mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB), vacc0);
+									vacc1 = _mm256_add_epi32(_mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB), vacc1);
+									vacc2 = _mm256_add_epi32(_mm256_mullo_epi32(_mm256_set1_epi32(*pA2++), vregB), vacc2);
+									vacc3 = _mm256_add_epi32(_mm256_mullo_epi32(_mm256_set1_epi32(*pA3++), vregB), vacc3);
+									vacc4 = _mm256_add_epi32(_mm256_mullo_epi32(_mm256_set1_epi32(*pA4++), vregB), vacc4);
+									vacc5 = _mm256_add_epi32(_mm256_mullo_epi32(_mm256_set1_epi32(*pA5++), vregB), vacc5);
+									vacc6 = _mm256_add_epi32(_mm256_mullo_epi32(_mm256_set1_epi32(*pA6++), vregB), vacc6);
+									vacc7 = _mm256_add_epi32(_mm256_mullo_epi32(_mm256_set1_epi32(*pA7++), vregB), vacc7);
+								}
+
+								_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc0); std::memcpy(pC, static_cast<int*>(temp), r);
+								_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<int*>(temp), r);
+								_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc2); std::memcpy(pC + 2 * jumpC, static_cast<int*>(temp), r);
+								_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc3); std::memcpy(pC + 3 * jumpC, static_cast<int*>(temp), r);
+								_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc4); std::memcpy(pC + 4 * jumpC, static_cast<int*>(temp), r);
+								_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc5); std::memcpy(pC + 5 * jumpC, static_cast<int*>(temp), r);
+								_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc6); std::memcpy(pC + 6 * jumpC, static_cast<int*>(temp), r);
+								_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc7); std::memcpy(pC + 7 * jumpC, static_cast<int*>(temp), r);
+							}
+						}
+					}
+				}
+			}
+
+			// bottom fringe of C
+			switch (Ar & 7)
+			{
+
+			case 0:
+				break;
+
+			case 1:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M);
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_add_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC), vacc0);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M);
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_add_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc0); std::memcpy(pC, static_cast<int*>(temp), r);
+						}
+					}
+				}
+				break;
+
+			case 2:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_add_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+								vacc1 = _mm256_add_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC), vacc0); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + jumpC), vacc1);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_add_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+								vacc1 = _mm256_add_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc0); std::memcpy(pC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<int*>(temp), r);
+						}
+					}
+				}
+				break;
+
+			case 3:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA;
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+							vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_add_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+								vacc1 = _mm256_add_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+								vacc2 = _mm256_add_epi32(vacc2, _mm256_mullo_epi32(_mm256_set1_epi32(*pA2++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC), vacc0); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + jumpC), vacc1);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC), vacc2);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA;
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+							vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_add_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+								vacc1 = _mm256_add_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+								vacc2 = _mm256_add_epi32(vacc2, _mm256_mullo_epi32(_mm256_set1_epi32(*pA2++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc0); std::memcpy(pC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc2); std::memcpy(pC + 2 * jumpC, static_cast<int*>(temp), r);
+						}
+					}
+				}
+				break;
+
+			case 4:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+							vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_add_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+								vacc1 = _mm256_add_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+								vacc2 = _mm256_add_epi32(vacc2, _mm256_mullo_epi32(_mm256_set1_epi32(*pA2++), vregB));
+								vacc3 = _mm256_add_epi32(vacc3, _mm256_mullo_epi32(_mm256_set1_epi32(*pA3++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC), vacc0); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + jumpC), vacc1);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC), vacc2); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC), vacc3);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+							vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_add_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+								vacc1 = _mm256_add_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+								vacc2 = _mm256_add_epi32(vacc2, _mm256_mullo_epi32(_mm256_set1_epi32(*pA2++), vregB));
+								vacc3 = _mm256_add_epi32(vacc3, _mm256_mullo_epi32(_mm256_set1_epi32(*pA3++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc0); std::memcpy(pC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc2); std::memcpy(pC + 2 * jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc3); std::memcpy(pC + 3 * jumpC, static_cast<int*>(temp), r);
+						}
+					}
+				}
+				break;
+
+			case 5:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+							pA4 = pA0 + 4 * jumpA;
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+							vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC));
+							vacc4 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 4 * jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_add_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+								vacc1 = _mm256_add_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+								vacc2 = _mm256_add_epi32(vacc2, _mm256_mullo_epi32(_mm256_set1_epi32(*pA2++), vregB));
+								vacc3 = _mm256_add_epi32(vacc3, _mm256_mullo_epi32(_mm256_set1_epi32(*pA3++), vregB));
+								vacc4 = _mm256_add_epi32(vacc4, _mm256_mullo_epi32(_mm256_set1_epi32(*pA4++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC), vacc0); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + jumpC), vacc1);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC), vacc2); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC), vacc3);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 4 * jumpC), vacc4);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+							pA4 = pA0 + 4 * jumpA;
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+							vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC));
+							vacc4 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 4 * jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_add_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+								vacc1 = _mm256_add_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+								vacc2 = _mm256_add_epi32(vacc2, _mm256_mullo_epi32(_mm256_set1_epi32(*pA2++), vregB));
+								vacc3 = _mm256_add_epi32(vacc3, _mm256_mullo_epi32(_mm256_set1_epi32(*pA3++), vregB));
+								vacc4 = _mm256_add_epi32(vacc4, _mm256_mullo_epi32(_mm256_set1_epi32(*pA4++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc0); std::memcpy(pC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc2); std::memcpy(pC + 2 * jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc3); std::memcpy(pC + 3 * jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc4); std::memcpy(pC + 4 * jumpC, static_cast<int*>(temp), r);
+						}
+					}
+				}
+				break;
+
+			case 6:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+							pA4 = pA0 + 4 * jumpA; pA5 = pA0 + 5 * jumpA;
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+							vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC));
+							vacc4 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 4 * jumpC)); vacc5 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 5 * jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_add_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+								vacc1 = _mm256_add_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+								vacc2 = _mm256_add_epi32(vacc2, _mm256_mullo_epi32(_mm256_set1_epi32(*pA2++), vregB));
+								vacc3 = _mm256_add_epi32(vacc3, _mm256_mullo_epi32(_mm256_set1_epi32(*pA3++), vregB));
+								vacc4 = _mm256_add_epi32(vacc4, _mm256_mullo_epi32(_mm256_set1_epi32(*pA4++), vregB));
+								vacc5 = _mm256_add_epi32(vacc5, _mm256_mullo_epi32(_mm256_set1_epi32(*pA5++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC), vacc0); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + jumpC), vacc1);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC), vacc2); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC), vacc3);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 4 * jumpC), vacc4); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 5 * jumpC), vacc5);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+							pA4 = pA0 + 4 * jumpA; pA5 = pA0 + 5 * jumpA;
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+							vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC));
+							vacc4 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 4 * jumpC)); vacc5 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 5 * jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_add_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+								vacc1 = _mm256_add_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+								vacc2 = _mm256_add_epi32(vacc2, _mm256_mullo_epi32(_mm256_set1_epi32(*pA2++), vregB));
+								vacc3 = _mm256_add_epi32(vacc3, _mm256_mullo_epi32(_mm256_set1_epi32(*pA3++), vregB));
+								vacc4 = _mm256_add_epi32(vacc4, _mm256_mullo_epi32(_mm256_set1_epi32(*pA4++), vregB));
+								vacc5 = _mm256_add_epi32(vacc5, _mm256_mullo_epi32(_mm256_set1_epi32(*pA5++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc0); std::memcpy(pC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc2); std::memcpy(pC + 2 * jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc3); std::memcpy(pC + 3 * jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc4); std::memcpy(pC + 4 * jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc5); std::memcpy(pC + 5 * jumpC, static_cast<int*>(temp), r);
+						}
+					}
+				}
+				break;
+
+			case 7:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+							pA4 = pA0 + 4 * jumpA; pA5 = pA0 + 5 * jumpA;
+							pA6 = pA0 + 6 * jumpA;
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+							vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC));
+							vacc4 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 4 * jumpC)); vacc5 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 5 * jumpC));
+							vacc6 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 6 * jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_add_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+								vacc1 = _mm256_add_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+								vacc2 = _mm256_add_epi32(vacc2, _mm256_mullo_epi32(_mm256_set1_epi32(*pA2++), vregB));
+								vacc3 = _mm256_add_epi32(vacc3, _mm256_mullo_epi32(_mm256_set1_epi32(*pA3++), vregB));
+								vacc4 = _mm256_add_epi32(vacc4, _mm256_mullo_epi32(_mm256_set1_epi32(*pA4++), vregB));
+								vacc5 = _mm256_add_epi32(vacc5, _mm256_mullo_epi32(_mm256_set1_epi32(*pA5++), vregB));
+								vacc6 = _mm256_add_epi32(vacc6, _mm256_mullo_epi32(_mm256_set1_epi32(*pA6++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC), vacc0); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + jumpC), vacc1);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC), vacc2); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC), vacc3);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 4 * jumpC), vacc4); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 5 * jumpC), vacc5);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 6 * jumpC), vacc6);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+							pA4 = pA0 + 4 * jumpA; pA5 = pA0 + 5 * jumpA;
+							pA6 = pA0 + 6 * jumpA;
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+							vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC));
+							vacc4 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 4 * jumpC)); vacc5 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 5 * jumpC));
+							vacc6 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 6 * jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_add_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+								vacc1 = _mm256_add_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+								vacc2 = _mm256_add_epi32(vacc2, _mm256_mullo_epi32(_mm256_set1_epi32(*pA2++), vregB));
+								vacc3 = _mm256_add_epi32(vacc3, _mm256_mullo_epi32(_mm256_set1_epi32(*pA3++), vregB));
+								vacc4 = _mm256_add_epi32(vacc4, _mm256_mullo_epi32(_mm256_set1_epi32(*pA4++), vregB));
+								vacc5 = _mm256_add_epi32(vacc5, _mm256_mullo_epi32(_mm256_set1_epi32(*pA5++), vregB));
+								vacc6 = _mm256_add_epi32(vacc6, _mm256_mullo_epi32(_mm256_set1_epi32(*pA6++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc0); std::memcpy(pC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc2); std::memcpy(pC + 2 * jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc3); std::memcpy(pC + 3 * jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc4); std::memcpy(pC + 4 * jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc5); std::memcpy(pC + 5 * jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc6); std::memcpy(pC + 6 * jumpC, static_cast<int*>(temp), r);
+						}
+					}
+				}
+				break;
+			}
+		}
+		void p_mxm(int* const pfC, const int* const pfA, const int* const pfB,
+			const std::size_t Ar, const std::size_t Bc, const std::size_t Ac,
+			const std::size_t skipC, const std::size_t skipA, const std::size_t skipB) noexcept
+		{
+			const int* pB; int* pC;
+
+			const int* pA0; const int* pA1; const int* pA2; const int* pA3;
+			const int* pA4; const int* pA5; const int* pA6; const int* pA7;
+
+			int temp[8];
+
+			std::size_t jumpA = Ac + skipA;
+			std::size_t jumpB = Bc + skipB;
+			std::size_t jumpC = Bc + skipC;
+			std::size_t M = Ar - (Ar & 7);
+			std::size_t N = Bc - (Bc & 7);
+			std::size_t r = (Bc & 7) * sizeof(int);
+
+			std::size_t i, j, k, iOut, jOut, kOut, imax, jmax, kmax;
+
+			__m256i vacc0; __m256i vacc1; __m256i vacc2; __m256i vacc3;
+			__m256i vacc4; __m256i vacc5; __m256i vacc6; __m256i vacc7;
+			__m256i vregB;
+
+			// major upper part of C
+			for (iOut = 0; iOut < Ar; iOut += WELP_MATRIX_AVX_ps_mm_Ti)
+			{
+				imax = (iOut + WELP_MATRIX_AVX_ps_mm_Ti < Ar) ? iOut + WELP_MATRIX_AVX_ps_mm_Ti : M;
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (i = iOut; i < imax; i += 8)
+						{
+							for (j = jOut; j < jmax; j += 8)
+							{
+								pB = (pfB + j) + (jumpB * kOut);
+								pC = (pfC + j) + (jumpC * i);
+
+								pA0 = (pfA + kOut) + (jumpA * i); pA1 = pA0 + jumpA;
+								pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+								pA4 = pA0 + 4 * jumpA; pA5 = pA0 + 5 * jumpA;
+								pA6 = pA0 + 6 * jumpA; pA7 = pA0 + 7 * jumpA;
+
+								vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+								vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC));
+								vacc4 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 4 * jumpC)); vacc5 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 5 * jumpC));
+								vacc6 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 6 * jumpC)); vacc7 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 7 * jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+								for (k = kOut; k < kmax; k++)
+								{
+									vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+									vacc0 = _mm256_sub_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+									vacc1 = _mm256_sub_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+									vacc2 = _mm256_sub_epi32(vacc2, _mm256_mullo_epi32(_mm256_set1_epi32(*pA2++), vregB));
+									vacc3 = _mm256_sub_epi32(vacc3, _mm256_mullo_epi32(_mm256_set1_epi32(*pA3++), vregB));
+									vacc4 = _mm256_sub_epi32(vacc4, _mm256_mullo_epi32(_mm256_set1_epi32(*pA4++), vregB));
+									vacc5 = _mm256_sub_epi32(vacc5, _mm256_mullo_epi32(_mm256_set1_epi32(*pA5++), vregB));
+									vacc6 = _mm256_sub_epi32(vacc6, _mm256_mullo_epi32(_mm256_set1_epi32(*pA6++), vregB));
+									vacc7 = _mm256_sub_epi32(vacc7, _mm256_mullo_epi32(_mm256_set1_epi32(*pA7++), vregB));
+								}
+
+								_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC), vacc0); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + jumpC), vacc1);
+								_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC), vacc2); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC), vacc3);
+								_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 4 * jumpC), vacc4); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 5 * jumpC), vacc5);
+								_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 6 * jumpC), vacc6); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 7 * jumpC), vacc7);
+							}
+							if ((jmax == N) && (r != 0))
+							{
+								pB = (pfB + N) + (jumpB * kOut);
+								pC = (pfC + N) + (jumpC * i);
+
+								pA0 = (pfA + kOut) + (jumpA * i); pA1 = pA0 + jumpA;
+								pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+								pA4 = pA0 + 4 * jumpA; pA5 = pA0 + 5 * jumpA;
+								pA6 = pA0 + 6 * jumpA; pA7 = pA0 + 7 * jumpA;
+
+								vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+								vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC));
+								vacc4 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 4 * jumpC)); vacc5 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 5 * jumpC));
+								vacc6 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 6 * jumpC)); vacc7 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 7 * jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+								for (k = kOut; k < kmax; k++)
+								{
+									vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+									vacc0 = _mm256_sub_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+									vacc1 = _mm256_sub_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+									vacc2 = _mm256_sub_epi32(vacc2, _mm256_mullo_epi32(_mm256_set1_epi32(*pA2++), vregB));
+									vacc3 = _mm256_sub_epi32(vacc3, _mm256_mullo_epi32(_mm256_set1_epi32(*pA3++), vregB));
+									vacc4 = _mm256_sub_epi32(vacc4, _mm256_mullo_epi32(_mm256_set1_epi32(*pA4++), vregB));
+									vacc5 = _mm256_sub_epi32(vacc5, _mm256_mullo_epi32(_mm256_set1_epi32(*pA5++), vregB));
+									vacc6 = _mm256_sub_epi32(vacc6, _mm256_mullo_epi32(_mm256_set1_epi32(*pA6++), vregB));
+									vacc7 = _mm256_sub_epi32(vacc7, _mm256_mullo_epi32(_mm256_set1_epi32(*pA7++), vregB));
+								}
+
+								_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc0); std::memcpy(pC, static_cast<int*>(temp), r);
+								_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<int*>(temp), r);
+								_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc2); std::memcpy(pC + 2 * jumpC, static_cast<int*>(temp), r);
+								_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc3); std::memcpy(pC + 3 * jumpC, static_cast<int*>(temp), r);
+								_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc4); std::memcpy(pC + 4 * jumpC, static_cast<int*>(temp), r);
+								_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc5); std::memcpy(pC + 5 * jumpC, static_cast<int*>(temp), r);
+								_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc6); std::memcpy(pC + 6 * jumpC, static_cast<int*>(temp), r);
+								_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc7); std::memcpy(pC + 7 * jumpC, static_cast<int*>(temp), r);
+							}
+						}
+					}
+				}
+			}
+
+			// bottom fringe of C
+			switch (Ar & 7)
+			{
+
+			case 0:
+				break;
+
+			case 1:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M);
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_sub_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC), vacc0);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M);
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_sub_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc0); std::memcpy(pC, static_cast<int*>(temp), r);
+						}
+					}
+				}
+				break;
+
+			case 2:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_sub_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+								vacc1 = _mm256_sub_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC), vacc0); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + jumpC), vacc1);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_sub_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+								vacc1 = _mm256_sub_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc0); std::memcpy(pC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<int*>(temp), r);
+						}
+					}
+				}
+				break;
+
+			case 3:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA;
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+							vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_sub_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+								vacc1 = _mm256_sub_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+								vacc2 = _mm256_sub_epi32(vacc2, _mm256_mullo_epi32(_mm256_set1_epi32(*pA2++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC), vacc0); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + jumpC), vacc1);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC), vacc2);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA; pA2 = pA0 + 2 * jumpA;
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+							vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_sub_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+								vacc1 = _mm256_sub_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+								vacc2 = _mm256_sub_epi32(vacc2, _mm256_mullo_epi32(_mm256_set1_epi32(*pA2++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc0); std::memcpy(pC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc2); std::memcpy(pC + 2 * jumpC, static_cast<int*>(temp), r);
+						}
+					}
+				}
+				break;
+
+			case 4:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpC * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+							vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_sub_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+								vacc1 = _mm256_sub_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+								vacc2 = _mm256_sub_epi32(vacc2, _mm256_mullo_epi32(_mm256_set1_epi32(*pA2++), vregB));
+								vacc3 = _mm256_sub_epi32(vacc3, _mm256_mullo_epi32(_mm256_set1_epi32(*pA3++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC), vacc0); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + jumpC), vacc1);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC), vacc2); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC), vacc3);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+							vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_sub_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+								vacc1 = _mm256_sub_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+								vacc2 = _mm256_sub_epi32(vacc2, _mm256_mullo_epi32(_mm256_set1_epi32(*pA2++), vregB));
+								vacc3 = _mm256_sub_epi32(vacc3, _mm256_mullo_epi32(_mm256_set1_epi32(*pA3++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc0); std::memcpy(pC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc2); std::memcpy(pC + 2 * jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc3); std::memcpy(pC + 3 * jumpC, static_cast<int*>(temp), r);
+						}
+					}
+				}
+				break;
+
+			case 5:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+							pA4 = pA0 + 4 * jumpA;
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+							vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC));
+							vacc4 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 4 * jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_sub_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+								vacc1 = _mm256_sub_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+								vacc2 = _mm256_sub_epi32(vacc2, _mm256_mullo_epi32(_mm256_set1_epi32(*pA2++), vregB));
+								vacc3 = _mm256_sub_epi32(vacc3, _mm256_mullo_epi32(_mm256_set1_epi32(*pA3++), vregB));
+								vacc4 = _mm256_sub_epi32(vacc4, _mm256_mullo_epi32(_mm256_set1_epi32(*pA4++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC), vacc0); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + jumpC), vacc1);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC), vacc2); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC), vacc3);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 4 * jumpC), vacc4);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+							pA4 = pA0 + 4 * jumpA;
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+							vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC));
+							vacc4 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 4 * jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_sub_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+								vacc1 = _mm256_sub_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+								vacc2 = _mm256_sub_epi32(vacc2, _mm256_mullo_epi32(_mm256_set1_epi32(*pA2++), vregB));
+								vacc3 = _mm256_sub_epi32(vacc3, _mm256_mullo_epi32(_mm256_set1_epi32(*pA3++), vregB));
+								vacc4 = _mm256_sub_epi32(vacc4, _mm256_mullo_epi32(_mm256_set1_epi32(*pA4++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc0); std::memcpy(pC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc2); std::memcpy(pC + 2 * jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc3); std::memcpy(pC + 3 * jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc4); std::memcpy(pC + 4 * jumpC, static_cast<int*>(temp), r);
+						}
+					}
+				}
+				break;
+
+			case 6:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+							pA4 = pA0 + 4 * jumpA; pA5 = pA0 + 5 * jumpA;
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+							vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC));
+							vacc4 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 4 * jumpC)); vacc5 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 5 * jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_sub_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+								vacc1 = _mm256_sub_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+								vacc2 = _mm256_sub_epi32(vacc2, _mm256_mullo_epi32(_mm256_set1_epi32(*pA2++), vregB));
+								vacc3 = _mm256_sub_epi32(vacc3, _mm256_mullo_epi32(_mm256_set1_epi32(*pA3++), vregB));
+								vacc4 = _mm256_sub_epi32(vacc4, _mm256_mullo_epi32(_mm256_set1_epi32(*pA4++), vregB));
+								vacc5 = _mm256_sub_epi32(vacc5, _mm256_mullo_epi32(_mm256_set1_epi32(*pA5++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC), vacc0); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + jumpC), vacc1);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC), vacc2); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC), vacc3);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 4 * jumpC), vacc4); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 5 * jumpC), vacc5);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+							pA4 = pA0 + 4 * jumpA; pA5 = pA0 + 5 * jumpA;
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+							vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC));
+							vacc4 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 4 * jumpC)); vacc5 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 5 * jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_sub_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+								vacc1 = _mm256_sub_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+								vacc2 = _mm256_sub_epi32(vacc2, _mm256_mullo_epi32(_mm256_set1_epi32(*pA2++), vregB));
+								vacc3 = _mm256_sub_epi32(vacc3, _mm256_mullo_epi32(_mm256_set1_epi32(*pA3++), vregB));
+								vacc4 = _mm256_sub_epi32(vacc4, _mm256_mullo_epi32(_mm256_set1_epi32(*pA4++), vregB));
+								vacc5 = _mm256_sub_epi32(vacc5, _mm256_mullo_epi32(_mm256_set1_epi32(*pA5++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc0); std::memcpy(pC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc2); std::memcpy(pC + 2 * jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc3); std::memcpy(pC + 3 * jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc4); std::memcpy(pC + 4 * jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc5); std::memcpy(pC + 5 * jumpC, static_cast<int*>(temp), r);
+						}
+					}
+				}
+				break;
+
+			case 7:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+							pA4 = pA0 + 4 * jumpA; pA5 = pA0 + 5 * jumpA;
+							pA6 = pA0 + 6 * jumpA;
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+							vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC));
+							vacc4 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 4 * jumpC)); vacc5 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 5 * jumpC));
+							vacc6 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 6 * jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_sub_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+								vacc1 = _mm256_sub_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+								vacc2 = _mm256_sub_epi32(vacc2, _mm256_mullo_epi32(_mm256_set1_epi32(*pA2++), vregB));
+								vacc3 = _mm256_sub_epi32(vacc3, _mm256_mullo_epi32(_mm256_set1_epi32(*pA3++), vregB));
+								vacc4 = _mm256_sub_epi32(vacc4, _mm256_mullo_epi32(_mm256_set1_epi32(*pA4++), vregB));
+								vacc5 = _mm256_sub_epi32(vacc5, _mm256_mullo_epi32(_mm256_set1_epi32(*pA5++), vregB));
+								vacc6 = _mm256_sub_epi32(vacc6, _mm256_mullo_epi32(_mm256_set1_epi32(*pA6++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC), vacc0); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + jumpC), vacc1);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC), vacc2); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC), vacc3);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 4 * jumpC), vacc4); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 5 * jumpC), vacc5);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 6 * jumpC), vacc6);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+							pA4 = pA0 + 4 * jumpA; pA5 = pA0 + 5 * jumpA;
+							pA6 = pA0 + 6 * jumpA;
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+							vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC));
+							vacc4 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 4 * jumpC)); vacc5 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 5 * jumpC));
+							vacc6 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 6 * jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_sub_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+								vacc1 = _mm256_sub_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+								vacc2 = _mm256_sub_epi32(vacc2, _mm256_mullo_epi32(_mm256_set1_epi32(*pA2++), vregB));
+								vacc3 = _mm256_sub_epi32(vacc3, _mm256_mullo_epi32(_mm256_set1_epi32(*pA3++), vregB));
+								vacc4 = _mm256_sub_epi32(vacc4, _mm256_mullo_epi32(_mm256_set1_epi32(*pA4++), vregB));
+								vacc5 = _mm256_sub_epi32(vacc5, _mm256_mullo_epi32(_mm256_set1_epi32(*pA5++), vregB));
+								vacc6 = _mm256_sub_epi32(vacc6, _mm256_mullo_epi32(_mm256_set1_epi32(*pA6++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc0); std::memcpy(pC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc2); std::memcpy(pC + 2 * jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc3); std::memcpy(pC + 3 * jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc4); std::memcpy(pC + 4 * jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc5); std::memcpy(pC + 5 * jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc6); std::memcpy(pC + 6 * jumpC, static_cast<int*>(temp), r);
+						}
+					}
+				}
+				break;
+			}
+		}
+		
 		void pmxm(float* const pfC, const float* const pfA, const float* const pfB, const std::size_t Ar, const std::size_t Bc, const std::size_t Ac) noexcept
 		{
 			if (Bc == 1)
@@ -10870,6 +14129,3265 @@ namespace welp
 				break;
 			}
 		}
+		
+		inline void pmxv(float* const pfC, const float* const pfA, const float* const pfB,
+			const std::size_t Ar, const std::size_t Ac, const std::size_t skipA) noexcept
+		{
+			float acc0; float acc1; float acc2; float acc3; float regB;
+			std::size_t jump = Ac + skipA;
+			const float* pA0 = pfA;
+			const float* pA1 = pfA + jump;
+			const float* pA2 = pfA + 2 * jump;
+			const float* pA3 = pfA + 3 * jump;
+			const float* pB; float* pC = pfC;
+			std::size_t N = Ar - (Ar & 3);
+			std::size_t M = Ac - (Ac & 7);
+			jump = 3 * Ac + 4 * skipA;
+
+			std::size_t i, k;
+
+			__m256 vacc0; __m256 vacc1; __m256 vacc2; __m256 vacc3; __m256 vB;
+			union { __m256 v; float arr[8]; } varr;
+
+			// major upper part of A
+			for (i = N; i > 0; i -= 4)
+			{
+				acc0 = 0.0f; acc1 = 0.0f; acc2 = 0.0f; acc3 = 0.0f;
+				vacc0 = _mm256_setzero_ps();
+				vacc1 = _mm256_setzero_ps();
+				vacc2 = _mm256_setzero_ps();
+				vacc3 = _mm256_setzero_ps();
+				pB = pfB;
+
+				for (k = M; k > 0; k -= 8)
+				{
+					vB = _mm256_loadu_ps(pB); pB += 8;
+					vacc0 = _mm256_fmadd_ps(_mm256_loadu_ps(pA0), vB, vacc0); pA0 += 8;
+					vacc1 = _mm256_fmadd_ps(_mm256_loadu_ps(pA1), vB, vacc1); pA1 += 8;
+					vacc2 = _mm256_fmadd_ps(_mm256_loadu_ps(pA2), vB, vacc2); pA2 += 8;
+					vacc3 = _mm256_fmadd_ps(_mm256_loadu_ps(pA3), vB, vacc3); pA3 += 8;
+				}
+				for (k = Ac & 7; k > 0; k--)
+				{
+					regB = *pB++;
+					acc0 += (*pA0++) * regB;
+					acc1 += (*pA1++) * regB;
+					acc2 += (*pA2++) * regB;
+					acc3 += (*pA3++) * regB;
+				}
+				vacc0 = _mm256_hadd_ps(vacc0, vacc0); varr.v = _mm256_hadd_ps(vacc0, vacc0);
+				*pC += acc0 + varr.arr[0] + varr.arr[4];
+				vacc1 = _mm256_hadd_ps(vacc1, vacc1); varr.v = _mm256_hadd_ps(vacc1, vacc1);
+				*(pC + 1) += acc1 + varr.arr[0] + varr.arr[4];
+				vacc2 = _mm256_hadd_ps(vacc2, vacc2); varr.v = _mm256_hadd_ps(vacc2, vacc2);
+				*(pC + 2) += acc2 + varr.arr[0] + varr.arr[4];
+				vacc3 = _mm256_hadd_ps(vacc3, vacc3); varr.v = _mm256_hadd_ps(vacc3, vacc3);
+				*(pC + 3) += acc3 + varr.arr[0] + varr.arr[4];
+				pC += 4;
+
+				pA0 += jump;
+				pA1 += jump;
+				pA2 += jump;
+				pA3 += jump;
+			}
+
+			// bottom fringe of A
+			switch (Ar & 3)
+			{
+
+			case 0:
+				break;
+
+			case 1:
+				acc0 = 0.0f;
+				vacc0 = _mm256_setzero_ps();
+				pB = pfB;
+
+				for (k = M; k > 0; k -= 8)
+				{
+					vacc0 = _mm256_fmadd_ps(_mm256_loadu_ps(pA0), _mm256_loadu_ps(pB), vacc0);
+					pA0 += 8; pB += 8;
+				}
+				for (k = Ac & 7; k > 0; k--)
+				{
+					regB = *pB++;
+					acc0 += (*pA0++) * regB;
+				}
+				vacc0 = _mm256_hadd_ps(vacc0, vacc0); varr.v = _mm256_hadd_ps(vacc0, vacc0);
+				*pC += acc0 + varr.arr[0] + varr.arr[4];
+				break;
+
+			case 2:
+				acc0 = 0.0f; acc1 = 0.0f;
+				vacc0 = _mm256_setzero_ps();
+				vacc1 = _mm256_setzero_ps();
+				pB = pfB;
+
+				for (k = M; k > 0; k -= 8)
+				{
+					vB = _mm256_loadu_ps(pB); pB += 8;
+					vacc0 = _mm256_fmadd_ps(_mm256_loadu_ps(pA0), vB, vacc0); pA0 += 8;
+					vacc1 = _mm256_fmadd_ps(_mm256_loadu_ps(pA1), vB, vacc1); pA1 += 8;
+				}
+				for (k = Ac & 7; k > 0; k--)
+				{
+					regB = *pB++;
+					acc0 += (*pA0++) * regB;
+					acc1 += (*pA1++) * regB;
+				}
+				vacc0 = _mm256_hadd_ps(vacc0, vacc0); varr.v = _mm256_hadd_ps(vacc0, vacc0);
+				*pC += acc0 + varr.arr[0] + varr.arr[4];
+				vacc1 = _mm256_hadd_ps(vacc1, vacc1); varr.v = _mm256_hadd_ps(vacc1, vacc1);
+				*(pC + 1) += acc1 + varr.arr[0] + varr.arr[4];
+				break;
+
+			case 3:
+				acc0 = 0.0f; acc1 = 0.0f; acc2 = 0.0f;
+				vacc0 = _mm256_setzero_ps();
+				vacc1 = _mm256_setzero_ps();
+				vacc2 = _mm256_setzero_ps();
+				pB = pfB;
+
+				for (k = M; k > 0; k -= 8)
+				{
+					vB = _mm256_loadu_ps(pB); pB += 8;
+					vacc0 = _mm256_fmadd_ps(_mm256_loadu_ps(pA0), vB, vacc0); pA0 += 8;
+					vacc1 = _mm256_fmadd_ps(_mm256_loadu_ps(pA1), vB, vacc1); pA1 += 8;
+					vacc2 = _mm256_fmadd_ps(_mm256_loadu_ps(pA2), vB, vacc2); pA2 += 8;
+				}
+				for (k = Ac & 7; k > 0; k--)
+				{
+					regB = *pB++;
+					acc0 += (*pA0++) * regB;
+					acc1 += (*pA1++) * regB;
+					acc2 += (*pA2++) * regB;
+				}
+				vacc0 = _mm256_hadd_ps(vacc0, vacc0); varr.v = _mm256_hadd_ps(vacc0, vacc0);
+				*pC += acc0 + varr.arr[0] + varr.arr[4];
+				vacc1 = _mm256_hadd_ps(vacc1, vacc1); varr.v = _mm256_hadd_ps(vacc1, vacc1);
+				*(pC + 1) += acc1 + varr.arr[0] + varr.arr[4];
+				vacc2 = _mm256_hadd_ps(vacc2, vacc2); varr.v = _mm256_hadd_ps(vacc2, vacc2);
+				*(pC + 2) += acc2 + varr.arr[0] + varr.arr[4];
+				break;
+			}
+		}
+		inline void p_mxv(float* const pfC, const float* const pfA, const float* const pfB,
+			const std::size_t Ar, const std::size_t Ac, const std::size_t skipA) noexcept
+		{
+			float acc0; float acc1; float acc2; float acc3; float regB;
+			std::size_t jump = Ac + skipA;
+			const float* pA0 = pfA;
+			const float* pA1 = pfA + jump;
+			const float* pA2 = pfA + 2 * jump;
+			const float* pA3 = pfA + 3 * jump;
+			const float* pB; float* pC = pfC;
+			std::size_t N = Ar - (Ar & 3);
+			std::size_t M = Ac - (Ac & 7);
+			jump = 3 * Ac + 4 * skipA;
+
+			std::size_t i, k;
+
+			__m256 vacc0; __m256 vacc1; __m256 vacc2; __m256 vacc3; __m256 vB;
+			union { __m256 v; float arr[8]; } varr;
+
+			// major upper part of A
+			for (i = N; i > 0; i -= 4)
+			{
+				acc0 = 0.0f; acc1 = 0.0f; acc2 = 0.0f; acc3 = 0.0f;
+				vacc0 = _mm256_setzero_ps();
+				vacc1 = _mm256_setzero_ps();
+				vacc2 = _mm256_setzero_ps();
+				vacc3 = _mm256_setzero_ps();
+				pB = pfB;
+
+				for (k = M; k > 0; k -= 8)
+				{
+					vB = _mm256_loadu_ps(pB); pB += 8;
+					vacc0 = _mm256_fmadd_ps(_mm256_loadu_ps(pA0), vB, vacc0); pA0 += 8;
+					vacc1 = _mm256_fmadd_ps(_mm256_loadu_ps(pA1), vB, vacc1); pA1 += 8;
+					vacc2 = _mm256_fmadd_ps(_mm256_loadu_ps(pA2), vB, vacc2); pA2 += 8;
+					vacc3 = _mm256_fmadd_ps(_mm256_loadu_ps(pA3), vB, vacc3); pA3 += 8;
+				}
+				for (k = Ac & 7; k > 0; k--)
+				{
+					regB = *pB++;
+					acc0 += (*pA0++) * regB;
+					acc1 += (*pA1++) * regB;
+					acc2 += (*pA2++) * regB;
+					acc3 += (*pA3++) * regB;
+				}
+				vacc0 = _mm256_hadd_ps(vacc0, vacc0); varr.v = _mm256_hadd_ps(vacc0, vacc0);
+				*pC -= acc0 + varr.arr[0] + varr.arr[4];
+				vacc1 = _mm256_hadd_ps(vacc1, vacc1); varr.v = _mm256_hadd_ps(vacc1, vacc1);
+				*(pC + 1) -= acc1 + varr.arr[0] + varr.arr[4];
+				vacc2 = _mm256_hadd_ps(vacc2, vacc2); varr.v = _mm256_hadd_ps(vacc2, vacc2);
+				*(pC + 2) -= acc2 + varr.arr[0] + varr.arr[4];
+				vacc3 = _mm256_hadd_ps(vacc3, vacc3); varr.v = _mm256_hadd_ps(vacc3, vacc3);
+				*(pC + 3) -= acc3 + varr.arr[0] + varr.arr[4];
+				pC += 4;
+
+				pA0 += jump;
+				pA1 += jump;
+				pA2 += jump;
+				pA3 += jump;
+			}
+
+			// bottom fringe of A
+			switch (Ar & 3)
+			{
+
+			case 0:
+				break;
+
+			case 1:
+				acc0 = 0.0f;
+				vacc0 = _mm256_setzero_ps();
+				pB = pfB;
+
+				for (k = M; k > 0; k -= 8)
+				{
+					vacc0 = _mm256_fmadd_ps(_mm256_loadu_ps(pA0), _mm256_loadu_ps(pB), vacc0);
+					pA0 += 8; pB += 8;
+				}
+				for (k = Ac & 7; k > 0; k--)
+				{
+					regB = *pB++;
+					acc0 += (*pA0++) * regB;
+				}
+				vacc0 = _mm256_hadd_ps(vacc0, vacc0); varr.v = _mm256_hadd_ps(vacc0, vacc0);
+				*pC -= acc0 + varr.arr[0] + varr.arr[4];
+				break;
+
+			case 2:
+				acc0 = 0.0f; acc1 = 0.0f;
+				vacc0 = _mm256_setzero_ps();
+				vacc1 = _mm256_setzero_ps();
+				pB = pfB;
+
+				for (k = M; k > 0; k -= 8)
+				{
+					vB = _mm256_loadu_ps(pB); pB += 8;
+					vacc0 = _mm256_fmadd_ps(_mm256_loadu_ps(pA0), vB, vacc0); pA0 += 8;
+					vacc1 = _mm256_fmadd_ps(_mm256_loadu_ps(pA1), vB, vacc1); pA1 += 8;
+				}
+				for (k = Ac & 7; k > 0; k--)
+				{
+					regB = *pB++;
+					acc0 += (*pA0++) * regB;
+					acc1 += (*pA1++) * regB;
+				}
+				vacc0 = _mm256_hadd_ps(vacc0, vacc0); varr.v = _mm256_hadd_ps(vacc0, vacc0);
+				*pC -= acc0 + varr.arr[0] + varr.arr[4];
+				vacc1 = _mm256_hadd_ps(vacc1, vacc1); varr.v = _mm256_hadd_ps(vacc1, vacc1);
+				*(pC + 1) -= acc1 + varr.arr[0] + varr.arr[4];
+				break;
+
+			case 3:
+				acc0 = 0.0f; acc1 = 0.0f; acc2 = 0.0f;
+				vacc0 = _mm256_setzero_ps();
+				vacc1 = _mm256_setzero_ps();
+				vacc2 = _mm256_setzero_ps();
+				pB = pfB;
+
+				for (k = M; k > 0; k -= 8)
+				{
+					vB = _mm256_loadu_ps(pB); pB += 8;
+					vacc0 = _mm256_fmadd_ps(_mm256_loadu_ps(pA0), vB, vacc0); pA0 += 8;
+					vacc1 = _mm256_fmadd_ps(_mm256_loadu_ps(pA1), vB, vacc1); pA1 += 8;
+					vacc2 = _mm256_fmadd_ps(_mm256_loadu_ps(pA2), vB, vacc2); pA2 += 8;
+				}
+				for (k = Ac & 7; k > 0; k--)
+				{
+					regB = *pB++;
+					acc0 += (*pA0++) * regB;
+					acc1 += (*pA1++) * regB;
+					acc2 += (*pA2++) * regB;
+				}
+				vacc0 = _mm256_hadd_ps(vacc0, vacc0); varr.v = _mm256_hadd_ps(vacc0, vacc0);
+				*pC -= acc0 + varr.arr[0] + varr.arr[4];
+				vacc1 = _mm256_hadd_ps(vacc1, vacc1); varr.v = _mm256_hadd_ps(vacc1, vacc1);
+				*(pC + 1) -= acc1 + varr.arr[0] + varr.arr[4];
+				vacc2 = _mm256_hadd_ps(vacc2, vacc2); varr.v = _mm256_hadd_ps(vacc2, vacc2);
+				*(pC + 2) -= acc2 + varr.arr[0] + varr.arr[4];
+				break;
+			}
+		}
+		inline void pvxm(float* const pfC, const float* const pfA, const float* const pfB,
+			const std::size_t Br, const std::size_t Bc, const std::size_t skipB) noexcept
+		{
+			float regA0; float regA1; float regA2; float regA3;
+			std::size_t jump = Bc + skipB;
+			const float* pA = pfA;
+			const float* pB0 = pfB;
+			const float* pB1 = pfB + jump;
+			const float* pB2 = pfB + 2 * jump;
+			const float* pB3 = pfB + 3 * jump;
+			float* pC;
+			std::size_t N = Br - (Br & 3);
+			std::size_t M = Bc - (Bc & 7);
+			jump = 3 * Bc + 4 * skipB;
+
+			std::size_t j, k;
+
+			__m256 vregA0; __m256 vregA1; __m256 vregA2; __m256 vregA3; __m256 vregC;
+
+			// major upper part of B
+			for (k = N; k > 0; k -= 4)
+			{
+				pC = pfC;
+
+				vregA0 = _mm256_broadcast_ss(pA);
+				vregA1 = _mm256_broadcast_ss(pA + 1);
+				vregA2 = _mm256_broadcast_ss(pA + 2);
+				vregA3 = _mm256_broadcast_ss(pA + 3);
+
+				for (j = M; j > 0; j -= 8)
+				{
+					vregC = _mm256_loadu_ps(pC);
+					vregC = _mm256_fmadd_ps(vregA0, _mm256_loadu_ps(pB0), vregC); pB0 += 8;
+					vregC = _mm256_fmadd_ps(vregA1, _mm256_loadu_ps(pB1), vregC); pB1 += 8;
+					vregC = _mm256_fmadd_ps(vregA2, _mm256_loadu_ps(pB2), vregC); pB2 += 8;
+					vregC = _mm256_fmadd_ps(vregA3, _mm256_loadu_ps(pB3), vregC); pB3 += 8;
+					_mm256_storeu_ps(pC, vregC); pC += 8;
+				}
+				regA0 = *pA;
+				regA1 = *(pA + 1);
+				regA2 = *(pA + 2);
+				regA3 = *(pA + 3);
+				pA += 4;
+				for (j = Bc - M; j > 0; j--)
+				{
+					*pC++ += (regA0 * (*pB0++) + regA1 * (*pB1++))
+						+ (regA2 * (*pB2++) + regA3 * (*pB3++));
+				}
+				pB0 += jump;
+				pB1 += jump;
+				pB2 += jump;
+				pB3 += jump;
+			}
+
+			// bottom fringe of B
+			switch (Br & 3)
+			{
+
+			case 0:
+				break;
+
+			case 1:
+				pC = pfC;
+				vregA0 = _mm256_broadcast_ss(pA);
+
+				for (j = M; j > 0; j -= 8)
+				{
+					_mm256_storeu_ps(pC, _mm256_fmadd_ps(vregA0,
+						_mm256_loadu_ps(pB0), _mm256_loadu_ps(pC)));
+					pB0 += 8; pC += 8;
+				}
+				regA0 = *pA;
+				for (j = Bc - M; j > 0; j--)
+				{
+					*pC++ += regA0 * (*pB0++);
+				}
+				break;
+
+			case 2:
+				pC = pfC;
+				vregA0 = _mm256_broadcast_ss(pA);
+				vregA1 = _mm256_broadcast_ss(pA + 1);
+
+				for (j = M; j > 0; j -= 8)
+				{
+					vregC = _mm256_loadu_ps(pC);
+					vregC = _mm256_fmadd_ps(vregA0, _mm256_loadu_ps(pB0), vregC); pB0 += 8;
+					vregC = _mm256_fmadd_ps(vregA1, _mm256_loadu_ps(pB1), vregC); pB1 += 8;
+					_mm256_storeu_ps(pC, vregC); pC += 8;
+				}
+				regA0 = *pA;
+				regA1 = *(pA + 1);
+				for (j = Bc - M; j > 0; j--)
+				{
+					*pC++ += regA0 * (*pB0++) + regA1 * (*pB1++);
+				}
+				break;
+
+			case 3:
+				pC = pfC;
+				vregA0 = _mm256_broadcast_ss(pA);
+				vregA1 = _mm256_broadcast_ss(pA + 1);
+				vregA2 = _mm256_broadcast_ss(pA + 2);
+
+				for (j = M; j > 0; j -= 8)
+				{
+					vregC = _mm256_loadu_ps(pC);
+					vregC = _mm256_fmadd_ps(vregA0, _mm256_loadu_ps(pB0), vregC); pB0 += 8;
+					vregC = _mm256_fmadd_ps(vregA1, _mm256_loadu_ps(pB1), vregC); pB1 += 8;
+					vregC = _mm256_fmadd_ps(vregA2, _mm256_loadu_ps(pB2), vregC); pB2 += 8;
+					_mm256_storeu_ps(pC, vregC); pC += 8;
+				}
+				regA0 = *pA;
+				regA1 = *(pA + 1);
+				regA2 = *(pA + 2);
+				for (j = Bc - M; j > 0; j--)
+				{
+					*pC++ += (regA0 * (*pB0++) + regA1 * (*pB1++)) + regA2 * (*pB2++);
+				}
+				break;
+			}
+		}
+		inline void p_vxm(float* const pfC, const float* const pfA, const float* const pfB,
+			const std::size_t Br, const std::size_t Bc, const std::size_t skipB) noexcept
+		{
+			float regA0; float regA1; float regA2; float regA3;
+			std::size_t jump = Bc + skipB;
+			const float* pA = pfA;
+			const float* pB0 = pfB;
+			const float* pB1 = pB0 + jump;
+			const float* pB2 = pB0 + 2 * jump;
+			const float* pB3 = pB0 + 3 * jump;
+			float* pC;
+			std::size_t N = Br - (Br & 3);
+			std::size_t M = Bc - (Bc & 7);
+			jump = 3 * Bc + 4 * skipB;
+
+			std::size_t j, k;
+
+			__m256 vregA0; __m256 vregA1; __m256 vregA2; __m256 vregA3; __m256 vregC;
+
+			// major upper part of B
+			for (k = N; k > 0; k -= 4)
+			{
+				pC = pfC;
+
+				vregA0 = _mm256_broadcast_ss(pA);
+				vregA1 = _mm256_broadcast_ss(pA + 1);
+				vregA2 = _mm256_broadcast_ss(pA + 2);
+				vregA3 = _mm256_broadcast_ss(pA + 3);
+
+				for (j = M; j > 0; j -= 8)
+				{
+					vregC = _mm256_loadu_ps(pC);
+					vregC = _mm256_fnmadd_ps(vregA0, _mm256_loadu_ps(pB0), vregC); pB0 += 8;
+					vregC = _mm256_fnmadd_ps(vregA1, _mm256_loadu_ps(pB1), vregC); pB1 += 8;
+					vregC = _mm256_fnmadd_ps(vregA2, _mm256_loadu_ps(pB2), vregC); pB2 += 8;
+					vregC = _mm256_fnmadd_ps(vregA3, _mm256_loadu_ps(pB3), vregC); pB3 += 8;
+					_mm256_storeu_ps(pC, vregC); pC += 8;
+				}
+				regA0 = *pA;
+				regA1 = *(pA + 1);
+				regA2 = *(pA + 2);
+				regA3 = *(pA + 3);
+				pA += 4;
+				for (j = Bc - M; j > 0; j--)
+				{
+					*pC++ -= (regA0 * (*pB0++) + regA1 * (*pB1++))
+						+ (regA2 * (*pB2++) + regA3 * (*pB3++));
+				}
+				pB0 += jump;
+				pB1 += jump;
+				pB2 += jump;
+				pB3 += jump;
+			}
+
+			// bottom fringe of B
+			switch (Br & 3)
+			{
+
+			case 0:
+				break;
+
+			case 1:
+				pC = pfC;
+				vregA0 = _mm256_broadcast_ss(pA);
+
+				for (j = M; j > 0; j -= 8)
+				{
+					_mm256_storeu_ps(pC, _mm256_fnmadd_ps(vregA0,
+						_mm256_loadu_ps(pB0), _mm256_loadu_ps(pC)));
+					pB0 += 8; pC += 8;
+				}
+				regA0 = *pA;
+				for (j = Bc - M; j > 0; j--)
+				{
+					*pC++ -= regA0 * (*pB0++);
+				}
+				break;
+
+			case 2:
+				pC = pfC;
+				vregA0 = _mm256_broadcast_ss(pA);
+				vregA1 = _mm256_broadcast_ss(pA + 1);
+
+				for (j = M; j > 0; j -= 8)
+				{
+					vregC = _mm256_loadu_ps(pC);
+					vregC = _mm256_fnmadd_ps(vregA0, _mm256_loadu_ps(pB0), vregC); pB0 += 8;
+					vregC = _mm256_fnmadd_ps(vregA1, _mm256_loadu_ps(pB1), vregC); pB1 += 8;
+					_mm256_storeu_ps(pC, vregC); pC += 8;
+				}
+				regA0 = *pA;
+				regA1 = *(pA + 1);
+				for (j = Bc - M; j > 0; j--)
+				{
+					*pC++ -= regA0 * (*pB0++) + regA1 * (*pB1++);
+				}
+				break;
+
+			case 3:
+				pC = pfC;
+				vregA0 = _mm256_broadcast_ss(pA);
+				vregA1 = _mm256_broadcast_ss(pA + 1);
+				vregA2 = _mm256_broadcast_ss(pA + 2);
+
+				for (j = M; j > 0; j -= 8)
+				{
+					vregC = _mm256_loadu_ps(pC);
+					vregC = _mm256_fnmadd_ps(vregA0, _mm256_loadu_ps(pB0), vregC); pB0 += 8;
+					vregC = _mm256_fnmadd_ps(vregA1, _mm256_loadu_ps(pB1), vregC); pB1 += 8;
+					vregC = _mm256_fnmadd_ps(vregA2, _mm256_loadu_ps(pB2), vregC); pB2 += 8;
+					_mm256_storeu_ps(pC, vregC); pC += 8;
+				}
+				regA0 = *pA;
+				regA1 = *(pA + 1);
+				regA2 = *(pA + 2);
+				for (j = Bc - M; j > 0; j--)
+				{
+					*pC++ -= (regA0 * (*pB0++) + regA1 * (*pB1++)) + regA2 * (*pB2++);
+				}
+				break;
+			}
+		}
+		inline void pvxv(float* const pfC, const float* const pfA, const float* const pfB,
+			const std::size_t Ar, const std::size_t Bc, const std::size_t skipC) noexcept
+		{
+			float regA0; float regA1; float regA2; float regA3; float regB;
+			std::size_t jump = Bc + skipC;
+			const float* pA = pfA;
+			const float* pB;
+			float* pC0 = pfC;
+			float* pC1 = pfC + jump;
+			float* pC2 = pfC + 2 * jump;
+			float* pC3 = pfC + 3 * jump;
+			std::size_t N = Ar - (Ar & 3);
+			std::size_t M = Bc - (Bc & 7);
+			jump = 3 * Bc + 4 * skipC;
+
+			std::size_t i, j;
+
+			__m256 vregA0; __m256 vregA1; __m256 vregA2; __m256 vregA3; __m256 vregB;
+
+			// major upper part of C
+			for (i = N; i > 0; i -= 4)
+			{
+				pB = pfB;
+				vregA0 = _mm256_broadcast_ss(pA);
+				vregA1 = _mm256_broadcast_ss(pA + 1);
+				vregA2 = _mm256_broadcast_ss(pA + 2);
+				vregA3 = _mm256_broadcast_ss(pA + 3);
+				for (j = M; j > 0; j -= 8)
+				{
+					vregB = _mm256_loadu_ps(pB); pB += 8;
+					_mm256_storeu_ps(pC0, _mm256_fmadd_ps(vregA0, vregB, _mm256_loadu_ps(pC0))); pC0 += 8;
+					_mm256_storeu_ps(pC1, _mm256_fmadd_ps(vregA1, vregB, _mm256_loadu_ps(pC1))); pC1 += 8;
+					_mm256_storeu_ps(pC2, _mm256_fmadd_ps(vregA2, vregB, _mm256_loadu_ps(pC2))); pC2 += 8;
+					_mm256_storeu_ps(pC3, _mm256_fmadd_ps(vregA3, vregB, _mm256_loadu_ps(pC3))); pC3 += 8;
+				}
+				regA0 = *pA;
+				regA1 = *(pA + 1);
+				regA2 = *(pA + 2);
+				regA3 = *(pA + 3);
+				pA += 4;
+				for (j = Bc - M; j > 0; j--)
+				{
+					regB = *pB++;
+					*pC0++ += regA0 * regB;
+					*pC1++ += regA1 * regB;
+					*pC2++ += regA2 * regB;
+					*pC3++ += regA3 * regB;
+				}
+				pC0 += jump;
+				pC1 += jump;
+				pC2 += jump;
+				pC3 += jump;
+			}
+
+			// bottom fringe of C
+			switch (Ar & 3)
+			{
+
+			case 0:
+				break;
+
+			case 1:
+				pB = pfB;
+				vregA0 = _mm256_broadcast_ss(pA);
+				for (j = M; j > 0; j -= 8)
+				{
+					_mm256_storeu_ps(pC0, _mm256_fmadd_ps(vregA0, _mm256_loadu_ps(pB), _mm256_loadu_ps(pC0)));
+					pB += 8; pC0 += 8;
+				}
+				regA0 = *pA;
+				for (j = Bc - M; j > 0; j--)
+				{
+					*pC0++ += regA0 * (*pB++);
+				}
+				break;
+
+			case 2:
+				pB = pfB;
+				vregA0 = _mm256_broadcast_ss(pA);
+				vregA1 = _mm256_broadcast_ss(pA + 1);
+				for (j = M; j > 0; j -= 8)
+				{
+					vregB = _mm256_loadu_ps(pB); pB += 8;
+					_mm256_storeu_ps(pC0, _mm256_fmadd_ps(vregA0, vregB, _mm256_loadu_ps(pC0))); pC0 += 8;
+					_mm256_storeu_ps(pC1, _mm256_fmadd_ps(vregA1, vregB, _mm256_loadu_ps(pC1))); pC1 += 8;
+				}
+				regA0 = *pA;
+				regA1 = *(pA + 1);
+				for (j = Bc - M; j > 0; j--)
+				{
+					regB = *pB++;
+					*pC0++ += regA0 * regB;
+					*pC1++ += regA1 * regB;
+				}
+				break;
+
+			case 3:
+				pB = pfB;
+				vregA0 = _mm256_broadcast_ss(pA);
+				vregA1 = _mm256_broadcast_ss(pA + 1);
+				vregA2 = _mm256_broadcast_ss(pA + 2);
+				for (j = M; j > 0; j -= 8)
+				{
+					vregB = _mm256_loadu_ps(pB); pB += 8;
+					_mm256_storeu_ps(pC0, _mm256_fmadd_ps(vregA0, vregB, _mm256_loadu_ps(pC0))); pC0 += 8;
+					_mm256_storeu_ps(pC1, _mm256_fmadd_ps(vregA1, vregB, _mm256_loadu_ps(pC1))); pC1 += 8;
+					_mm256_storeu_ps(pC2, _mm256_fmadd_ps(vregA2, vregB, _mm256_loadu_ps(pC2))); pC2 += 8;
+				}
+				regA0 = *pA;
+				regA1 = *(pA + 1);
+				regA2 = *(pA + 2);
+				for (j = Bc - M; j > 0; j--)
+				{
+					regB = *pB++;
+					*pC0++ += regA0 * regB;
+					*pC1++ += regA1 * regB;
+					*pC2++ += regA2 * regB;
+				}
+				break;
+			}
+		}
+		inline void p_vxv(float* const pfC, const float* const pfA, const float* const pfB,
+			const std::size_t Ar, const std::size_t Bc, const std::size_t skipC) noexcept
+		{
+			float regA0; float regA1; float regA2; float regA3; float regB;
+			std::size_t jump = Bc + skipC;
+			const float* pA = pfA;
+			const float* pB;
+			float* pC0 = pfC;
+			float* pC1 = pfC + jump;
+			float* pC2 = pfC + 2 * jump;
+			float* pC3 = pfC + 3 * jump;
+			std::size_t N = Ar - (Ar & 3);
+			std::size_t M = Bc - (Bc & 7);
+			jump = 3 * Bc + 4 * skipC;
+
+			std::size_t i, j;
+
+			__m256 vregA0; __m256 vregA1; __m256 vregA2; __m256 vregA3; __m256 vregB;
+
+			// major upper part of C
+			for (i = N; i > 0; i -= 4)
+			{
+				pB = pfB;
+				vregA0 = _mm256_broadcast_ss(pA);
+				vregA1 = _mm256_broadcast_ss(pA + 1);
+				vregA2 = _mm256_broadcast_ss(pA + 2);
+				vregA3 = _mm256_broadcast_ss(pA + 3);
+				for (j = M; j > 0; j -= 8)
+				{
+					vregB = _mm256_loadu_ps(pB); pB += 8;
+					_mm256_storeu_ps(pC0, _mm256_fnmadd_ps(vregA0, vregB, _mm256_loadu_ps(pC0))); pC0 += 8;
+					_mm256_storeu_ps(pC1, _mm256_fnmadd_ps(vregA1, vregB, _mm256_loadu_ps(pC1))); pC1 += 8;
+					_mm256_storeu_ps(pC2, _mm256_fnmadd_ps(vregA2, vregB, _mm256_loadu_ps(pC2))); pC2 += 8;
+					_mm256_storeu_ps(pC3, _mm256_fnmadd_ps(vregA3, vregB, _mm256_loadu_ps(pC3))); pC3 += 8;
+				}
+				regA0 = *pA;
+				regA1 = *(pA + 1);
+				regA2 = *(pA + 2);
+				regA3 = *(pA + 3);
+				pA += 4;
+				for (j = Bc - M; j > 0; j--)
+				{
+					regB = *pB++;
+					*pC0++ -= regA0 * regB;
+					*pC1++ -= regA1 * regB;
+					*pC2++ -= regA2 * regB;
+					*pC3++ -= regA3 * regB;
+				}
+				pC0 += jump;
+				pC1 += jump;
+				pC2 += jump;
+				pC3 += jump;
+			}
+
+			// bottom fringe of C
+			switch (Ar & 3)
+			{
+
+			case 0:
+				break;
+
+			case 1:
+				pB = pfB;
+				vregA0 = _mm256_broadcast_ss(pA);
+				for (j = M; j > 0; j -= 8)
+				{
+					_mm256_storeu_ps(pC0, _mm256_fnmadd_ps(vregA0, _mm256_loadu_ps(pB), _mm256_loadu_ps(pC0)));
+					pB += 8; pC0 += 8;
+				}
+				regA0 = *pA;
+				for (j = Bc - M; j > 0; j--)
+				{
+					*pC0++ -= regA0 * (*pB++);
+				}
+				break;
+
+			case 2:
+				pB = pfB;
+				vregA0 = _mm256_broadcast_ss(pA);
+				vregA1 = _mm256_broadcast_ss(pA + 1);
+				for (j = M; j > 0; j -= 8)
+				{
+					vregB = _mm256_loadu_ps(pB); pB += 8;
+					_mm256_storeu_ps(pC0, _mm256_fnmadd_ps(vregA0, vregB, _mm256_loadu_ps(pC0))); pC0 += 8;
+					_mm256_storeu_ps(pC1, _mm256_fnmadd_ps(vregA1, vregB, _mm256_loadu_ps(pC1))); pC1 += 8;
+				}
+				regA0 = *pA;
+				regA1 = *(pA + 1);
+				for (j = Bc - M; j > 0; j--)
+				{
+					regB = *pB++;
+					*pC0++ -= regA0 * regB;
+					*pC1++ -= regA1 * regB;
+				}
+				break;
+
+			case 3:
+				pB = pfB;
+				vregA0 = _mm256_broadcast_ss(pA);
+				vregA1 = _mm256_broadcast_ss(pA + 1);
+				vregA2 = _mm256_broadcast_ss(pA + 2);
+				for (j = M; j > 0; j -= 8)
+				{
+					vregB = _mm256_loadu_ps(pB); pB += 8;
+					_mm256_storeu_ps(pC0, _mm256_fnmadd_ps(vregA0, vregB, _mm256_loadu_ps(pC0))); pC0 += 8;
+					_mm256_storeu_ps(pC1, _mm256_fnmadd_ps(vregA1, vregB, _mm256_loadu_ps(pC1))); pC1 += 8;
+					_mm256_storeu_ps(pC2, _mm256_fnmadd_ps(vregA2, vregB, _mm256_loadu_ps(pC2))); pC2 += 8;
+				}
+				regA0 = *pA;
+				regA1 = *(pA + 1);
+				regA2 = *(pA + 2);
+				for (j = Bc - M; j > 0; j--)
+				{
+					regB = *pB++;
+					*pC0++ -= regA0 * regB;
+					*pC1++ -= regA1 * regB;
+					*pC2++ -= regA2 * regB;
+				}
+				break;
+			}
+		}
+
+		void pmxm(float* const pfC, const float* const pfA, const float* const pfB,
+			const std::size_t Ar, const std::size_t Bc, const std::size_t Ac,
+			const std::size_t skipC, const std::size_t skipA, const std::size_t skipB) noexcept
+		{
+			const float* pB; float* pC;
+
+			const float* pA0; const float* pA1; const float* pA2; const float* pA3;
+			const float* pA4; const float* pA5; const float* pA6; const float* pA7;
+
+			float temp[8];
+
+			std::size_t jumpA = Ac + skipA;
+			std::size_t jumpB = Bc + skipB;
+			std::size_t jumpC = Bc + skipC;
+			std::size_t M = Ar - (Ar & 7);
+			std::size_t N = Bc - (Bc & 7);
+			std::size_t r = (Bc & 7) * sizeof(float);
+
+			std::size_t i, j, k, iOut, jOut, kOut, imax, jmax, kmax;
+
+			__m256 vacc0; __m256 vacc1; __m256 vacc2; __m256 vacc3;
+			__m256 vacc4; __m256 vacc5; __m256 vacc6; __m256 vacc7;
+			__m256 vregB;
+
+			// major upper part of C
+			for (iOut = 0; iOut < Ar; iOut += WELP_MATRIX_AVX_ps_mm_Ti)
+			{
+				imax = (iOut + WELP_MATRIX_AVX_ps_mm_Ti < Ar) ? iOut + WELP_MATRIX_AVX_ps_mm_Ti : M;
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (i = iOut; i < imax; i += 8)
+						{
+							for (j = jOut; j < jmax; j += 8)
+							{
+								pB = (pfB + j) + (jumpB * kOut);
+								pC = (pfC + j) + (jumpC * i);
+
+								pA0 = (pfA + kOut) + (jumpA * i); pA1 = pA0 + jumpA;
+								pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+								pA4 = pA0 + 4 * jumpA; pA5 = pA0 + 5 * jumpA;
+								pA6 = pA0 + 6 * jumpA; pA7 = pA0 + 7 * jumpA;
+
+								vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+								vacc2 = _mm256_loadu_ps(pC + 2 * jumpC); vacc3 = _mm256_loadu_ps(pC + 3 * jumpC);
+								vacc4 = _mm256_loadu_ps(pC + 4 * jumpC); vacc5 = _mm256_loadu_ps(pC + 5 * jumpC);
+								vacc6 = _mm256_loadu_ps(pC + 6 * jumpC); vacc7 = _mm256_loadu_ps(pC + 7 * jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+								for (k = kOut; k < kmax; k++)
+								{
+									vregB = _mm256_loadu_ps(pB); pB += jumpB;
+									vacc0 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+									vacc1 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+									vacc2 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA2++), vregB, vacc2);
+									vacc3 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA3++), vregB, vacc3);
+									vacc4 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA4++), vregB, vacc4);
+									vacc5 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA5++), vregB, vacc5);
+									vacc6 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA6++), vregB, vacc6);
+									vacc7 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA7++), vregB, vacc7);
+								}
+
+								_mm256_storeu_ps(pC, vacc0); _mm256_storeu_ps(pC + jumpC, vacc1);
+								_mm256_storeu_ps(pC + 2 * jumpC, vacc2); _mm256_storeu_ps(pC + 3 * jumpC, vacc3);
+								_mm256_storeu_ps(pC + 4 * jumpC, vacc4); _mm256_storeu_ps(pC + 5 * jumpC, vacc5);
+								_mm256_storeu_ps(pC + 6 * jumpC, vacc6); _mm256_storeu_ps(pC + 7 * jumpC, vacc7);
+							}
+							if ((jmax == N) && (r != 0))
+							{
+								pB = (pfB + N) + (jumpB * kOut);
+								pC = (pfC + N) + (jumpC * i);
+
+								pA0 = (pfA + kOut) + (jumpA * i); pA1 = pA0 + jumpA;
+								pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+								pA4 = pA0 + 4 * jumpA; pA5 = pA0 + 5 * jumpA;
+								pA6 = pA0 + 6 * jumpA; pA7 = pA0 + 7 * jumpA;
+
+								vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+								vacc2 = _mm256_loadu_ps(pC + 2 * jumpC); vacc3 = _mm256_loadu_ps(pC + 3 * jumpC);
+								vacc4 = _mm256_loadu_ps(pC + 4 * jumpC); vacc5 = _mm256_loadu_ps(pC + 5 * jumpC);
+								vacc6 = _mm256_loadu_ps(pC + 6 * jumpC); vacc7 = _mm256_loadu_ps(pC + 7 * jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+								for (k = kOut; k < kmax; k++)
+								{
+									vregB = _mm256_loadu_ps(pB); pB += jumpB;
+									vacc0 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+									vacc1 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+									vacc2 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA2++), vregB, vacc2);
+									vacc3 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA3++), vregB, vacc3);
+									vacc4 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA4++), vregB, vacc4);
+									vacc5 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA5++), vregB, vacc5);
+									vacc6 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA6++), vregB, vacc6);
+									vacc7 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA7++), vregB, vacc7);
+								}
+
+								_mm256_storeu_ps(static_cast<float*>(temp), vacc0); std::memcpy(pC, static_cast<float*>(temp), r);
+								_mm256_storeu_ps(static_cast<float*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<float*>(temp), r);
+								_mm256_storeu_ps(static_cast<float*>(temp), vacc2); std::memcpy(pC + 2 * jumpC, static_cast<float*>(temp), r);
+								_mm256_storeu_ps(static_cast<float*>(temp), vacc3); std::memcpy(pC + 3 * jumpC, static_cast<float*>(temp), r);
+								_mm256_storeu_ps(static_cast<float*>(temp), vacc4); std::memcpy(pC + 4 * jumpC, static_cast<float*>(temp), r);
+								_mm256_storeu_ps(static_cast<float*>(temp), vacc5); std::memcpy(pC + 5 * jumpC, static_cast<float*>(temp), r);
+								_mm256_storeu_ps(static_cast<float*>(temp), vacc6); std::memcpy(pC + 6 * jumpC, static_cast<float*>(temp), r);
+								_mm256_storeu_ps(static_cast<float*>(temp), vacc7); std::memcpy(pC + 7 * jumpC, static_cast<float*>(temp), r);
+							}
+						}
+					}
+				}
+			}
+
+			// bottom fringe of C
+			switch (Ar & 7)
+			{
+
+			case 0:
+				break;
+
+			case 1:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M);
+
+							vacc0 = _mm256_loadu_ps(pC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+							}
+
+							_mm256_storeu_ps(pC, vacc0);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M);
+
+							vacc0 = _mm256_loadu_ps(pC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+							}
+
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc0); std::memcpy(pC, static_cast<float*>(temp), r);
+						}
+					}
+				}
+				break;
+
+			case 2:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+
+							vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+								vacc1 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+							}
+
+							_mm256_storeu_ps(pC, vacc0); _mm256_storeu_ps(pC + jumpC, vacc1);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+
+							vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+								vacc1 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+							}
+
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc0); std::memcpy(pC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<float*>(temp), r);
+						}
+					}
+				}
+				break;
+
+			case 3:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA;
+
+							vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+							vacc2 = _mm256_loadu_ps(pC + 2 * jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+								vacc1 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+								vacc2 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA2++), vregB, vacc2);
+							}
+
+							_mm256_storeu_ps(pC, vacc0); _mm256_storeu_ps(pC + jumpC, vacc1);
+							_mm256_storeu_ps(pC + 2 * jumpC, vacc2);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA;
+
+							vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+							vacc2 = _mm256_loadu_ps(pC + 2 * jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+								vacc1 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+								vacc2 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA2++), vregB, vacc2);
+							}
+
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc0); std::memcpy(pC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc2); std::memcpy(pC + 2 * jumpC, static_cast<float*>(temp), r);
+						}
+					}
+				}
+				break;
+
+			case 4:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+
+							vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+							vacc2 = _mm256_loadu_ps(pC + 2 * jumpC); vacc3 = _mm256_loadu_ps(pC + 3 * jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+								vacc1 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+								vacc2 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA2++), vregB, vacc2);
+								vacc3 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA3++), vregB, vacc3);
+							}
+
+							_mm256_storeu_ps(pC, vacc0); _mm256_storeu_ps(pC + jumpC, vacc1);
+							_mm256_storeu_ps(pC + 2 * jumpC, vacc2); _mm256_storeu_ps(pC + 3 * jumpC, vacc3);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+
+							vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+							vacc2 = _mm256_loadu_ps(pC + 2 * jumpC); vacc3 = _mm256_loadu_ps(pC + 3 * jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+								vacc1 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+								vacc2 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA2++), vregB, vacc2);
+								vacc3 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA3++), vregB, vacc3);
+							}
+
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc0); std::memcpy(pC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc2); std::memcpy(pC + 2 * jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc3); std::memcpy(pC + 3 * jumpC, static_cast<float*>(temp), r);
+						}
+					}
+				}
+				break;
+
+			case 5:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+							pA4 = pA0 + 4 * jumpA;
+
+							vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+							vacc2 = _mm256_loadu_ps(pC + 2 * jumpC); vacc3 = _mm256_loadu_ps(pC + 3 * jumpC);
+							vacc4 = _mm256_loadu_ps(pC + 4 * jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+								vacc1 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+								vacc2 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA2++), vregB, vacc2);
+								vacc3 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA3++), vregB, vacc3);
+								vacc4 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA4++), vregB, vacc4);
+							}
+
+							_mm256_storeu_ps(pC, vacc0); _mm256_storeu_ps(pC + jumpC, vacc1);
+							_mm256_storeu_ps(pC + 2 * jumpC, vacc2); _mm256_storeu_ps(pC + 3 * jumpC, vacc3);
+							_mm256_storeu_ps(pC + 4 * jumpC, vacc4);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+							pA4 = pA0 + 4 * jumpA;
+
+							vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+							vacc2 = _mm256_loadu_ps(pC + 2 * jumpC); vacc3 = _mm256_loadu_ps(pC + 3 * jumpC);
+							vacc4 = _mm256_loadu_ps(pC + 4 * jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+								vacc1 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+								vacc2 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA2++), vregB, vacc2);
+								vacc3 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA3++), vregB, vacc3);
+								vacc4 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA4++), vregB, vacc4);
+							}
+
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc0); std::memcpy(pC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc2); std::memcpy(pC + 2 * jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc3); std::memcpy(pC + 3 * jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc4); std::memcpy(pC + 4 * jumpC, static_cast<float*>(temp), r);
+						}
+					}
+				}
+				break;
+
+			case 6:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+							pA4 = pA0 + 4 * jumpA; pA5 = pA0 + 5 * jumpA;
+
+							vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+							vacc2 = _mm256_loadu_ps(pC + 2 * jumpC); vacc3 = _mm256_loadu_ps(pC + 3 * jumpC);
+							vacc4 = _mm256_loadu_ps(pC + 4 * jumpC); vacc5 = _mm256_loadu_ps(pC + 5 * jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+								vacc1 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+								vacc2 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA2++), vregB, vacc2);
+								vacc3 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA3++), vregB, vacc3);
+								vacc4 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA4++), vregB, vacc4);
+								vacc5 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA5++), vregB, vacc5);
+							}
+
+							_mm256_storeu_ps(pC, vacc0); _mm256_storeu_ps(pC + jumpC, vacc1);
+							_mm256_storeu_ps(pC + 2 * jumpC, vacc2); _mm256_storeu_ps(pC + 3 * jumpC, vacc3);
+							_mm256_storeu_ps(pC + 4 * jumpC, vacc4); _mm256_storeu_ps(pC + 5 * jumpC, vacc5);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+							pA4 = pA0 + 4 * jumpA; pA5 = pA0 + 5 * jumpA;
+
+							vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+							vacc2 = _mm256_loadu_ps(pC + 2 * jumpC); vacc3 = _mm256_loadu_ps(pC + 3 * jumpC);
+							vacc4 = _mm256_loadu_ps(pC + 4 * jumpC); vacc5 = _mm256_loadu_ps(pC + 5 * jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+								vacc1 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+								vacc2 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA2++), vregB, vacc2);
+								vacc3 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA3++), vregB, vacc3);
+								vacc4 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA4++), vregB, vacc4);
+								vacc5 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA5++), vregB, vacc5);
+							}
+
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc0); std::memcpy(pC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc2); std::memcpy(pC + 2 * jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc3); std::memcpy(pC + 3 * jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc4); std::memcpy(pC + 4 * jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc5); std::memcpy(pC + 5 * jumpC, static_cast<float*>(temp), r);
+						}
+					}
+				}
+				break;
+
+			case 7:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+							pA4 = pA0 + 4 * jumpA; pA5 = pA0 + 5 * jumpA;
+							pA6 = pA0 + 6 * jumpA;
+
+							vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+							vacc2 = _mm256_loadu_ps(pC + 2 * jumpC); vacc3 = _mm256_loadu_ps(pC + 3 * jumpC);
+							vacc4 = _mm256_loadu_ps(pC + 4 * jumpC); vacc5 = _mm256_loadu_ps(pC + 5 * jumpC);
+							vacc6 = _mm256_loadu_ps(pC + 6 * jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+								vacc1 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+								vacc2 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA2++), vregB, vacc2);
+								vacc3 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA3++), vregB, vacc3);
+								vacc4 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA4++), vregB, vacc4);
+								vacc5 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA5++), vregB, vacc5);
+								vacc6 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA6++), vregB, vacc6);
+							}
+
+							_mm256_storeu_ps(pC, vacc0); _mm256_storeu_ps(pC + jumpC, vacc1);
+							_mm256_storeu_ps(pC + 2 * jumpC, vacc2); _mm256_storeu_ps(pC + 3 * jumpC, vacc3);
+							_mm256_storeu_ps(pC + 4 * jumpC, vacc4); _mm256_storeu_ps(pC + 5 * jumpC, vacc5);
+							_mm256_storeu_ps(pC + 6 * jumpC, vacc6);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+							pA4 = pA0 + 4 * jumpA; pA5 = pA0 + 5 * jumpA;
+							pA6 = pA0 + 6 * jumpA;
+
+							vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+							vacc2 = _mm256_loadu_ps(pC + 2 * jumpC); vacc3 = _mm256_loadu_ps(pC + 3 * jumpC);
+							vacc4 = _mm256_loadu_ps(pC + 4 * jumpC); vacc5 = _mm256_loadu_ps(pC + 5 * jumpC);
+							vacc6 = _mm256_loadu_ps(pC + 6 * jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+								vacc1 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+								vacc2 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA2++), vregB, vacc2);
+								vacc3 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA3++), vregB, vacc3);
+								vacc4 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA4++), vregB, vacc4);
+								vacc5 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA5++), vregB, vacc5);
+								vacc6 = _mm256_fmadd_ps(_mm256_broadcast_ss(pA6++), vregB, vacc6);
+							}
+
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc0); std::memcpy(pC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc2); std::memcpy(pC + 2 * jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc3); std::memcpy(pC + 3 * jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc4); std::memcpy(pC + 4 * jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc5); std::memcpy(pC + 5 * jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc6); std::memcpy(pC + 6 * jumpC, static_cast<float*>(temp), r);
+						}
+					}
+				}
+				break;
+			}
+		}
+		void p_mxm(float* const pfC, const float* const pfA, const float* const pfB,
+			const std::size_t Ar, const std::size_t Bc, const std::size_t Ac,
+			const std::size_t skipC, const std::size_t skipA, const std::size_t skipB) noexcept
+		{
+			const float* pB; float* pC;
+
+			const float* pA0; const float* pA1; const float* pA2; const float* pA3;
+			const float* pA4; const float* pA5; const float* pA6; const float* pA7;
+
+			float temp[8];
+
+			std::size_t jumpA = Ac + skipA;
+			std::size_t jumpB = Bc + skipB;
+			std::size_t jumpC = Bc + skipC;
+			std::size_t M = Ar - (Ar & 7);
+			std::size_t N = Bc - (Bc & 7);
+			std::size_t r = (Bc & 7) * sizeof(float);
+
+			std::size_t i, j, k, iOut, jOut, kOut, imax, jmax, kmax;
+
+			__m256 vacc0; __m256 vacc1; __m256 vacc2; __m256 vacc3;
+			__m256 vacc4; __m256 vacc5; __m256 vacc6; __m256 vacc7;
+			__m256 vregB;
+
+			// major upper part of C
+			for (iOut = 0; iOut < Ar; iOut += WELP_MATRIX_AVX_ps_mm_Ti)
+			{
+				imax = (iOut + WELP_MATRIX_AVX_ps_mm_Ti < Ar) ? iOut + WELP_MATRIX_AVX_ps_mm_Ti : M;
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (i = iOut; i < imax; i += 8)
+						{
+							for (j = jOut; j < jmax; j += 8)
+							{
+								pB = (pfB + j) + (jumpB * kOut);
+								pC = (pfC + j) + (jumpC * i);
+
+								pA0 = (pfA + kOut) + (jumpA * i); pA1 = pA0 + jumpA;
+								pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+								pA4 = pA0 + 4 * jumpA; pA5 = pA0 + 5 * jumpA;
+								pA6 = pA0 + 6 * jumpA; pA7 = pA0 + 7 * jumpA;
+
+								vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+								vacc2 = _mm256_loadu_ps(pC + 2 * jumpC); vacc3 = _mm256_loadu_ps(pC + 3 * jumpC);
+								vacc4 = _mm256_loadu_ps(pC + 4 * jumpC); vacc5 = _mm256_loadu_ps(pC + 5 * jumpC);
+								vacc6 = _mm256_loadu_ps(pC + 6 * jumpC); vacc7 = _mm256_loadu_ps(pC + 7 * jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+								for (k = kOut; k < kmax; k++)
+								{
+									vregB = _mm256_loadu_ps(pB); pB += jumpB;
+									vacc0 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+									vacc1 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+									vacc2 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA2++), vregB, vacc2);
+									vacc3 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA3++), vregB, vacc3);
+									vacc4 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA4++), vregB, vacc4);
+									vacc5 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA5++), vregB, vacc5);
+									vacc6 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA6++), vregB, vacc6);
+									vacc7 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA7++), vregB, vacc7);
+								}
+
+								_mm256_storeu_ps(pC, vacc0); _mm256_storeu_ps(pC + jumpC, vacc1);
+								_mm256_storeu_ps(pC + 2 * jumpC, vacc2); _mm256_storeu_ps(pC + 3 * jumpC, vacc3);
+								_mm256_storeu_ps(pC + 4 * jumpC, vacc4); _mm256_storeu_ps(pC + 5 * jumpC, vacc5);
+								_mm256_storeu_ps(pC + 6 * jumpC, vacc6); _mm256_storeu_ps(pC + 7 * jumpC, vacc7);
+							}
+							if ((jmax == N) && (r != 0))
+							{
+								pB = (pfB + N) + (jumpB * kOut);
+								pC = (pfC + N) + (jumpC * i);
+
+								pA0 = (pfA + kOut) + (jumpA * i); pA1 = pA0 + jumpA;
+								pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+								pA4 = pA0 + 4 * jumpA; pA5 = pA0 + 5 * jumpA;
+								pA6 = pA0 + 6 * jumpA; pA7 = pA0 + 7 * jumpA;
+
+								vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+								vacc2 = _mm256_loadu_ps(pC + 2 * jumpC); vacc3 = _mm256_loadu_ps(pC + 3 * jumpC);
+								vacc4 = _mm256_loadu_ps(pC + 4 * jumpC); vacc5 = _mm256_loadu_ps(pC + 5 * jumpC);
+								vacc6 = _mm256_loadu_ps(pC + 6 * jumpC); vacc7 = _mm256_loadu_ps(pC + 7 * jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+								for (k = kOut; k < kmax; k++)
+								{
+									vregB = _mm256_loadu_ps(pB); pB += jumpB;
+									vacc0 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+									vacc1 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+									vacc2 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA2++), vregB, vacc2);
+									vacc3 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA3++), vregB, vacc3);
+									vacc4 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA4++), vregB, vacc4);
+									vacc5 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA5++), vregB, vacc5);
+									vacc6 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA6++), vregB, vacc6);
+									vacc7 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA7++), vregB, vacc7);
+								}
+
+								_mm256_storeu_ps(static_cast<float*>(temp), vacc0); std::memcpy(pC, static_cast<float*>(temp), r);
+								_mm256_storeu_ps(static_cast<float*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<float*>(temp), r);
+								_mm256_storeu_ps(static_cast<float*>(temp), vacc2); std::memcpy(pC + 2 * jumpC, static_cast<float*>(temp), r);
+								_mm256_storeu_ps(static_cast<float*>(temp), vacc3); std::memcpy(pC + 3 * jumpC, static_cast<float*>(temp), r);
+								_mm256_storeu_ps(static_cast<float*>(temp), vacc4); std::memcpy(pC + 4 * jumpC, static_cast<float*>(temp), r);
+								_mm256_storeu_ps(static_cast<float*>(temp), vacc5); std::memcpy(pC + 5 * jumpC, static_cast<float*>(temp), r);
+								_mm256_storeu_ps(static_cast<float*>(temp), vacc6); std::memcpy(pC + 6 * jumpC, static_cast<float*>(temp), r);
+								_mm256_storeu_ps(static_cast<float*>(temp), vacc7); std::memcpy(pC + 7 * jumpC, static_cast<float*>(temp), r);
+							}
+						}
+					}
+				}
+			}
+
+			// bottom fringe of C
+			switch (Ar & 7)
+			{
+
+			case 0:
+				break;
+
+			case 1:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M);
+
+							vacc0 = _mm256_loadu_ps(pC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+							}
+
+							_mm256_storeu_ps(pC, vacc0);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M);
+
+							vacc0 = _mm256_loadu_ps(pC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+							}
+
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc0); std::memcpy(pC, static_cast<float*>(temp), r);
+						}
+					}
+				}
+				break;
+
+			case 2:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+
+							vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+								vacc1 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+							}
+
+							_mm256_storeu_ps(pC, vacc0); _mm256_storeu_ps(pC + jumpC, vacc1);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+
+							vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+								vacc1 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+							}
+
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc0); std::memcpy(pC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<float*>(temp), r);
+						}
+					}
+				}
+				break;
+
+			case 3:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA;
+
+							vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+							vacc2 = _mm256_loadu_ps(pC + 2 * jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+								vacc1 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+								vacc2 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA2++), vregB, vacc2);
+							}
+
+							_mm256_storeu_ps(pC, vacc0); _mm256_storeu_ps(pC + jumpC, vacc1);
+							_mm256_storeu_ps(pC + 2 * jumpC, vacc2);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA;
+
+							vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+							vacc2 = _mm256_loadu_ps(pC + 2 * jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+								vacc1 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+								vacc2 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA2++), vregB, vacc2);
+							}
+
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc0); std::memcpy(pC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc2); std::memcpy(pC + 2 * jumpC, static_cast<float*>(temp), r);
+						}
+					}
+				}
+				break;
+
+			case 4:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+
+							vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+							vacc2 = _mm256_loadu_ps(pC + 2 * jumpC); vacc3 = _mm256_loadu_ps(pC + 3 * jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+								vacc1 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+								vacc2 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA2++), vregB, vacc2);
+								vacc3 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA3++), vregB, vacc3);
+							}
+
+							_mm256_storeu_ps(pC, vacc0); _mm256_storeu_ps(pC + jumpC, vacc1);
+							_mm256_storeu_ps(pC + 2 * jumpC, vacc2); _mm256_storeu_ps(pC + 3 * jumpC, vacc3);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+
+							vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+							vacc2 = _mm256_loadu_ps(pC + 2 * jumpC); vacc3 = _mm256_loadu_ps(pC + 3 * jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+								vacc1 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+								vacc2 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA2++), vregB, vacc2);
+								vacc3 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA3++), vregB, vacc3);
+							}
+
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc0); std::memcpy(pC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc2); std::memcpy(pC + 2 * jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc3); std::memcpy(pC + 3 * jumpC, static_cast<float*>(temp), r);
+						}
+					}
+				}
+				break;
+
+			case 5:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+							pA4 = pA0 + 4 * jumpA;
+
+							vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+							vacc2 = _mm256_loadu_ps(pC + 2 * jumpC); vacc3 = _mm256_loadu_ps(pC + 3 * jumpC);
+							vacc4 = _mm256_loadu_ps(pC + 4 * jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+								vacc1 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+								vacc2 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA2++), vregB, vacc2);
+								vacc3 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA3++), vregB, vacc3);
+								vacc4 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA4++), vregB, vacc4);
+							}
+
+							_mm256_storeu_ps(pC, vacc0); _mm256_storeu_ps(pC + jumpC, vacc1);
+							_mm256_storeu_ps(pC + 2 * jumpC, vacc2); _mm256_storeu_ps(pC + 3 * jumpC, vacc3);
+							_mm256_storeu_ps(pC + 4 * jumpC, vacc4);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+							pA4 = pA0 + 4 * jumpA;
+
+							vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+							vacc2 = _mm256_loadu_ps(pC + 2 * jumpC); vacc3 = _mm256_loadu_ps(pC + 3 * jumpC);
+							vacc4 = _mm256_loadu_ps(pC + 4 * jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+								vacc1 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+								vacc2 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA2++), vregB, vacc2);
+								vacc3 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA3++), vregB, vacc3);
+								vacc4 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA4++), vregB, vacc4);
+							}
+
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc0); std::memcpy(pC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc2); std::memcpy(pC + 2 * jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc3); std::memcpy(pC + 3 * jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc4); std::memcpy(pC + 4 * jumpC, static_cast<float*>(temp), r);
+						}
+					}
+				}
+				break;
+
+			case 6:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+							pA4 = pA0 + 4 * jumpA; pA5 = pA0 + 5 * jumpA;
+
+							vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+							vacc2 = _mm256_loadu_ps(pC + 2 * jumpC); vacc3 = _mm256_loadu_ps(pC + 3 * jumpC);
+							vacc4 = _mm256_loadu_ps(pC + 4 * jumpC); vacc5 = _mm256_loadu_ps(pC + 5 * jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+								vacc1 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+								vacc2 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA2++), vregB, vacc2);
+								vacc3 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA3++), vregB, vacc3);
+								vacc4 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA4++), vregB, vacc4);
+								vacc5 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA5++), vregB, vacc5);
+							}
+
+							_mm256_storeu_ps(pC, vacc0); _mm256_storeu_ps(pC + jumpC, vacc1);
+							_mm256_storeu_ps(pC + 2 * jumpC, vacc2); _mm256_storeu_ps(pC + 3 * jumpC, vacc3);
+							_mm256_storeu_ps(pC + 4 * jumpC, vacc4); _mm256_storeu_ps(pC + 5 * jumpC, vacc5);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+							pA4 = pA0 + 4 * jumpA; pA5 = pA0 + 5 * jumpA;
+
+							vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+							vacc2 = _mm256_loadu_ps(pC + 2 * jumpC); vacc3 = _mm256_loadu_ps(pC + 3 * jumpC);
+							vacc4 = _mm256_loadu_ps(pC + 4 * jumpC); vacc5 = _mm256_loadu_ps(pC + 5 * jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+								vacc1 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+								vacc2 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA2++), vregB, vacc2);
+								vacc3 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA3++), vregB, vacc3);
+								vacc4 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA4++), vregB, vacc4);
+								vacc5 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA5++), vregB, vacc5);
+							}
+
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc0); std::memcpy(pC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc2); std::memcpy(pC + 2 * jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc3); std::memcpy(pC + 3 * jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc4); std::memcpy(pC + 4 * jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc5); std::memcpy(pC + 5 * jumpC, static_cast<float*>(temp), r);
+						}
+					}
+				}
+				break;
+
+			case 7:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+							pA4 = pA0 + 4 * jumpA; pA5 = pA0 + 5 * jumpA;
+							pA6 = pA0 + 6 * jumpA;
+
+							vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+							vacc2 = _mm256_loadu_ps(pC + 2 * jumpC); vacc3 = _mm256_loadu_ps(pC + 3 * jumpC);
+							vacc4 = _mm256_loadu_ps(pC + 4 * jumpC); vacc5 = _mm256_loadu_ps(pC + 5 * jumpC);
+							vacc6 = _mm256_loadu_ps(pC + 6 * jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+								vacc1 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+								vacc2 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA2++), vregB, vacc2);
+								vacc3 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA3++), vregB, vacc3);
+								vacc4 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA4++), vregB, vacc4);
+								vacc5 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA5++), vregB, vacc5);
+								vacc6 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA6++), vregB, vacc6);
+							}
+
+							_mm256_storeu_ps(pC, vacc0); _mm256_storeu_ps(pC + jumpC, vacc1);
+							_mm256_storeu_ps(pC + 2 * jumpC, vacc2); _mm256_storeu_ps(pC + 3 * jumpC, vacc3);
+							_mm256_storeu_ps(pC + 4 * jumpC, vacc4); _mm256_storeu_ps(pC + 5 * jumpC, vacc5);
+							_mm256_storeu_ps(pC + 6 * jumpC, vacc6);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+							pA4 = pA0 + 4 * jumpA; pA5 = pA0 + 5 * jumpA;
+							pA6 = pA0 + 6 * jumpA;
+
+							vacc0 = _mm256_loadu_ps(pC); vacc1 = _mm256_loadu_ps(pC + jumpC);
+							vacc2 = _mm256_loadu_ps(pC + 2 * jumpC); vacc3 = _mm256_loadu_ps(pC + 3 * jumpC);
+							vacc4 = _mm256_loadu_ps(pC + 4 * jumpC); vacc5 = _mm256_loadu_ps(pC + 5 * jumpC);
+							vacc6 = _mm256_loadu_ps(pC + 6 * jumpC);
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_ps(pB); pB += jumpB;
+								vacc0 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA0++), vregB, vacc0);
+								vacc1 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA1++), vregB, vacc1);
+								vacc2 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA2++), vregB, vacc2);
+								vacc3 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA3++), vregB, vacc3);
+								vacc4 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA4++), vregB, vacc4);
+								vacc5 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA5++), vregB, vacc5);
+								vacc6 = _mm256_fnmadd_ps(_mm256_broadcast_ss(pA6++), vregB, vacc6);
+							}
+
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc0); std::memcpy(pC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc2); std::memcpy(pC + 2 * jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc3); std::memcpy(pC + 3 * jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc4); std::memcpy(pC + 4 * jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc5); std::memcpy(pC + 5 * jumpC, static_cast<float*>(temp), r);
+							_mm256_storeu_ps(static_cast<float*>(temp), vacc6); std::memcpy(pC + 6 * jumpC, static_cast<float*>(temp), r);
+						}
+					}
+				}
+				break;
+			}
+		}
+
+		void pmxm(int* const pfC, const int* const pfA, const int* const pfB,
+			const std::size_t Ar, const std::size_t Bc, const std::size_t Ac,
+			const std::size_t skipC, const std::size_t skipA, const std::size_t skipB) noexcept
+		{
+			const int* pB; int* pC;
+
+			const int* pA0; const int* pA1; const int* pA2; const int* pA3;
+			const int* pA4; const int* pA5; const int* pA6; const int* pA7;
+
+			int temp[8];
+
+			std::size_t jumpA = Ac + skipA;
+			std::size_t jumpB = Bc + skipB;
+			std::size_t jumpC = Bc + skipC;
+			std::size_t M = Ar - (Ar & 7);
+			std::size_t N = Bc - (Bc & 7);
+			std::size_t r = (Bc & 7) * sizeof(int);
+
+			std::size_t i, j, k, iOut, jOut, kOut, imax, jmax, kmax;
+
+			__m256i vacc0; __m256i vacc1; __m256i vacc2; __m256i vacc3;
+			__m256i vacc4; __m256i vacc5; __m256i vacc6; __m256i vacc7;
+			__m256i vregB;
+
+			// major upper part of C
+			for (iOut = 0; iOut < Ar; iOut += WELP_MATRIX_AVX_ps_mm_Ti)
+			{
+				imax = (iOut + WELP_MATRIX_AVX_ps_mm_Ti < Ar) ? iOut + WELP_MATRIX_AVX_ps_mm_Ti : M;
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (i = iOut; i < imax; i += 8)
+						{
+							for (j = jOut; j < jmax; j += 8)
+							{
+								pB = (pfB + j) + (jumpB * kOut);
+								pC = (pfC + j) + (jumpC * i);
+
+								pA0 = (pfA + kOut) + (jumpA * i); pA1 = pA0 + jumpA;
+								pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+								pA4 = pA0 + 4 * jumpA; pA5 = pA0 + 5 * jumpA;
+								pA6 = pA0 + 6 * jumpA; pA7 = pA0 + 7 * jumpA;
+
+								vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+								vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC));
+								vacc4 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 4 * jumpC)); vacc5 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 5 * jumpC));
+								vacc6 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 6 * jumpC)); vacc7 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 7 * jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+								for (k = kOut; k < kmax; k++)
+								{
+									vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+									vacc0 = _mm256_add_epi32(_mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB), vacc0);
+									vacc1 = _mm256_add_epi32(_mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB), vacc1);
+									vacc2 = _mm256_add_epi32(_mm256_mullo_epi32(_mm256_set1_epi32(*pA2++), vregB), vacc2);
+									vacc3 = _mm256_add_epi32(_mm256_mullo_epi32(_mm256_set1_epi32(*pA3++), vregB), vacc3);
+									vacc4 = _mm256_add_epi32(_mm256_mullo_epi32(_mm256_set1_epi32(*pA4++), vregB), vacc4);
+									vacc5 = _mm256_add_epi32(_mm256_mullo_epi32(_mm256_set1_epi32(*pA5++), vregB), vacc5);
+									vacc6 = _mm256_add_epi32(_mm256_mullo_epi32(_mm256_set1_epi32(*pA6++), vregB), vacc6);
+									vacc7 = _mm256_add_epi32(_mm256_mullo_epi32(_mm256_set1_epi32(*pA7++), vregB), vacc7);
+								}
+
+								_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC), vacc0); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + jumpC), vacc1);
+								_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC), vacc2); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC), vacc3);
+								_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 4 * jumpC), vacc4); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 5 * jumpC), vacc5);
+								_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 6 * jumpC), vacc6); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 7 * jumpC), vacc7);
+							}
+							if ((jmax == N) && (r != 0))
+							{
+								pB = (pfB + N) + (jumpB * kOut);
+								pC = (pfC + N) + (jumpC * i);
+
+								pA0 = (pfA + kOut) + (jumpA * i); pA1 = pA0 + jumpA;
+								pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+								pA4 = pA0 + 4 * jumpA; pA5 = pA0 + 5 * jumpA;
+								pA6 = pA0 + 6 * jumpA; pA7 = pA0 + 7 * jumpA;
+
+								vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+								vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC));
+								vacc4 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 4 * jumpC)); vacc5 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 5 * jumpC));
+								vacc6 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 6 * jumpC)); vacc7 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 7 * jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+								for (k = kOut; k < kmax; k++)
+								{
+									vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+									vacc0 = _mm256_add_epi32(_mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB), vacc0);
+									vacc1 = _mm256_add_epi32(_mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB), vacc1);
+									vacc2 = _mm256_add_epi32(_mm256_mullo_epi32(_mm256_set1_epi32(*pA2++), vregB), vacc2);
+									vacc3 = _mm256_add_epi32(_mm256_mullo_epi32(_mm256_set1_epi32(*pA3++), vregB), vacc3);
+									vacc4 = _mm256_add_epi32(_mm256_mullo_epi32(_mm256_set1_epi32(*pA4++), vregB), vacc4);
+									vacc5 = _mm256_add_epi32(_mm256_mullo_epi32(_mm256_set1_epi32(*pA5++), vregB), vacc5);
+									vacc6 = _mm256_add_epi32(_mm256_mullo_epi32(_mm256_set1_epi32(*pA6++), vregB), vacc6);
+									vacc7 = _mm256_add_epi32(_mm256_mullo_epi32(_mm256_set1_epi32(*pA7++), vregB), vacc7);
+								}
+
+								_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc0); std::memcpy(pC, static_cast<int*>(temp), r);
+								_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<int*>(temp), r);
+								_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc2); std::memcpy(pC + 2 * jumpC, static_cast<int*>(temp), r);
+								_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc3); std::memcpy(pC + 3 * jumpC, static_cast<int*>(temp), r);
+								_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc4); std::memcpy(pC + 4 * jumpC, static_cast<int*>(temp), r);
+								_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc5); std::memcpy(pC + 5 * jumpC, static_cast<int*>(temp), r);
+								_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc6); std::memcpy(pC + 6 * jumpC, static_cast<int*>(temp), r);
+								_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc7); std::memcpy(pC + 7 * jumpC, static_cast<int*>(temp), r);
+							}
+						}
+					}
+				}
+			}
+
+			// bottom fringe of C
+			switch (Ar & 7)
+			{
+
+			case 0:
+				break;
+
+			case 1:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M);
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_add_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC), vacc0);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M);
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_add_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc0); std::memcpy(pC, static_cast<int*>(temp), r);
+						}
+					}
+				}
+				break;
+
+			case 2:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_add_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+								vacc1 = _mm256_add_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC), vacc0); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + jumpC), vacc1);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_add_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+								vacc1 = _mm256_add_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc0); std::memcpy(pC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<int*>(temp), r);
+						}
+					}
+				}
+				break;
+
+			case 3:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA;
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+							vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_add_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+								vacc1 = _mm256_add_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+								vacc2 = _mm256_add_epi32(vacc2, _mm256_mullo_epi32(_mm256_set1_epi32(*pA2++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC), vacc0); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + jumpC), vacc1);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC), vacc2);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA;
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+							vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_add_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+								vacc1 = _mm256_add_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+								vacc2 = _mm256_add_epi32(vacc2, _mm256_mullo_epi32(_mm256_set1_epi32(*pA2++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc0); std::memcpy(pC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc2); std::memcpy(pC + 2 * jumpC, static_cast<int*>(temp), r);
+						}
+					}
+				}
+				break;
+
+			case 4:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+							vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_add_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+								vacc1 = _mm256_add_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+								vacc2 = _mm256_add_epi32(vacc2, _mm256_mullo_epi32(_mm256_set1_epi32(*pA2++), vregB));
+								vacc3 = _mm256_add_epi32(vacc3, _mm256_mullo_epi32(_mm256_set1_epi32(*pA3++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC), vacc0); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + jumpC), vacc1);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC), vacc2); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC), vacc3);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+							vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_add_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+								vacc1 = _mm256_add_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+								vacc2 = _mm256_add_epi32(vacc2, _mm256_mullo_epi32(_mm256_set1_epi32(*pA2++), vregB));
+								vacc3 = _mm256_add_epi32(vacc3, _mm256_mullo_epi32(_mm256_set1_epi32(*pA3++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc0); std::memcpy(pC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc2); std::memcpy(pC + 2 * jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc3); std::memcpy(pC + 3 * jumpC, static_cast<int*>(temp), r);
+						}
+					}
+				}
+				break;
+
+			case 5:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+							pA4 = pA0 + 4 * jumpA;
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+							vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC));
+							vacc4 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 4 * jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_add_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+								vacc1 = _mm256_add_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+								vacc2 = _mm256_add_epi32(vacc2, _mm256_mullo_epi32(_mm256_set1_epi32(*pA2++), vregB));
+								vacc3 = _mm256_add_epi32(vacc3, _mm256_mullo_epi32(_mm256_set1_epi32(*pA3++), vregB));
+								vacc4 = _mm256_add_epi32(vacc4, _mm256_mullo_epi32(_mm256_set1_epi32(*pA4++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC), vacc0); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + jumpC), vacc1);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC), vacc2); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC), vacc3);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 4 * jumpC), vacc4);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+							pA4 = pA0 + 4 * jumpA;
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+							vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC));
+							vacc4 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 4 * jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_add_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+								vacc1 = _mm256_add_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+								vacc2 = _mm256_add_epi32(vacc2, _mm256_mullo_epi32(_mm256_set1_epi32(*pA2++), vregB));
+								vacc3 = _mm256_add_epi32(vacc3, _mm256_mullo_epi32(_mm256_set1_epi32(*pA3++), vregB));
+								vacc4 = _mm256_add_epi32(vacc4, _mm256_mullo_epi32(_mm256_set1_epi32(*pA4++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc0); std::memcpy(pC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc2); std::memcpy(pC + 2 * jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc3); std::memcpy(pC + 3 * jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc4); std::memcpy(pC + 4 * jumpC, static_cast<int*>(temp), r);
+						}
+					}
+				}
+				break;
+
+			case 6:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+							pA4 = pA0 + 4 * jumpA; pA5 = pA0 + 5 * jumpA;
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+							vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC));
+							vacc4 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 4 * jumpC)); vacc5 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 5 * jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_add_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+								vacc1 = _mm256_add_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+								vacc2 = _mm256_add_epi32(vacc2, _mm256_mullo_epi32(_mm256_set1_epi32(*pA2++), vregB));
+								vacc3 = _mm256_add_epi32(vacc3, _mm256_mullo_epi32(_mm256_set1_epi32(*pA3++), vregB));
+								vacc4 = _mm256_add_epi32(vacc4, _mm256_mullo_epi32(_mm256_set1_epi32(*pA4++), vregB));
+								vacc5 = _mm256_add_epi32(vacc5, _mm256_mullo_epi32(_mm256_set1_epi32(*pA5++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC), vacc0); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + jumpC), vacc1);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC), vacc2); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC), vacc3);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 4 * jumpC), vacc4); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 5 * jumpC), vacc5);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+							pA4 = pA0 + 4 * jumpA; pA5 = pA0 + 5 * jumpA;
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+							vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC));
+							vacc4 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 4 * jumpC)); vacc5 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 5 * jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_add_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+								vacc1 = _mm256_add_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+								vacc2 = _mm256_add_epi32(vacc2, _mm256_mullo_epi32(_mm256_set1_epi32(*pA2++), vregB));
+								vacc3 = _mm256_add_epi32(vacc3, _mm256_mullo_epi32(_mm256_set1_epi32(*pA3++), vregB));
+								vacc4 = _mm256_add_epi32(vacc4, _mm256_mullo_epi32(_mm256_set1_epi32(*pA4++), vregB));
+								vacc5 = _mm256_add_epi32(vacc5, _mm256_mullo_epi32(_mm256_set1_epi32(*pA5++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc0); std::memcpy(pC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc2); std::memcpy(pC + 2 * jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc3); std::memcpy(pC + 3 * jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc4); std::memcpy(pC + 4 * jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc5); std::memcpy(pC + 5 * jumpC, static_cast<int*>(temp), r);
+						}
+					}
+				}
+				break;
+
+			case 7:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+							pA4 = pA0 + 4 * jumpA; pA5 = pA0 + 5 * jumpA;
+							pA6 = pA0 + 6 * jumpA;
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+							vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC));
+							vacc4 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 4 * jumpC)); vacc5 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 5 * jumpC));
+							vacc6 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 6 * jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_add_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+								vacc1 = _mm256_add_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+								vacc2 = _mm256_add_epi32(vacc2, _mm256_mullo_epi32(_mm256_set1_epi32(*pA2++), vregB));
+								vacc3 = _mm256_add_epi32(vacc3, _mm256_mullo_epi32(_mm256_set1_epi32(*pA3++), vregB));
+								vacc4 = _mm256_add_epi32(vacc4, _mm256_mullo_epi32(_mm256_set1_epi32(*pA4++), vregB));
+								vacc5 = _mm256_add_epi32(vacc5, _mm256_mullo_epi32(_mm256_set1_epi32(*pA5++), vregB));
+								vacc6 = _mm256_add_epi32(vacc6, _mm256_mullo_epi32(_mm256_set1_epi32(*pA6++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC), vacc0); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + jumpC), vacc1);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC), vacc2); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC), vacc3);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 4 * jumpC), vacc4); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 5 * jumpC), vacc5);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 6 * jumpC), vacc6);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+							pA4 = pA0 + 4 * jumpA; pA5 = pA0 + 5 * jumpA;
+							pA6 = pA0 + 6 * jumpA;
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+							vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC));
+							vacc4 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 4 * jumpC)); vacc5 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 5 * jumpC));
+							vacc6 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 6 * jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_add_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+								vacc1 = _mm256_add_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+								vacc2 = _mm256_add_epi32(vacc2, _mm256_mullo_epi32(_mm256_set1_epi32(*pA2++), vregB));
+								vacc3 = _mm256_add_epi32(vacc3, _mm256_mullo_epi32(_mm256_set1_epi32(*pA3++), vregB));
+								vacc4 = _mm256_add_epi32(vacc4, _mm256_mullo_epi32(_mm256_set1_epi32(*pA4++), vregB));
+								vacc5 = _mm256_add_epi32(vacc5, _mm256_mullo_epi32(_mm256_set1_epi32(*pA5++), vregB));
+								vacc6 = _mm256_add_epi32(vacc6, _mm256_mullo_epi32(_mm256_set1_epi32(*pA6++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc0); std::memcpy(pC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc2); std::memcpy(pC + 2 * jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc3); std::memcpy(pC + 3 * jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc4); std::memcpy(pC + 4 * jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc5); std::memcpy(pC + 5 * jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc6); std::memcpy(pC + 6 * jumpC, static_cast<int*>(temp), r);
+						}
+					}
+				}
+				break;
+			}
+		}
+		void p_mxm(int* const pfC, const int* const pfA, const int* const pfB,
+			const std::size_t Ar, const std::size_t Bc, const std::size_t Ac,
+			const std::size_t skipC, const std::size_t skipA, const std::size_t skipB) noexcept
+		{
+			const int* pB; int* pC;
+
+			const int* pA0; const int* pA1; const int* pA2; const int* pA3;
+			const int* pA4; const int* pA5; const int* pA6; const int* pA7;
+
+			int temp[8];
+
+			std::size_t jumpA = Ac + skipA;
+			std::size_t jumpB = Bc + skipB;
+			std::size_t jumpC = Bc + skipC;
+			std::size_t M = Ar - (Ar & 7);
+			std::size_t N = Bc - (Bc & 7);
+			std::size_t r = (Bc & 7) * sizeof(int);
+
+			std::size_t i, j, k, iOut, jOut, kOut, imax, jmax, kmax;
+
+			__m256i vacc0; __m256i vacc1; __m256i vacc2; __m256i vacc3;
+			__m256i vacc4; __m256i vacc5; __m256i vacc6; __m256i vacc7;
+			__m256i vregB;
+
+			// major upper part of C
+			for (iOut = 0; iOut < Ar; iOut += WELP_MATRIX_AVX_ps_mm_Ti)
+			{
+				imax = (iOut + WELP_MATRIX_AVX_ps_mm_Ti < Ar) ? iOut + WELP_MATRIX_AVX_ps_mm_Ti : M;
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (i = iOut; i < imax; i += 8)
+						{
+							for (j = jOut; j < jmax; j += 8)
+							{
+								pB = (pfB + j) + (jumpB * kOut);
+								pC = (pfC + j) + (jumpC * i);
+
+								pA0 = (pfA + kOut) + (jumpA * i); pA1 = pA0 + jumpA;
+								pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+								pA4 = pA0 + 4 * jumpA; pA5 = pA0 + 5 * jumpA;
+								pA6 = pA0 + 6 * jumpA; pA7 = pA0 + 7 * jumpA;
+
+								vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+								vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC));
+								vacc4 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 4 * jumpC)); vacc5 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 5 * jumpC));
+								vacc6 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 6 * jumpC)); vacc7 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 7 * jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+								for (k = kOut; k < kmax; k++)
+								{
+									vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+									vacc0 = _mm256_sub_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+									vacc1 = _mm256_sub_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+									vacc2 = _mm256_sub_epi32(vacc2, _mm256_mullo_epi32(_mm256_set1_epi32(*pA2++), vregB));
+									vacc3 = _mm256_sub_epi32(vacc3, _mm256_mullo_epi32(_mm256_set1_epi32(*pA3++), vregB));
+									vacc4 = _mm256_sub_epi32(vacc4, _mm256_mullo_epi32(_mm256_set1_epi32(*pA4++), vregB));
+									vacc5 = _mm256_sub_epi32(vacc5, _mm256_mullo_epi32(_mm256_set1_epi32(*pA5++), vregB));
+									vacc6 = _mm256_sub_epi32(vacc6, _mm256_mullo_epi32(_mm256_set1_epi32(*pA6++), vregB));
+									vacc7 = _mm256_sub_epi32(vacc7, _mm256_mullo_epi32(_mm256_set1_epi32(*pA7++), vregB));
+								}
+
+								_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC), vacc0); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + jumpC), vacc1);
+								_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC), vacc2); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC), vacc3);
+								_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 4 * jumpC), vacc4); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 5 * jumpC), vacc5);
+								_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 6 * jumpC), vacc6); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 7 * jumpC), vacc7);
+							}
+							if ((jmax == N) && (r != 0))
+							{
+								pB = (pfB + N) + (jumpB * kOut);
+								pC = (pfC + N) + (jumpC * i);
+
+								pA0 = (pfA + kOut) + (jumpA * i); pA1 = pA0 + jumpA;
+								pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+								pA4 = pA0 + 4 * jumpA; pA5 = pA0 + 5 * jumpA;
+								pA6 = pA0 + 6 * jumpA; pA7 = pA0 + 7 * jumpA;
+
+								vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+								vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC));
+								vacc4 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 4 * jumpC)); vacc5 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 5 * jumpC));
+								vacc6 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 6 * jumpC)); vacc7 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 7 * jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+								for (k = kOut; k < kmax; k++)
+								{
+									vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+									vacc0 = _mm256_sub_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+									vacc1 = _mm256_sub_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+									vacc2 = _mm256_sub_epi32(vacc2, _mm256_mullo_epi32(_mm256_set1_epi32(*pA2++), vregB));
+									vacc3 = _mm256_sub_epi32(vacc3, _mm256_mullo_epi32(_mm256_set1_epi32(*pA3++), vregB));
+									vacc4 = _mm256_sub_epi32(vacc4, _mm256_mullo_epi32(_mm256_set1_epi32(*pA4++), vregB));
+									vacc5 = _mm256_sub_epi32(vacc5, _mm256_mullo_epi32(_mm256_set1_epi32(*pA5++), vregB));
+									vacc6 = _mm256_sub_epi32(vacc6, _mm256_mullo_epi32(_mm256_set1_epi32(*pA6++), vregB));
+									vacc7 = _mm256_sub_epi32(vacc7, _mm256_mullo_epi32(_mm256_set1_epi32(*pA7++), vregB));
+								}
+
+								_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc0); std::memcpy(pC, static_cast<int*>(temp), r);
+								_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<int*>(temp), r);
+								_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc2); std::memcpy(pC + 2 * jumpC, static_cast<int*>(temp), r);
+								_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc3); std::memcpy(pC + 3 * jumpC, static_cast<int*>(temp), r);
+								_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc4); std::memcpy(pC + 4 * jumpC, static_cast<int*>(temp), r);
+								_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc5); std::memcpy(pC + 5 * jumpC, static_cast<int*>(temp), r);
+								_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc6); std::memcpy(pC + 6 * jumpC, static_cast<int*>(temp), r);
+								_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc7); std::memcpy(pC + 7 * jumpC, static_cast<int*>(temp), r);
+							}
+						}
+					}
+				}
+			}
+
+			// bottom fringe of C
+			switch (Ar & 7)
+			{
+
+			case 0:
+				break;
+
+			case 1:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M);
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_sub_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC), vacc0);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M);
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_sub_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc0); std::memcpy(pC, static_cast<int*>(temp), r);
+						}
+					}
+				}
+				break;
+
+			case 2:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_sub_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+								vacc1 = _mm256_sub_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC), vacc0); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + jumpC), vacc1);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_sub_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+								vacc1 = _mm256_sub_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc0); std::memcpy(pC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<int*>(temp), r);
+						}
+					}
+				}
+				break;
+
+			case 3:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA;
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+							vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_sub_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+								vacc1 = _mm256_sub_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+								vacc2 = _mm256_sub_epi32(vacc2, _mm256_mullo_epi32(_mm256_set1_epi32(*pA2++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC), vacc0); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + jumpC), vacc1);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC), vacc2);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA; pA2 = pA0 + 2 * jumpA;
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+							vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_sub_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+								vacc1 = _mm256_sub_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+								vacc2 = _mm256_sub_epi32(vacc2, _mm256_mullo_epi32(_mm256_set1_epi32(*pA2++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc0); std::memcpy(pC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc2); std::memcpy(pC + 2 * jumpC, static_cast<int*>(temp), r);
+						}
+					}
+				}
+				break;
+
+			case 4:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpC * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+							vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_sub_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+								vacc1 = _mm256_sub_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+								vacc2 = _mm256_sub_epi32(vacc2, _mm256_mullo_epi32(_mm256_set1_epi32(*pA2++), vregB));
+								vacc3 = _mm256_sub_epi32(vacc3, _mm256_mullo_epi32(_mm256_set1_epi32(*pA3++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC), vacc0); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + jumpC), vacc1);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC), vacc2); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC), vacc3);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+							vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_sub_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+								vacc1 = _mm256_sub_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+								vacc2 = _mm256_sub_epi32(vacc2, _mm256_mullo_epi32(_mm256_set1_epi32(*pA2++), vregB));
+								vacc3 = _mm256_sub_epi32(vacc3, _mm256_mullo_epi32(_mm256_set1_epi32(*pA3++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc0); std::memcpy(pC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc2); std::memcpy(pC + 2 * jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc3); std::memcpy(pC + 3 * jumpC, static_cast<int*>(temp), r);
+						}
+					}
+				}
+				break;
+
+			case 5:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+							pA4 = pA0 + 4 * jumpA;
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+							vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC));
+							vacc4 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 4 * jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_sub_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+								vacc1 = _mm256_sub_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+								vacc2 = _mm256_sub_epi32(vacc2, _mm256_mullo_epi32(_mm256_set1_epi32(*pA2++), vregB));
+								vacc3 = _mm256_sub_epi32(vacc3, _mm256_mullo_epi32(_mm256_set1_epi32(*pA3++), vregB));
+								vacc4 = _mm256_sub_epi32(vacc4, _mm256_mullo_epi32(_mm256_set1_epi32(*pA4++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC), vacc0); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + jumpC), vacc1);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC), vacc2); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC), vacc3);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 4 * jumpC), vacc4);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+							pA4 = pA0 + 4 * jumpA;
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+							vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC));
+							vacc4 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 4 * jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_sub_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+								vacc1 = _mm256_sub_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+								vacc2 = _mm256_sub_epi32(vacc2, _mm256_mullo_epi32(_mm256_set1_epi32(*pA2++), vregB));
+								vacc3 = _mm256_sub_epi32(vacc3, _mm256_mullo_epi32(_mm256_set1_epi32(*pA3++), vregB));
+								vacc4 = _mm256_sub_epi32(vacc4, _mm256_mullo_epi32(_mm256_set1_epi32(*pA4++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc0); std::memcpy(pC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc2); std::memcpy(pC + 2 * jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc3); std::memcpy(pC + 3 * jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc4); std::memcpy(pC + 4 * jumpC, static_cast<int*>(temp), r);
+						}
+					}
+				}
+				break;
+
+			case 6:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+							pA4 = pA0 + 4 * jumpA; pA5 = pA0 + 5 * jumpA;
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+							vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC));
+							vacc4 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 4 * jumpC)); vacc5 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 5 * jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_sub_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+								vacc1 = _mm256_sub_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+								vacc2 = _mm256_sub_epi32(vacc2, _mm256_mullo_epi32(_mm256_set1_epi32(*pA2++), vregB));
+								vacc3 = _mm256_sub_epi32(vacc3, _mm256_mullo_epi32(_mm256_set1_epi32(*pA3++), vregB));
+								vacc4 = _mm256_sub_epi32(vacc4, _mm256_mullo_epi32(_mm256_set1_epi32(*pA4++), vregB));
+								vacc5 = _mm256_sub_epi32(vacc5, _mm256_mullo_epi32(_mm256_set1_epi32(*pA5++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC), vacc0); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + jumpC), vacc1);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC), vacc2); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC), vacc3);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 4 * jumpC), vacc4); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 5 * jumpC), vacc5);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+							pA4 = pA0 + 4 * jumpA; pA5 = pA0 + 5 * jumpA;
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+							vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC));
+							vacc4 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 4 * jumpC)); vacc5 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 5 * jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_sub_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+								vacc1 = _mm256_sub_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+								vacc2 = _mm256_sub_epi32(vacc2, _mm256_mullo_epi32(_mm256_set1_epi32(*pA2++), vregB));
+								vacc3 = _mm256_sub_epi32(vacc3, _mm256_mullo_epi32(_mm256_set1_epi32(*pA3++), vregB));
+								vacc4 = _mm256_sub_epi32(vacc4, _mm256_mullo_epi32(_mm256_set1_epi32(*pA4++), vregB));
+								vacc5 = _mm256_sub_epi32(vacc5, _mm256_mullo_epi32(_mm256_set1_epi32(*pA5++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc0); std::memcpy(pC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc2); std::memcpy(pC + 2 * jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc3); std::memcpy(pC + 3 * jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc4); std::memcpy(pC + 4 * jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc5); std::memcpy(pC + 5 * jumpC, static_cast<int*>(temp), r);
+						}
+					}
+				}
+				break;
+
+			case 7:
+				for (jOut = 0; jOut < N || jOut == 0; jOut += WELP_MATRIX_AVX_ps_mm_Tj)
+				{
+					jmax = (jOut + WELP_MATRIX_AVX_ps_mm_Tj < Bc) ? jOut + WELP_MATRIX_AVX_ps_mm_Tj : N;
+					for (kOut = 0; kOut < Ac; kOut += WELP_MATRIX_AVX_ps_mm_Tk)
+					{
+						kmax = (kOut + WELP_MATRIX_AVX_ps_mm_Tk < Ac) ? kOut + WELP_MATRIX_AVX_ps_mm_Tk : Ac;
+						for (j = jOut; j < jmax; j += 8)
+						{
+							pB = (pfB + j) + (jumpB * kOut);
+							pC = (pfC + j) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+							pA4 = pA0 + 4 * jumpA; pA5 = pA0 + 5 * jumpA;
+							pA6 = pA0 + 6 * jumpA;
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+							vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC));
+							vacc4 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 4 * jumpC)); vacc5 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 5 * jumpC));
+							vacc6 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 6 * jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_sub_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+								vacc1 = _mm256_sub_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+								vacc2 = _mm256_sub_epi32(vacc2, _mm256_mullo_epi32(_mm256_set1_epi32(*pA2++), vregB));
+								vacc3 = _mm256_sub_epi32(vacc3, _mm256_mullo_epi32(_mm256_set1_epi32(*pA3++), vregB));
+								vacc4 = _mm256_sub_epi32(vacc4, _mm256_mullo_epi32(_mm256_set1_epi32(*pA4++), vregB));
+								vacc5 = _mm256_sub_epi32(vacc5, _mm256_mullo_epi32(_mm256_set1_epi32(*pA5++), vregB));
+								vacc6 = _mm256_sub_epi32(vacc6, _mm256_mullo_epi32(_mm256_set1_epi32(*pA6++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC), vacc0); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + jumpC), vacc1);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC), vacc2); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC), vacc3);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 4 * jumpC), vacc4); _mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 5 * jumpC), vacc5);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(pC + 6 * jumpC), vacc6);
+						}
+						if ((jmax == N) && (r != 0))
+						{
+							pB = (pfB + N) + (jumpB * kOut);
+							pC = (pfC + N) + (jumpC * M);
+
+							pA0 = (pfA + kOut) + (jumpA * M); pA1 = pA0 + jumpA;
+							pA2 = pA0 + 2 * jumpA; pA3 = pA0 + 3 * jumpA;
+							pA4 = pA0 + 4 * jumpA; pA5 = pA0 + 5 * jumpA;
+							pA6 = pA0 + 6 * jumpA;
+
+							vacc0 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC)); vacc1 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + jumpC));
+							vacc2 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 2 * jumpC)); vacc3 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 3 * jumpC));
+							vacc4 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 4 * jumpC)); vacc5 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 5 * jumpC));
+							vacc6 = _mm256_loadu_si256(reinterpret_cast<__m256i*>(pC + 6 * jumpC));
+#ifdef __clang__
+#pragma unroll 8
+#endif // __clang__
+#if defined __GNUC__ && !defined __clang__
+#pragma GCC unroll 8
+#endif // defined __GNUC__ && !defined __clang__
+							for (k = kOut; k < kmax; k++)
+							{
+								vregB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pB)); pB += jumpB;
+								vacc0 = _mm256_sub_epi32(vacc0, _mm256_mullo_epi32(_mm256_set1_epi32(*pA0++), vregB));
+								vacc1 = _mm256_sub_epi32(vacc1, _mm256_mullo_epi32(_mm256_set1_epi32(*pA1++), vregB));
+								vacc2 = _mm256_sub_epi32(vacc2, _mm256_mullo_epi32(_mm256_set1_epi32(*pA2++), vregB));
+								vacc3 = _mm256_sub_epi32(vacc3, _mm256_mullo_epi32(_mm256_set1_epi32(*pA3++), vregB));
+								vacc4 = _mm256_sub_epi32(vacc4, _mm256_mullo_epi32(_mm256_set1_epi32(*pA4++), vregB));
+								vacc5 = _mm256_sub_epi32(vacc5, _mm256_mullo_epi32(_mm256_set1_epi32(*pA5++), vregB));
+								vacc6 = _mm256_sub_epi32(vacc6, _mm256_mullo_epi32(_mm256_set1_epi32(*pA6++), vregB));
+							}
+
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc0); std::memcpy(pC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc1); std::memcpy(pC + jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc2); std::memcpy(pC + 2 * jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc3); std::memcpy(pC + 3 * jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc4); std::memcpy(pC + 4 * jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc5); std::memcpy(pC + 5 * jumpC, static_cast<int*>(temp), r);
+							_mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), vacc6); std::memcpy(pC + 6 * jumpC, static_cast<int*>(temp), r);
+						}
+					}
+				}
+				break;
+			}
+		}
+		
 		void pmxm(double* const pfC, const double* const pfA, const double* const pfB, const std::size_t Ar, const std::size_t Bc, const std::size_t Ac) noexcept
 		{
 			if (Bc == 1)
