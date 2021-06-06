@@ -417,7 +417,7 @@ namespace welp
 		void p_vxv(double* const pfC, const double* const pfA, const double* const pfB,
 			const std::size_t Ar, const std::size_t Bc, const std::size_t skipC) noexcept;
 
-		
+
 		void pmxm(double* const pfC, const double* const pfA, const double* const pfB,
 			const std::size_t Ar, const std::size_t Bc, const std::size_t Ac,
 			const std::size_t skipC, const std::size_t skipA, const std::size_t skipB) noexcept;
@@ -693,31 +693,18 @@ namespace welp
 
 #ifdef WELP_MATRIX_INCLUDE_IOSTREAM
 		// prints *this matrix in console
-		template <std::size_t cmax = 10, std::size_t rblock = 20, std::size_t cwidth = 12> const welp::matrix<Ty, _Allocator>& say() const;
-		template <std::size_t cmax = 10, std::size_t rblock = 20, std::size_t cwidth = 12, typename msg_Ty> const welp::matrix<Ty, _Allocator>& say
-		(const msg_Ty& msg) const;
-		template <std::size_t cmax = 10, std::size_t rblock = 20, std::size_t cwidth = 12,
-			typename msg_Ty1, typename msg_Ty2> const welp::matrix<Ty, _Allocator>& say
-			(const msg_Ty1& msg1, const msg_Ty2& msg2) const;
-		template <std::size_t cmax = 10, std::size_t rblock = 20, std::size_t cwidth = 12,
-			typename msg_Ty1, typename msg_Ty2, typename msg_Ty3> const welp::matrix<Ty, _Allocator>& say
-			(const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3) const;
-		template <std::size_t cmax = 10, std::size_t rblock = 20, std::size_t cwidth = 12,
-			typename msg_Ty1, typename msg_Ty2, typename msg_Ty3, typename msg_Ty4> const welp::matrix<Ty, _Allocator>& say
-			(const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3, const msg_Ty4& msg4) const;
-		// prints *this matrix in console
-		template <std::size_t cmax = 10, std::size_t rblock = 20, std::size_t cwidth = 12> welp::matrix<Ty, _Allocator>& say();
-		template <std::size_t cmax = 10, std::size_t rblock = 20, std::size_t cwidth = 12, typename msg_Ty> welp::matrix<Ty, _Allocator>& say
-		(const msg_Ty& msg);
-		template <std::size_t cmax = 10, std::size_t rblock = 20, std::size_t cwidth = 12,
-			typename msg_Ty1, typename msg_Ty2> welp::matrix<Ty, _Allocator>& say
-			(const msg_Ty1& msg1, const msg_Ty2& msg2);
-		template <std::size_t cmax = 10, std::size_t rblock = 20, std::size_t cwidth = 12,
-			typename msg_Ty1, typename msg_Ty2, typename msg_Ty3> welp::matrix<Ty, _Allocator>& say
-			(const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3);
-		template <std::size_t cmax = 10, std::size_t rblock = 20, std::size_t cwidth = 12,
-			typename msg_Ty1, typename msg_Ty2, typename msg_Ty3, typename msg_Ty4> welp::matrix<Ty, _Allocator>& say
-			(const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3, const msg_Ty4& msg4);
+		private:
+
+		template <std::size_t cmax = 10, std::size_t rblock = 20, std::size_t cwidth = 12> const welp::matrix<Ty, _Allocator>& __say() const;
+		template <std::size_t cmax = 10, std::size_t rblock = 20, std::size_t cwidth = 12> welp::matrix<Ty, _Allocator>& __say();
+		template <char _ch, class msg_Ty> char __say_header(const msg_Ty & arg) const;
+
+		public:
+
+		template <char _ch = ' ', class msg_Ty, class... _Args> const welp::matrix<Ty, _Allocator>& say(const msg_Ty& arg, _Args&&... args) const;
+		template <char _ch = ' '> const welp::matrix<Ty, _Allocator>& say() const;	
+		template <char _ch = ' ', class msg_Ty, class... _Args> welp::matrix<Ty, _Allocator>& say(const msg_Ty& arg, _Args&&... args);
+		template <char _ch = ' '> welp::matrix<Ty, _Allocator>& say();
 #endif // WELP_MATRIX_INCLUDE_IOSTREAM
 	};
 
@@ -13567,68 +13554,63 @@ template <typename Ty, class _Allocator> template <class Predicate> welp::matrix
 }
 
 #ifdef WELP_MATRIX_INCLUDE_IOSTREAM
-template <typename Ty, class _Allocator> template <std::size_t cmax, std::size_t rblock, std::size_t cwidth> const welp::matrix<Ty, _Allocator>& welp::matrix<Ty, _Allocator>::say() const
+template <typename Ty, class _Allocator>
+template <std::size_t cmax, std::size_t rblock, std::size_t cwidth> const welp::matrix<Ty, _Allocator>& welp::matrix<Ty, _Allocator>::__say() const
 {
 	if (this->data() == nullptr) { std::cout << ">>>         matrix is not allocated" << std::endl; }
 	else if (this->size() == 0) { std::cout << ">>>         matrix is empty" << std::endl; }
 	else { welp::matrix_subroutines::say_rm(this->data(), this->r(), this->c(), cmax, rblock, cwidth); }
 	return *this;
 }
-template <typename Ty, class _Allocator> template <std::size_t cmax, std::size_t rblock, std::size_t cwidth, typename msg_Ty> const welp::matrix<Ty, _Allocator>& welp::matrix<Ty, _Allocator>::say
-(const msg_Ty & msg) const
-{
-	std::cout << "[ " << msg << " ]\n";
-	return this->say();
-}
-template <typename Ty, class _Allocator> template <std::size_t cmax, std::size_t rblock, std::size_t cwidth, typename msg_Ty1, typename msg_Ty2> const welp::matrix<Ty, _Allocator>& welp::matrix<Ty, _Allocator>::say
-(const msg_Ty1 & msg1, const msg_Ty2 & msg2) const
-{
-	std::cout << "[ " << msg1 << " " << msg2 << " ]\n";
-	return this->say();
-}
-template <typename Ty, class _Allocator> template <std::size_t cmax, std::size_t rblock, std::size_t cwidth, typename msg_Ty1, typename msg_Ty2, typename msg_Ty3> const welp::matrix<Ty, _Allocator>& welp::matrix<Ty, _Allocator>::say
-(const msg_Ty1 & msg1, const msg_Ty2 & msg2, const msg_Ty3 & msg3) const
-{
-	std::cout << "[ " << msg1 << " " << msg2 << " " << msg3 << " ]\n";
-	return this->say();
-}
-template <typename Ty, class _Allocator> template <std::size_t cmax, std::size_t rblock, std::size_t cwidth, typename msg_Ty1, typename msg_Ty2, typename msg_Ty3, typename msg_Ty4> const welp::matrix<Ty, _Allocator>& welp::matrix<Ty, _Allocator>::say
-(const msg_Ty1 & msg1, const msg_Ty2 & msg2, const msg_Ty3 & msg3, const msg_Ty4 & msg4) const
-{
-	std::cout << "[ " << msg1 << " " << msg2 << " " << msg3 << " " << msg4 << " ]\n";
-	return this->say();
-}
-template <typename Ty, class _Allocator> template <std::size_t cmax, std::size_t rblock, std::size_t cwidth> welp::matrix<Ty, _Allocator>& welp::matrix<Ty, _Allocator>::say()
+template <typename Ty, class _Allocator>
+template <std::size_t cmax, std::size_t rblock, std::size_t cwidth> welp::matrix<Ty, _Allocator>& welp::matrix<Ty, _Allocator>::__say()
 {
 	if (this->data() == nullptr) { std::cout << ">>>         matrix is not allocated" << std::endl; }
 	else if (this->size() == 0) { std::cout << ">>>         matrix is empty" << std::endl; }
 	else { welp::matrix_subroutines::say_rm(this->data(), this->r(), this->c(), cmax, rblock, cwidth); }
 	return *this;
 }
-template <typename Ty, class _Allocator> template <std::size_t cmax, std::size_t rblock, std::size_t cwidth, typename msg_Ty> welp::matrix<Ty, _Allocator>& welp::matrix<Ty, _Allocator>::say
-(const msg_Ty & msg)
+template <typename Ty, class _Allocator>
+template <char _ch, class msg_Ty> char welp::matrix<Ty, _Allocator>::__say_header(const msg_Ty& arg) const
 {
-	std::cout << "[ " << msg << " ]\n";
-	return this->say();
+	std::cout << _ch << arg;
+	return 0;
 }
-template <typename Ty, class _Allocator> template <std::size_t cmax, std::size_t rblock, std::size_t cwidth, typename msg_Ty1, typename msg_Ty2> welp::matrix<Ty, _Allocator>& welp::matrix<Ty, _Allocator>::say
-(const msg_Ty1 & msg1, const msg_Ty2 & msg2)
+
+template <typename Ty, class _Allocator>
+template <char _ch, class msg_Ty, class... _Args> const welp::matrix<Ty, _Allocator>& welp::matrix<Ty, _Allocator>::say(const msg_Ty& arg, _Args&&... args) const
 {
-	std::cout << "[ " << msg1 << " " << msg2 << " ]\n";
-	return this->say();
+	std::cout << "[ " << arg;
+	char msgs[sizeof...(args)] = { __say_header<_ch>(std::forward<_Args>(args))... };
+	std::cout << " ]\n";
+	if (msgs[0] == 0)
+	{
+		return this->__say();
+	}
+	else
+	{
+		return this->__say();
+	}
 }
-template <typename Ty, class _Allocator> template <std::size_t cmax, std::size_t rblock, std::size_t cwidth, typename msg_Ty1, typename msg_Ty2, typename msg_Ty3> welp::matrix<Ty, _Allocator>& welp::matrix<Ty, _Allocator>::say
-(const msg_Ty1 & msg1, const msg_Ty2 & msg2, const msg_Ty3 & msg3)
+template <typename Ty, class _Allocator>
+template <char _ch> const welp::matrix<Ty, _Allocator>& welp::matrix<Ty, _Allocator>::say() const { return *this->__say(); }
+template <typename Ty, class _Allocator>
+template <char _ch, class msg_Ty, class... _Args> welp::matrix<Ty, _Allocator>& welp::matrix<Ty, _Allocator>::say(const msg_Ty& arg, _Args&&... args)
 {
-	std::cout << "[ " << msg1 << " " << msg2 << " " << msg3 << " ]\n";
-	return this->say();
+	std::cout << "[ " << arg;
+	char msgs[sizeof...(args)] = { __say_header<_ch>(std::forward<_Args>(args))... };
+	std::cout << " ]\n";
+	if (msgs[0] == 0)
+	{
+		return this->__say();
+	}
+	else
+	{
+		return this->__say();
+	}
 }
-template <typename Ty, class _Allocator> template <std::size_t cmax, std::size_t rblock, std::size_t cwidth, typename msg_Ty1, typename msg_Ty2, typename msg_Ty3, typename msg_Ty4> welp::matrix<Ty, _Allocator>& welp::matrix<Ty, _Allocator>::say
-(const msg_Ty1 & msg1, const msg_Ty2 & msg2, const msg_Ty3 & msg3, const msg_Ty4 & msg4)
-{
-	std::cout << "[ " << msg1 << " " << msg2 << " " << msg3 << " " << msg4 << " ]\n";
-	return this->say();
-}
+template <typename Ty, class _Allocator>
+template <char _ch> welp::matrix<Ty, _Allocator>& welp::matrix<Ty, _Allocator>::say() { return this->__say(); }
 #endif // WELP_MATRIX_INCLUDE_IOSTREAM
 
 template <std::size_t length, typename Ty, class _Allocator>
