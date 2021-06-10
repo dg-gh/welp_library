@@ -693,16 +693,16 @@ namespace welp
 
 #ifdef WELP_MATRIX_INCLUDE_IOSTREAM
 		// prints *this matrix in console
-		private:
+	private:
 
 		template <std::size_t cmax = 10, std::size_t rblock = 20, std::size_t cwidth = 12> const welp::matrix<Ty, _Allocator>& __say() const;
 		template <std::size_t cmax = 10, std::size_t rblock = 20, std::size_t cwidth = 12> welp::matrix<Ty, _Allocator>& __say();
-		template <char _ch, class msg_Ty> char __say_header(const msg_Ty & arg) const;
+		template <char _ch, class msg_Ty> char __say_header(const msg_Ty& arg) const;
 
-		public:
+	public:
 
 		template <char _ch = ' ', class msg_Ty, class... _Args> const welp::matrix<Ty, _Allocator>& say(const msg_Ty& arg, _Args&&... args) const;
-		template <char _ch = ' '> const welp::matrix<Ty, _Allocator>& say() const;	
+		template <char _ch = ' '> const welp::matrix<Ty, _Allocator>& say() const;
 		template <char _ch = ' ', class msg_Ty, class... _Args> welp::matrix<Ty, _Allocator>& say(const msg_Ty& arg, _Args&&... args);
 		template <char _ch = ' '> welp::matrix<Ty, _Allocator>& say();
 #endif // WELP_MATRIX_INCLUDE_IOSTREAM
@@ -1158,57 +1158,18 @@ namespace welp
 				char delim, function_f f);
 #endif // WELP_MATRIX_INCLUDE_ALGORITHM
 
-		// writes A as file filename with delim as the delimiter
-		template <typename Ty1, typename Ty2, class _Allocator_A> void write(
-			const std::string& filename, const welp::matrix<Ty1, _Allocator_A>& A, Ty2 delim);
+		// subroutines, do not use
+		template <typename Ty, class _Allocator> char __write_sub_first(const char delim, std::size_t line, std::ofstream& writemat, const welp::matrix<Ty, _Allocator>& A);
+		template <typename Ty, class _Allocator> char __write_sub(const char delim, std::size_t line, std::ofstream& writemat, const welp::matrix<Ty, _Allocator>& A);
+		template <typename Ty, class _Allocator> std::size_t __min_size_sub(const welp::matrix<Ty, _Allocator>& A);
 
-		// writes [A B] as file filename with delim as the delimiter
-		template <typename Ty1, typename Ty2, typename Ty3, class _Allocator_A, class _Allocator_B> void write(
-			const std::string& filename, const welp::matrix<Ty1, _Allocator_A>& A, const welp::matrix<Ty2, _Allocator_B>& B,
-			const Ty3& delim);
+		// writes [A0 A1, A2, A3 ...] as file filename with delim as the delimiter
+		template <class first_arg, class... _Args> bool write(const std::string& filename, char delim, const first_arg& A0, _Args&&... As);
+		bool write(const std::string& filename, char delim);
 
-		// writes [A B C] as file filename with delim as the delimiter
-		template <typename Ty1, typename Ty2, typename Ty3, typename Ty4, class _Allocator_A, class _Allocator_B, class _Allocator_C>
-		void write(const std::string& filename, const welp::matrix<Ty1, _Allocator_A>& A, const welp::matrix<Ty2, _Allocator_B>& B,
-			const welp::matrix<Ty3, _Allocator_C>& C, const Ty4& delim);
-
-		// writes [A B C D] as file filename with delim as the delimiter
-		template <typename Ty1, typename Ty2, typename Ty3, typename Ty4, typename Ty5,
-			class _Allocator_A, class _Allocator_B, class _Allocator_C, class _Allocator_D> void write(const std::string& filename,
-				const welp::matrix<Ty1, _Allocator_A>& A, const welp::matrix<Ty2, _Allocator_B>& B,
-				const welp::matrix<Ty3, _Allocator_C>& C, const welp::matrix<Ty4, _Allocator_D>& D, const Ty5& delim);
-
-		// writes [A B C D E] as file filename with delim as the delimiter
-		template <typename Ty1, typename Ty2, typename Ty3, typename Ty4, typename Ty5, typename Ty6,
-			class _Allocator_A, class _Allocator_B, class _Allocator_C, class _Allocator_D, class _Allocator_E> void write(const std::string& filename,
-				const welp::matrix<Ty1, _Allocator_A>& A, const welp::matrix<Ty2, _Allocator_B>& B, const welp::matrix<Ty3, _Allocator_C>& C,
-				const welp::matrix<Ty4, _Allocator_D>& D, const welp::matrix<Ty5, _Allocator_E>& E, const Ty6& delim);
-
-		// appends A to file filename with delim as the delimiter
-		template <typename Ty1, typename Ty2, class _Allocator_A> void append(
-			const std::string& filename, const welp::matrix<Ty1, _Allocator_A>& A, const Ty2& delim);
-
-		// appends [A B] to file filename with delim as the delimiter
-		template <typename Ty1, typename Ty2, typename Ty3, class _Allocator_A, class _Allocator_B> void append(
-			const std::string& filename, const welp::matrix<Ty1, _Allocator_A>& A, const welp::matrix<Ty2, _Allocator_B>& B,
-			const Ty3& delim);
-
-		// appends [A B C] to file filename with delim as the delimiter
-		template <typename Ty1, typename Ty2, typename Ty3, typename Ty4, class _Allocator_A, class _Allocator_B, class _Allocator_C>
-		void append(const std::string& filename, const welp::matrix<Ty1, _Allocator_A>& A, const welp::matrix<Ty2, _Allocator_B>& B,
-			const welp::matrix<Ty3, _Allocator_C>& C, const Ty4& delim);
-
-		// appends [A B C D] to file filename with delim as the delimiter
-		template <typename Ty1, typename Ty2, typename Ty3, typename Ty4, typename Ty5,
-			class _Allocator_A, class _Allocator_B, class _Allocator_C, class _Allocator_D> void append(const std::string& filename,
-				const welp::matrix<Ty1, _Allocator_A>& A, const welp::matrix<Ty2, _Allocator_B>& B,
-				const welp::matrix<Ty3, _Allocator_C>& C, const welp::matrix<Ty4, _Allocator_D>& D, const Ty5& delim);
-
-		// appends [A B C D E] to file filename with delim as the delimiter
-		template <typename Ty1, typename Ty2, typename Ty3, typename Ty4, typename Ty5, typename Ty6,
-			class _Allocator_A, class _Allocator_B, class _Allocator_C, class _Allocator_D, class _Allocator_E> void append(const std::string& filename,
-				const welp::matrix<Ty1, _Allocator_A>& A, const welp::matrix<Ty2, _Allocator_B>& B, const welp::matrix<Ty3, _Allocator_C>& C,
-				const welp::matrix<Ty4, _Allocator_D>& D, const welp::matrix<Ty4, _Allocator_E>& E, const Ty6& delim);
+		// appends [A0 A1, A2, A3 ...] to file filename with delim as the delimiter
+		template <class first_arg, class... _Args> bool append(const std::string& filename, char delim, const first_arg& A0, _Args&&... As);
+		bool append(const std::string& filename, char delim);
 
 		std::string file_path(const std::string& str);
 		std::string file_name(const std::string& str);
@@ -13571,14 +13532,14 @@ template <std::size_t cmax, std::size_t rblock, std::size_t cwidth> welp::matrix
 	return *this;
 }
 template <typename Ty, class _Allocator>
-template <char _ch, class msg_Ty> char welp::matrix<Ty, _Allocator>::__say_header(const msg_Ty& arg) const
+template <char _ch, class msg_Ty> char welp::matrix<Ty, _Allocator>::__say_header(const msg_Ty & arg) const
 {
 	std::cout << _ch << arg;
 	return 0;
 }
 
 template <typename Ty, class _Allocator>
-template <char _ch, class msg_Ty, class... _Args> const welp::matrix<Ty, _Allocator>& welp::matrix<Ty, _Allocator>::say(const msg_Ty& arg, _Args&&... args) const
+template <char _ch, class msg_Ty, class... _Args> const welp::matrix<Ty, _Allocator>& welp::matrix<Ty, _Allocator>::say(const msg_Ty & arg, _Args&&... args) const
 {
 	std::cout << "[ " << arg;
 	char msgs[sizeof...(args)] = { __say_header<_ch>(std::forward<_Args>(args))... };
@@ -13595,7 +13556,7 @@ template <char _ch, class msg_Ty, class... _Args> const welp::matrix<Ty, _Alloca
 template <typename Ty, class _Allocator>
 template <char _ch> const welp::matrix<Ty, _Allocator>& welp::matrix<Ty, _Allocator>::say() const { return *this->__say(); }
 template <typename Ty, class _Allocator>
-template <char _ch, class msg_Ty, class... _Args> welp::matrix<Ty, _Allocator>& welp::matrix<Ty, _Allocator>::say(const msg_Ty& arg, _Args&&... args)
+template <char _ch, class msg_Ty, class... _Args> welp::matrix<Ty, _Allocator>& welp::matrix<Ty, _Allocator>::say(const msg_Ty & arg, _Args&&... args)
 {
 	std::cout << "[ " << arg;
 	char msgs[sizeof...(args)] = { __say_header<_ch>(std::forward<_Args>(args))... };
@@ -15690,414 +15651,131 @@ namespace welp
 		}
 #endif // WELP_MATRIX_INCLUDE_ALGORITHM
 
-		template <typename Ty1, typename Ty2, class _Allocator_A> void write(
-			const std::string& filename, const welp::matrix<Ty1, _Allocator_A>& A, Ty2 delim)
+		template <typename Ty, class _Allocator> char __write_sub_first(const char delim, std::size_t line, std::ofstream& writemat, const welp::matrix<Ty, _Allocator>& A)
+		{
+			const Ty* pA = A.data() + A.c() * line;
+			if (A.c() != 0)
+			{
+				if (line != 0)
+				{
+					writemat << '\n' << *pA;
+				}
+				else
+				{
+					writemat << *pA;
+				}
+			}
+			for (std::size_t n = A.c(); n > 1; n--)
+			{
+				writemat << delim << *pA++;
+			}
+			return 0;
+		}
+		template <typename Ty, class _Allocator> char __write_sub(const char delim, std::size_t line, std::ofstream& writemat, const welp::matrix<Ty, _Allocator>& A)
+		{
+			const Ty* pA = A.data() + A.c() * line;
+			for (std::size_t n = A.c(); n > 0; n--)
+			{
+				writemat << delim << *pA++;
+			}
+			return 0;
+		}
+		template <typename Ty, class _Allocator> std::size_t __min_size_sub(const welp::matrix<Ty, _Allocator>& A)
+		{
+			return A.r();
+		}
+
+		template <class first_arg, class... _Args> bool write(const std::string& filename, char delim, const first_arg& A0, _Args&&... As)
+		{
+			std::size_t sz[sizeof...(As)] = { welp::file::__min_size_sub(std::forward<_Args>(As))... };
+			std::size_t rows = A0.r();
+
+			for (std::size_t n = 0; n < sizeof...(As); n++)
+			{
+				if (sz[n] < rows)
+				{
+					rows = sz[n];
+				}
+			}
+
+			std::ofstream writemat;
+			writemat.open(filename);
+			if (writemat.good())
+			{
+				for (std::size_t n = 0; n < rows; n++)
+				{
+					welp::file::__write_sub_first(delim, n, writemat, A0);
+					char ppack[sizeof...(As)] = { welp::file::__write_sub(delim, n, writemat, std::forward<_Args>(As))... };
+				}
+				writemat << '\n';
+				writemat.close();
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+		bool write(const std::string& filename, char delim)
 		{
 			std::ofstream writemat;
 			writemat.open(filename);
 			if (writemat.good())
 			{
-				std::size_t n = A.size();
-				const Ty1* pA = A.data();
-				std::size_t Ac = A.c();
-				std::size_t k = 1;
-				for (std::size_t j = 0; j < n; j++)
+				writemat << '\n';
+				writemat.close();
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+		template <class first_arg, class... _Args> bool append(const std::string& filename, char delim, const first_arg& A0, _Args&&... As)
+		{
+			std::size_t sz[sizeof...(As)] = { welp::file::__min_size_sub(std::forward<_Args>(As))... };
+			std::size_t rows = A0.r();
+
+			for (std::size_t n = 0; n < sizeof...(As); n++)
+			{
+				if (sz[n] < rows)
 				{
-					writemat << *pA++;
-					if (k == Ac) { writemat << "\n"; k = 1; }
-					else { writemat << delim; k++; }
+					rows = sz[n];
 				}
 			}
-			writemat.close();
-		}
 
-		template <typename Ty1, typename Ty2, typename Ty3, class _Allocator_A, class _Allocator_B> void write(
-			const std::string& filename, const welp::matrix<Ty1, _Allocator_A>& A, const welp::matrix<Ty2, _Allocator_B>& B,
-			const Ty3& delim)
-		{
-#ifdef WELP_MATRIX_DEBUG_MODE
-			assert(A.r() == B.r());
-#endif // WELP_MATRIX_DEBUG_MODE
 			std::ofstream writemat;
-			writemat.open(filename);
+			writemat.open(filename, std::ios::app);
 			if (writemat.good())
 			{
-				const Ty1* pA = A.data();
-				const Ty2* pB = B.data();
-				std::size_t Ar = A.r();
-				std::size_t Ac = A.c();
-				std::size_t Bc = B.c();
-				std::size_t j;
-				std::size_t k = 1;
-				for (std::size_t i = 0; i < Ar; i++)
+				for (std::size_t n = 0; n < rows; n++)
 				{
-					for (j = Ac; j > 0; j--)
-					{
-						writemat << *pA++ << delim;
-					}
-					for (j = Bc; j > 0; j--)
-					{
-						writemat << *pB++;
-						if (k == Bc) { writemat << "\n"; k = 1; }
-						else { writemat << delim; k++; }
-					}
+					welp::file::__write_sub_first(delim, n, writemat, A0);
+					char ppack[sizeof...(As)] = { welp::file::__write_sub(delim, n, writemat, std::forward<_Args>(As))... };
 				}
+				writemat << '\n';
+				writemat.close();
+				return true;
 			}
-			writemat.close();
-		}
-
-		template <typename Ty1, typename Ty2, typename Ty3, typename Ty4, class _Allocator_A, class _Allocator_B, class _Allocator_C>
-		void write(const std::string& filename, const welp::matrix<Ty1, _Allocator_A>& A, const welp::matrix<Ty2, _Allocator_B>& B,
-			const welp::matrix<Ty3, _Allocator_C>& C, const Ty4& delim)
-		{
-#ifdef WELP_MATRIX_DEBUG_MODE
-			assert(A.r() == B.r());
-			assert(A.r() == C.r());
-#endif // WELP_MATRIX_DEBUG_MODE
-			std::ofstream writemat;
-			writemat.open(filename);
-			if (writemat.good())
+			else
 			{
-				const Ty1* pA = A.data();
-				const Ty2* pB = B.data();
-				const Ty3* pC = C.data();
-				std::size_t Ar = A.r();
-				std::size_t Ac = A.c();
-				std::size_t Bc = B.c();
-				std::size_t Cc = C.c();
-				std::size_t j;
-				std::size_t k = 1;
-				for (std::size_t i = 0; i < Ar; i++)
-				{
-					for (j = Ac; j > 0; j--)
-					{
-						writemat << *pA++ << delim;
-					}
-					for (j = Bc; j > 0; j--)
-					{
-						writemat << *pB++ << delim;
-					}
-					for (j = Cc; j > 0; j--)
-					{
-						writemat << *pC++;
-						if (k == Cc) { writemat << "\n"; k = 1; }
-						else { writemat << delim; k++; }
-					}
-				}
+				return false;
 			}
-			writemat.close();
 		}
-
-		template <typename Ty1, typename Ty2, typename Ty3, typename Ty4, typename Ty5,
-			class _Allocator_A, class _Allocator_B, class _Allocator_C, class _Allocator_D> void write(const std::string& filename,
-				const welp::matrix<Ty1, _Allocator_A>& A, const welp::matrix<Ty2, _Allocator_B>& B,
-				const welp::matrix<Ty3, _Allocator_C>& C, const welp::matrix<Ty4, _Allocator_D>& D, const Ty5& delim)
-		{
-#ifdef WELP_MATRIX_DEBUG_MODE
-			assert(A.r() == B.r());
-			assert(A.r() == C.r());
-			assert(A.r() == D.r());
-#endif // WELP_MATRIX_DEBUG_MODE
-			std::ofstream writemat;
-			writemat.open(filename);
-			if (writemat.good())
-			{
-				const Ty1* pA = A.data();
-				const Ty2* pB = B.data();
-				const Ty3* pC = C.data();
-				const Ty4* pD = D.data();
-				std::size_t Ar = A.r();
-				std::size_t Ac = A.c();
-				std::size_t Bc = B.c();
-				std::size_t Cc = C.c();
-				std::size_t Dc = D.c();
-				std::size_t j;
-				std::size_t k = 1;
-				for (std::size_t i = 0; i < Ar; i++)
-				{
-					for (j = Ac; j > 0; j--)
-					{
-						writemat << *pA++ << delim;
-					}
-					for (j = Bc; j > 0; j--)
-					{
-						writemat << *pB++ << delim;
-					}
-					for (j = Cc; j > 0; j--)
-					{
-						writemat << *pC++ << delim;
-					}
-					for (j = Dc; j > 0; j--)
-					{
-						writemat << *pD++;
-						if (k == Dc) { writemat << "\n"; k = 1; }
-						else { writemat << delim; k++; }
-					}
-				}
-			}
-			writemat.close();
-		}
-
-		template <typename Ty1, typename Ty2, typename Ty3, typename Ty4, typename Ty5, typename Ty6,
-			class _Allocator_A, class _Allocator_B, class _Allocator_C, class _Allocator_D, class _Allocator_E> void write(const std::string& filename,
-				const welp::matrix<Ty1, _Allocator_A>& A, const welp::matrix<Ty2, _Allocator_B>& B, const welp::matrix<Ty3, _Allocator_C>& C,
-				const welp::matrix<Ty4, _Allocator_D>& D, const welp::matrix<Ty5, _Allocator_E>& E, const Ty6& delim)
-		{
-#ifdef WELP_MATRIX_DEBUG_MODE
-			assert(A.r() == B.r());
-			assert(A.r() == C.r());
-			assert(A.r() == D.r());
-			assert(A.r() == E.r());
-#endif // WELP_MATRIX_DEBUG_MODE
-			std::ofstream writemat;
-			writemat.open(filename);
-			if (writemat.good())
-			{
-				const Ty1* pA = A.data();
-				const Ty2* pB = B.data();
-				const Ty3* pC = C.data();
-				const Ty4* pD = D.data();
-				const Ty4* pE = E.data();
-				std::size_t Ar = A.r();
-				std::size_t Ac = A.c();
-				std::size_t Bc = B.c();
-				std::size_t Cc = C.c();
-				std::size_t Dc = D.c();
-				std::size_t Ec = E.c();
-				std::size_t j;
-				std::size_t k = 1;
-				for (std::size_t i = 0; i < Ar; i++)
-				{
-					for (j = Ac; j > 0; j--)
-					{
-						writemat << *pA++ << delim;
-					}
-					for (j = Bc; j > 0; j--)
-					{
-						writemat << *pB++ << delim;
-					}
-					for (j = Cc; j > 0; j--)
-					{
-						writemat << *pC++ << delim;
-					}
-					for (j = Dc; j > 0; j--)
-					{
-						writemat << *pD++ << delim;
-					}
-					for (j = Ec; j > 0; j--)
-					{
-						writemat << *pE++;
-						if (k == Ec) { writemat << "\n"; k = 1; }
-						else { writemat << delim; k++; }
-					}
-				}
-			}
-			writemat.close();
-		}
-
-		template <typename Ty1, typename Ty2, class _Allocator_A> void append(
-			const std::string& filename, const welp::matrix<Ty1, _Allocator_A>& A, const Ty2& delim)
+		bool append(const std::string& filename, char delim)
 		{
 			std::ofstream writemat;
 			writemat.open(filename, std::ios::app);
 			if (writemat.good())
 			{
-				std::size_t n = A.size();
-				const Ty1* pA = A.data();
-				std::size_t Ac = A.c();
-				std::size_t k = 1;
-				for (std::size_t j = 0; j < n; j++)
-				{
-					writemat << *pA++;
-					if (k == Ac) { writemat << "\n"; k = 1; }
-					else { writemat << delim; k++; }
-				}
+				writemat << '\n';
+				writemat.close();
+				return true;
 			}
-			writemat.close();
-		}
-
-		template <typename Ty1, typename Ty2, typename Ty3, class _Allocator_A, class _Allocator_B> void append(
-			const std::string& filename, const welp::matrix<Ty1, _Allocator_A>& A, const welp::matrix<Ty2, _Allocator_B>& B,
-			const Ty3& delim)
-		{
-#ifdef WELP_MATRIX_DEBUG_MODE
-			assert(A.r() == B.r());
-#endif // WELP_MATRIX_DEBUG_MODE
-			std::ofstream writemat;
-			writemat.open(filename, std::ios::app);
-			if (writemat.good())
+			else
 			{
-				const Ty1* pA = A.data();
-				const Ty2* pB = B.data();
-				std::size_t Ar = A.r();
-				std::size_t Ac = A.c();
-				std::size_t Bc = B.c();
-				std::size_t j;
-				std::size_t k = 1;
-				for (std::size_t i = 0; i < Ar; i++)
-				{
-					for (j = Ac; j > 0; j--)
-					{
-						writemat << *pA++ << delim;
-					}
-					for (j = Bc; j > 0; j--)
-					{
-						writemat << *pB++;
-						if (k == Bc) { writemat << "\n"; k = 1; }
-						else { writemat << delim; k++; }
-					}
-				}
+				return false;
 			}
-			writemat.close();
-		}
-
-		template <typename Ty1, typename Ty2, typename Ty3, typename Ty4, class _Allocator_A, class _Allocator_B, class _Allocator_C>
-		void append(const std::string& filename, const welp::matrix<Ty1, _Allocator_A>& A, const welp::matrix<Ty2, _Allocator_B>& B,
-			const welp::matrix<Ty3, _Allocator_C>& C, const Ty4& delim)
-		{
-#ifdef WELP_MATRIX_DEBUG_MODE
-			assert(A.r() == B.r());
-			assert(A.r() == C.r());
-#endif // WELP_MATRIX_DEBUG_MODE
-			std::ofstream writemat;
-			writemat.open(filename, std::ios::app);
-			if (writemat.good())
-			{
-				const Ty1* pA = A.data();
-				const Ty2* pB = B.data();
-				const Ty3* pC = C.data();
-				std::size_t Ar = A.r();
-				std::size_t Ac = A.c();
-				std::size_t Bc = B.c();
-				std::size_t Cc = C.c();
-				std::size_t j;
-				std::size_t k = 1;
-				for (std::size_t i = 0; i < Ar; i++)
-				{
-					for (j = Ac; j > 0; j--)
-					{
-						writemat << *pA++ << delim;
-					}
-					for (j = Bc; j > 0; j--)
-					{
-						writemat << *pB++ << delim;
-					}
-					for (j = Cc; j > 0; j--)
-					{
-						writemat << *pC++;
-						if (k == Cc) { writemat << "\n"; k = 1; }
-						else { writemat << delim; k++; }
-					}
-				}
-			}
-			writemat.close();
-		}
-
-		template <typename Ty1, typename Ty2, typename Ty3, typename Ty4, typename Ty5,
-			class _Allocator_A, class _Allocator_B, class _Allocator_C, class _Allocator_D> void append(const std::string& filename,
-				const welp::matrix<Ty1, _Allocator_A>& A, const welp::matrix<Ty2, _Allocator_B>& B,
-				const welp::matrix<Ty3, _Allocator_C>& C, const welp::matrix<Ty4, _Allocator_D>& D, const Ty5& delim)
-		{
-#ifdef WELP_MATRIX_DEBUG_MODE
-			assert(A.r() == B.r());
-			assert(A.r() == C.r());
-			assert(A.r() == D.r());
-#endif // WELP_MATRIX_DEBUG_MODE
-			std::ofstream writemat;
-			writemat.open(filename, std::ios::app);
-			if (writemat.good())
-			{
-				const Ty1* pA = A.data();
-				const Ty2* pB = B.data();
-				const Ty3* pC = C.data();
-				const Ty4* pD = D.data();
-				std::size_t Ar = A.r();
-				std::size_t Ac = A.c();
-				std::size_t Bc = B.c();
-				std::size_t Cc = C.c();
-				std::size_t Dc = D.c();
-				std::size_t j;
-				std::size_t k = 1;
-				for (std::size_t i = 0; i < Ar; i++)
-				{
-					for (j = Ac; j > 0; j--)
-					{
-						writemat << *pA++ << delim;
-					}
-					for (j = Bc; j > 0; j--)
-					{
-						writemat << *pB++ << delim;
-					}
-					for (j = Cc; j > 0; j--)
-					{
-						writemat << *pC++ << delim;
-					}
-					for (j = Dc; j > 0; j--)
-					{
-						writemat << *pD++;
-						if (k == Dc) { writemat << "\n"; k = 1; }
-						else { writemat << delim; k++; }
-					}
-				}
-			}
-			writemat.close();
-		}
-
-		template <typename Ty1, typename Ty2, typename Ty3, typename Ty4, typename Ty5, typename Ty6,
-			class _Allocator_A, class _Allocator_B, class _Allocator_C, class _Allocator_D, class _Allocator_E> void append(const std::string& filename,
-				const welp::matrix<Ty1, _Allocator_A>& A, const welp::matrix<Ty2, _Allocator_B>& B, const welp::matrix<Ty3, _Allocator_C>& C,
-				const welp::matrix<Ty4, _Allocator_D>& D, const welp::matrix<Ty4, _Allocator_E>& E, const Ty6& delim)
-		{
-#ifdef WELP_MATRIX_DEBUG_MODE
-			assert(A.r() == B.r());
-			assert(A.r() == C.r());
-			assert(A.r() == D.r());
-			assert(A.r() == E.r());
-#endif // WELP_MATRIX_DEBUG_MODE
-			std::ofstream writemat;
-			writemat.open(filename, std::ios::app);
-			if (writemat.good())
-			{
-				const Ty1* pA = A.data();
-				const Ty2* pB = B.data();
-				const Ty3* pC = C.data();
-				const Ty4* pD = D.data();
-				const Ty5* pE = E.data();
-				std::size_t Ar = A.r();
-				std::size_t Ac = A.c();
-				std::size_t Bc = B.c();
-				std::size_t Cc = C.c();
-				std::size_t Dc = D.c();
-				std::size_t Ec = E.c();
-				std::size_t j;
-				std::size_t k = 1;
-				for (std::size_t i = 0; i < Ar; i++)
-				{
-					for (j = Ac; j > 0; j--)
-					{
-						writemat << *pA++ << delim;
-					}
-					for (j = Bc; j > 0; j--)
-					{
-						writemat << *pB++ << delim;
-					}
-					for (j = Cc; j > 0; j--)
-					{
-						writemat << *pC++ << delim;
-					}
-					for (j = Dc; j > 0; j--)
-					{
-						writemat << *pD++ << delim;
-					}
-					for (j = Ec; j > 0; j--)
-					{
-						writemat << *pE++;
-						if (k == Ec) { writemat << "\n"; k = 1; }
-						else { writemat << delim; k++; }
-					}
-				}
-			}
-			writemat.close();
 		}
 
 		std::string file_path(const std::string& str)
