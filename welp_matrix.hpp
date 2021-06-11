@@ -2285,7 +2285,7 @@ namespace welp
 			const Ty* pB2 = pfB + 2 * jump;
 			const Ty* pB3 = pfB + 3 * jump;
 			Ty* pC;
-			std::size_t N = Ac - (Ac & 3);
+			std::size_t N = Br - (Br & 3);
 			jump = 3 * Bc + 4 * skipB;
 
 			std::size_t j, k;
@@ -2312,7 +2312,7 @@ namespace welp
 			}
 
 			// bottom fringe of B
-			switch (Ac & 3)
+			switch (Br & 3)
 			{
 
 			case 0:
@@ -2729,7 +2729,7 @@ namespace welp
 
 					pA = (pfA + k) + (jumpA * N);
 					regA0 = *pA;
-					regA1 = *(pA + jumpA;
+					regA1 = *(pA + jumpA);
 					regA2 = *(pA + 2 * jumpA);
 
 					for (j = Bc; j > 0; j--)
