@@ -1330,6 +1330,106 @@ namespace welp
 				pA += Ac; pC += Cc;
 			}
 		}
+		template <typename Ty> inline void get_blk(Ty* const pfC, const Ty* const pfA,
+			const std::size_t rows, const std::size_t cols,
+			const std::size_t Ci0, const std::size_t Cj0, const std::size_t Cc,
+			const std::size_t Ai0, const std::size_t Aj0, const std::size_t Ac)
+		{
+			Ty* pC = pfC + Cc * Ci0 + Cj0;
+			const Ty* pA = pfA + Ac * Ai0 + Aj0;
+			std::size_t N = cols - (cols & 3);
+			std::size_t j;
+
+			switch (cols & 3)
+			{
+
+			case 0:
+			{
+				std::size_t jumpC = Cc - cols;
+				std::size_t jumpA = Ac - cols;
+				for (std::size_t i = rows; i > 0; i--)
+				{
+					for (j = N; j > 0; j -= 4)
+					{
+						*pC = *pA;
+						*(pC + 1) = *(pA + 1);
+						*(pC + 2) = *(pA + 2);
+						*(pC + 3) = *(pA + 3);
+						pA += 4; pC += 4;
+					}
+					pC += jumpC;
+					pA += jumpA;
+				}
+			}
+			break;
+
+			case 1:
+			{
+				std::size_t jumpC = Cc - cols + 1;
+				std::size_t jumpA = Ac - cols + 1;
+				for (std::size_t i = rows; i > 0; i--)
+				{
+					for (j = N; j > 0; j -= 4)
+					{
+						*pC = *pA;
+						*(pC + 1) = *(pA + 1);
+						*(pC + 2) = *(pA + 2);
+						*(pC + 3) = *(pA + 3);
+						pA += 4; pC += 4;
+					}
+					*pC = *pA;
+					pC += jumpC;
+					pA += jumpA;
+				}
+			}
+			break;
+
+			case 2:
+			{
+				std::size_t jumpC = Cc - cols + 2;
+				std::size_t jumpA = Ac - cols + 2;
+				for (std::size_t i = rows; i > 0; i--)
+				{
+					for (j = N; j > 0; j -= 4)
+					{
+						*pC = *pA;
+						*(pC + 1) = *(pA + 1);
+						*(pC + 2) = *(pA + 2);
+						*(pC + 3) = *(pA + 3);
+						pA += 4; pC += 4;
+					}
+					*pC = *pA;
+					*(pC + 1) = *(pA + 1);
+					pC += jumpC;
+					pA += jumpA;
+				}
+			}
+			break;
+
+			case 3:
+			{
+				std::size_t jumpC = Cc - cols + 3;
+				std::size_t jumpA = Ac - cols + 3;
+				for (std::size_t i = rows; i > 0; i--)
+				{
+					for (j = N; j > 0; j -= 4)
+					{
+						*pC = *pA;
+						*(pC + 1) = *(pA + 1);
+						*(pC + 2) = *(pA + 2);
+						*(pC + 3) = *(pA + 3);
+						pA += 4; pC += 4;
+					}
+					*pC = *pA;
+					*(pC + 1) = *(pA + 1);
+					*(pC + 2) = *(pA + 2);
+					pC += jumpC;
+					pA += jumpA;
+				}
+			}
+			break;
+			}
+		}
 		template <typename Ty> inline void insert(Ty* const pfC, const Ty* const pfA, const std::size_t i0, const std::size_t j0,
 			const std::size_t Cc, const std::size_t Ar, const std::size_t Ac)
 		{
@@ -1477,6 +1577,73 @@ namespace welp
 				break;
 			}
 		}
+		template <typename Ty> inline void get_adj(Ty* const pfC, const Ty* const pfA,
+			const std::size_t rows, const std::size_t cols,
+			const std::size_t Ci0, const std::size_t Cj0, const std::size_t Cc,
+			const std::size_t Ai0, const std::size_t Aj0, const std::size_t Ac)
+		{
+			Ty* pC0 = pfC + Cc * Ci0 + Cj0;
+			Ty* pC1 = pC0 + Cc;
+			Ty* pC2 = pC0 + 2 * Cc;
+			Ty* pC3 = pC0 + 3 * Cc;
+			const Ty* pA = pfA + Ac * Ai0 + Aj0;
+
+			std::size_t jumpC = 4 * Cc - rows;
+			std::size_t jumpA = rows * Ac - 4;
+
+			std::size_t i;
+
+			for (std::size_t j = cols - (cols & 3); j > 0; j -= 4)
+			{
+				for (i = rows; i > 0; i--)
+				{
+					*pC0++ = *pA;
+					*pC1++ = *(pA + 1);
+					*pC2++ = *(pA + 2);
+					*pC3++ = *(pA + 3);
+					pA += Ac;
+				}
+				pC0 += jumpC;
+				pC1 += jumpC;
+				pC2 += jumpC;
+				pC3 += jumpC;
+				pA -= jumpA;
+			}
+
+			switch (cols & 3)
+			{
+
+			case 0:
+				break;
+
+			case 1:
+				for (i = rows; i > 0; i--)
+				{
+					*pC0++ = *pA;
+					pA += Ac;
+				}
+				break;
+
+			case 2:
+				for (i = rows; i > 0; i--)
+				{
+					*pC0++ = *pA;
+					*pC1++ = *(pA + 1);
+					pA += Ac;
+				}
+				break;
+
+			case 3:
+				for (i = rows; i > 0; i--)
+				{
+					*pC0++ = *pA;
+					*pC1++ = *(pA + 1);
+					*pC2++ = *(pA + 2);
+					pA += Ac;
+				}
+				break;
+			}
+		}
 		template <typename Ty> void adj_sqm(Ty* const pfC, const std::size_t Cc)
 		{
 			Ty temp0; Ty temp1; Ty temp2; Ty temp3;
@@ -1551,6 +1718,80 @@ namespace welp
 					case 0:
 						break;
 					}
+				}
+			}
+		}
+		template <typename Ty> void inplace_adj_sqm(Ty* const pfC, const std::size_t rows,
+			const std::size_t Ci0, const std::size_t Cj0, const std::size_t Cc)
+		{
+			Ty temp0; Ty temp1; Ty temp2; Ty temp3;
+			Ty* p; Ty* pC = pfC + Cc * Ci0 + Cj0;
+			Ty* q0; Ty* q1; Ty* q2; Ty* q3;
+			std::size_t jump = 4 * Cc;
+			std::size_t i, j;
+
+			for (i = 0; i < rows; i++)
+			{
+				p = (pC + i + 1) + (Cc * i);
+				q0 = (pC + i) + (Cc * (i + 1));
+				q1 = q0 + Cc;
+				q2 = q0 + 2 * Cc;
+				q3 = q0 + 3 * Cc;
+
+				for (j = i + 5; j < rows; j += 4)
+				{
+					temp0 = *p;
+					temp1 = *(p + 1);
+					temp2 = *(p + 2);
+					temp3 = *(p + 3);
+					*p = *q0;
+					*(p + 1) = *q1;
+					*(p + 2) = *q2;
+					*(p + 3) = *q3;
+					*q0 = temp0;
+					*q1 = temp1;
+					*q2 = temp2;
+					*q3 = temp3;
+
+					p += 4;
+					q0 += jump;
+					q1 += jump;
+					q2 += jump;
+					q3 += jump;
+				}
+
+				switch (rows - j + 4)
+				{
+
+				case 1:
+					temp0 = *p;
+					*p = *q0;
+					*q0 = temp0;
+					break;
+
+				case 2:
+					temp0 = *p;
+					temp1 = *(p + 1);
+					*p = *q0;
+					*(p + 1) = *q1;
+					*q0 = temp0;
+					*q1 = temp1;
+					break;
+
+				case 3:
+					temp0 = *p;
+					temp1 = *(p + 1);
+					temp2 = *(p + 2);
+					*p = *q0;
+					*(p + 1) = *q1;
+					*(p + 2) = *q2;
+					*q0 = temp0;
+					*q1 = temp1;
+					*q2 = temp2;
+					break;
+
+				default:
+					break;
 				}
 			}
 		}
