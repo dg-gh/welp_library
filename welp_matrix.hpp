@@ -159,23 +159,9 @@ namespace welp
 		// C <- column j0 of A, A has Ar rows and Ac columns
 		template <typename Ty> inline void get_col(Ty* const pfC, const Ty* const pfA, const std::size_t j, const std::size_t Ar, const std::size_t Ac);
 
-		// C <- submatrix of A starting from position (i0, j0), C has Cr rows and Cc columns, A has Ar rows and Ac columns
-		template <typename Ty> inline void get_blk(Ty* const pfC, const Ty* const pfA, const std::size_t i0, const std::size_t j0,
-			const std::size_t Cr, const std::size_t Cc, const std::size_t Ac);
-
-		// inserts A into C starting from position (i0, j0) in C, C has Cr rows and Cc columns, A has Ar rows and Ac columns
-		template <typename Ty> inline void insert(Ty* const pfC, const Ty* const pfA, const std::size_t i0, const std::size_t j0,
-			const std::size_t Cr, const std::size_t Cc, const std::size_t Ac);
-
 		// set diagonal to x of matrix C with Cr rows and Cc columns starting from element (r_offset, c_offset)
 		template <typename Ty> inline void diag(Ty* const pfC, const Ty x, const std::size_t Cr,
 			const std::size_t Cc, const std::size_t r_offset, const std::size_t c_offset) noexcept;
-
-		// C = A', A has Ar rows and Ac columns
-		template <typename Ty> void adj(Ty* const pfC, const Ty* const pfA, const std::size_t Ar, const std::size_t Ac);
-
-		// C <- C', C is a square matrix with Cc rows and Cc columns
-		template <typename Ty> void adj_sqm(Ty* const pfC, const std::size_t Cc);
 
 		// returns <A, B>, A has n elements
 		template <typename Ty> inline Ty dot(const Ty* const pfA, const Ty* const pfB, const std::size_t n) noexcept;
@@ -1293,43 +1279,6 @@ namespace welp
 			Ty* pC = pfC; const Ty* pA = pfA + j0;
 			for (std::size_t i = Ar; i > 0; i--) { *pC++ = *pA; pA += Ac; }
 		}
-		template <typename Ty> inline void get_blk(Ty* const pfC, const Ty* const pfA, const std::size_t i0, const std::size_t j0,
-			const std::size_t Cr, const std::size_t Cc, const std::size_t Ac)
-		{
-			Ty* pC = pfC; const Ty* pA = (pfA + j0) + (Ac * i0);
-			std::size_t mem = Ac - Cc;
-			std::size_t j;
-			for (std::size_t i = Cr; i > 0; i--)
-			{
-				for (j = Cc; j > 0; j--)
-				{
-					*pC++ = *pA++;
-				}
-				pA += mem;
-			}
-		}
-		template <> inline void get_blk(float* const pfC, const float* const pfA, const std::size_t i0, const std::size_t j0,
-			const std::size_t Cr, const std::size_t Cc, const std::size_t Ac)
-		{
-			float* pC = pfC; const float* pA = (pfA + j0) + (Ac * i0);
-			std::size_t mem = Cc * sizeof(float);
-			for (std::size_t i = Cr; i > 0; i--)
-			{
-				std::memcpy(pC, pA, mem);
-				pA += Ac; pC += Cc;
-			}
-		}
-		template <> inline void get_blk(double* const pfC, const double* const pfA, const std::size_t i0, const std::size_t j0,
-			const std::size_t Cr, const std::size_t Cc, const std::size_t Ac)
-		{
-			double* pC = pfC; const double* pA = (pfA + j0) + (Ac * i0);
-			std::size_t mem = Cc * sizeof(double);
-			for (std::size_t i = Cr; i > 0; i--)
-			{
-				std::memcpy(pC, pA, mem);
-				pA += Ac; pC += Cc;
-			}
-		}
 		template <typename Ty> inline void get_blk(Ty* const pfC, const Ty* const pfA,
 			const std::size_t rows, const std::size_t cols,
 			const std::size_t Ci0, const std::size_t Cj0, const std::size_t Cc,
@@ -1430,76 +1379,6 @@ namespace welp
 			break;
 			}
 		}
-		template <typename Ty> inline void insert(Ty* const pfC, const Ty* const pfA, const std::size_t i0, const std::size_t j0,
-			const std::size_t Cc, const std::size_t Ar, const std::size_t Ac)
-		{
-			Ty* pC = (pfC + j0) + (Cc * i0); const Ty* pA = pfA;
-			if (Ac == 1)
-			{
-				for (std::size_t i = Ar; i > 0; i--)
-				{
-					*pC = *pA++;
-					pC += Cc;
-				}
-			}
-			else
-			{
-				std::size_t memA = Cc - Ac;
-				std::size_t j;
-				for (std::size_t i = Ar; i > 0; i--)
-				{
-					for (j = Ac; j > 0; j--)
-					{
-						*pC++ = *pA++;
-					}
-					pC += memA;
-				}
-			}
-		}
-		template <> inline void insert(float* const pfC, const float* const pfA, const std::size_t i0, const std::size_t j0,
-			const std::size_t Cc, const std::size_t Ar, const std::size_t Ac)
-		{
-			float* pC = (pfC + j0) + (Cc * i0); const float* pA = pfA;
-			if (Ac == 1)
-			{
-				for (std::size_t i = Ar; i > 0; i--)
-				{
-					*pC = *pA++;
-					pC += Cc;
-				}
-			}
-			else
-			{
-				std::size_t memA = Ac * sizeof(float);
-				for (std::size_t i = Ar; i > 0; i--)
-				{
-					std::memcpy(pC, pA, memA);
-					pC += Cc; pA += Ac;
-				}
-			}
-		}
-		template <> inline void insert(double* const pfC, const double* const pfA, const std::size_t i0, const std::size_t j0,
-			const std::size_t Cc, const std::size_t Ar, const std::size_t Ac)
-		{
-			double* pC = (pfC + j0) + (Cc * i0); const double* pA = pfA;
-			if (Ac == 1)
-			{
-				for (std::size_t i = Ar; i > 0; i--)
-				{
-					*pC = *pA++;
-					pC += Cc;
-				}
-			}
-			else
-			{
-				std::size_t memA = Ac * sizeof(double);
-				for (std::size_t i = Ar; i > 0; i--)
-				{
-					std::memcpy(pC, pA, memA);
-					pC += Cc; pA += Ac;
-				}
-			}
-		}
 		template <typename Ty> inline void diag(Ty* const pfC, const Ty x, const std::size_t Cr,
 			const std::size_t Cc, const std::size_t r_offset, const std::size_t c_offset) noexcept
 		{
@@ -1509,72 +1388,6 @@ namespace welp
 				Cr - r_offset : Cc - c_offset; n > 0; n--)
 			{
 				*p = x; p += jump;
-			}
-		}
-		template <typename Ty> void adj(Ty* const pfC, const Ty* const pfA, const std::size_t Ar, const std::size_t Ac)
-		{
-			Ty* pC0; Ty* pC1; Ty* pC2; Ty* pC3; const Ty* pA;
-			std::size_t N = Ac - (Ac & 3);
-
-			for (std::size_t j = 0; j < N; j += 4)
-			{
-				pA = pfA + j;
-				pC0 = pfC + (Ar * j);
-				pC1 = pC0 + Ar;
-				pC2 = pC0 + 2 * Ar;
-				pC3 = pC0 + 3 * Ar;
-
-				for (std::size_t i = 0; i < Ar; i++)
-				{
-					*pC0++ = *pA;
-					*pC1++ = *(pA + 1);
-					*pC2++ = *(pA + 2);
-					*pC3++ = *(pA + 3);
-					pA += Ac;
-				}
-			}
-
-			switch (Ac & 3)
-			{
-
-			case 0:
-				break;
-
-			case 1:
-				pA = pfA + N;
-				pC0 = pfC + (Ar * N);
-				for (std::size_t i = 0; i < Ar; i++)
-				{
-					*pC0++ = *pA;
-					pA += Ac;
-				}
-				break;
-
-			case 2:
-				pA = pfA + N;
-				pC0 = pfC + (Ar * N);
-				pC1 = pC0 + Ar;
-				for (std::size_t i = 0; i < Ar; i++)
-				{
-					*pC0++ = *pA;
-					*pC1++ = *(pA + 1);
-					pA += Ac;
-				}
-				break;
-
-			case 3:
-				pA = pfA + N;
-				pC0 = pfC + (Ar * N);
-				pC1 = pC0 + Ar;
-				pC2 = pC0 + 2 * Ar;
-				for (std::size_t i = 0; i < Ar; i++)
-				{
-					*pC0++ = *pA;
-					*pC1++ = *(pA + 1);
-					*pC2++ = *(pA + 2);
-					pA += Ac;
-				}
-				break;
 			}
 		}
 		template <typename Ty> inline void get_adj(Ty* const pfC, const Ty* const pfA,
@@ -1642,83 +1455,6 @@ namespace welp
 					pA += Ac;
 				}
 				break;
-			}
-		}
-		template <typename Ty> void adj_sqm(Ty* const pfC, const std::size_t Cc)
-		{
-			Ty temp0; Ty temp1; Ty temp2; Ty temp3;
-			Ty* p; Ty* q0; Ty* q1; Ty* q2; Ty* q3;
-			std::size_t N;
-			std::size_t M = 4 * Cc;
-			std::size_t i, j;
-
-			for (i = 0; i < Cc; i++)
-			{
-				p = (pfC + i + 1) + (Cc * i);
-				q0 = (pfC + i) + (Cc * (i + 1));
-				q1 = q0 + Cc;
-				q2 = q0 + 2 * Cc;
-				q3 = q0 + 3 * Cc;
-
-				for (j = i + 1; j < Cc; j += 4)
-				{
-					N = (Cc - j < 4) ? Cc - j : 4;
-
-					switch (N)
-					{
-
-					case 4:
-						temp0 = *p;
-						temp1 = *(p + 1);
-						temp2 = *(p + 2);
-						temp3 = *(p + 3);
-						*p = *q0;
-						*(p + 1) = *q1;
-						*(p + 2) = *q2;
-						*(p + 3) = *q3;
-						*q0 = temp0;
-						*q1 = temp1;
-						*q2 = temp2;
-						*q3 = temp3;
-
-						p += 4;
-						q0 += M;
-						q1 += M;
-						q2 += M;
-						q3 += M;
-						break;
-
-					case 3:
-						temp0 = *p;
-						temp1 = *(p + 1);
-						temp2 = *(p + 2);
-						*p = *q0;
-						*(p + 1) = *q1;
-						*(p + 2) = *q2;
-						*q0 = temp0;
-						*q1 = temp1;
-						*q2 = temp2;
-						break;
-
-					case 2:
-						temp0 = *p;
-						temp1 = *(p + 1);
-						*p = *q0;
-						*(p + 1) = *q1;
-						*q0 = temp0;
-						*q1 = temp1;
-						break;
-
-					case 1:
-						temp0 = *p;
-						*p = *q0;
-						*q0 = temp0;
-						break;
-
-					case 0:
-						break;
-					}
-				}
 			}
 		}
 		template <typename Ty> void inplace_adj_sqm(Ty* const pfC, const std::size_t rows,
@@ -13315,13 +13051,12 @@ template <typename Ty, class _Allocator> welp::matrix<Ty, _Allocator> welp::matr
 	assert(j0 < this->c());
 	assert(i0 + Cr <= this->r());
 	assert(j0 + Cc <= this->c());
-
 #endif // WELP_MATRIX_DEBUG_MODE
 	welp::matrix<Ty, _Allocator> C(Cr, Cc);
-	welp::matrix_subroutines::get_blk(C.data(), this->data(), i0, j0, Cr, Cc, this->c());
+	welp::matrix_subroutines::get_blk(C.data(), this->data(), Cr, Cc, 0, 0, Cc, i0, j0, this->c());
 	return C;
 }
-template <typename Ty, class _Allocator> template <class _Allocator_C> void welp::matrix<Ty, _Allocator>::get_into(std::size_t i0, std::size_t j0, welp::matrix<Ty, _Allocator_C> & C) const
+template <typename Ty, class _Allocator> template <class _Allocator_C> void welp::matrix<Ty, _Allocator>::get_into(std::size_t i0, std::size_t j0, welp::matrix<Ty, _Allocator_C>& C) const
 {
 #ifdef WELP_MATRIX_DEBUG_MODE
 	assert(this->data() != nullptr);
@@ -13332,9 +13067,9 @@ template <typename Ty, class _Allocator> template <class _Allocator_C> void welp
 	assert(C.c() <= j0 + this->c());
 
 #endif // WELP_MATRIX_DEBUG_MODE
-	welp::matrix_subroutines::get_blk(C.data(), this->data(), i0, j0, C.r(), C.c(), this->c());
+	welp::matrix_subroutines::get_blk(C.data(), this->data(), C.r(), C.c(), 0, 0, C.c(), i0, j0, this->c());
 }
-template <typename Ty, class _Allocator> template <class _Allocator_A> welp::matrix<Ty, _Allocator>& welp::matrix<Ty, _Allocator>::insert(std::size_t i0, std::size_t j0, const welp::matrix<Ty, _Allocator_A> & A)
+template <typename Ty, class _Allocator> template <class _Allocator_A> welp::matrix<Ty, _Allocator>& welp::matrix<Ty, _Allocator>::insert(std::size_t i0, std::size_t j0, const welp::matrix<Ty, _Allocator_A>& A)
 {
 #ifdef WELP_MATRIX_DEBUG_MODE
 	assert(this->data() != nullptr);
@@ -13344,7 +13079,7 @@ template <typename Ty, class _Allocator> template <class _Allocator_A> welp::mat
 	assert(i0 + A.r() <= this->r());
 	assert(j0 + A.c() <= this->c());
 #endif // WELP_MATRIX_DEBUG_MODE
-	welp::matrix_subroutines::insert(this->data(), A.data(), i0, j0, this->c(), A.r(), A.c());
+	welp::matrix_subroutines::get_blk(this->data(), A.r(), A.c(), i0, j0, this->c(), A.r(), A.c(), A.c());
 	return *this;
 }
 
@@ -13362,14 +13097,14 @@ template <typename Ty, class _Allocator> welp::matrix<Ty, _Allocator>& welp::mat
 	}
 	else if (this->r() == this->c())
 	{
-		welp::matrix_subroutines::adj_sqm(this->data(), this->r());
+		welp::matrix_subroutines::inplace_adj_sqm(this->data(), this->r(), 0, 0, this->c());
 		return *this;
 	}
 	else
 	{
 		welp::matrix<Ty, _Allocator> A = *this;
-		welp::matrix_subroutines::adj(this->data(), A.data(), A.r(), A.c());
 		this->resize(this->c(), this->r());
+		welp::matrix_subroutines::get_adj(this->data(), A.data(), A.r(), A.c(), 0, 0, this->c(), 0, 0, A.c());
 		return *this;
 	}
 }
@@ -13386,7 +13121,7 @@ template <typename Ty, class _Allocator> template <class _Allocator_A> welp::mat
 	}
 	else
 	{
-		welp::matrix_subroutines::adj(this->data(), A.data(), A.r(), A.c());
+		welp::matrix_subroutines::adj(this->data(), A.data(), A.r(), A.c(), 0, 0, this->c(), 0, 0, A.c());
 	}
 	return *this;
 }
