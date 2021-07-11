@@ -24,9 +24,9 @@ namespace welp
 
 	template <class base_type, unsigned int id_number = static_cast<unsigned int>(-1), class _Allocator = std::allocator<base_type>, class ... _Args>
 	inline _global_instance<base_type, id_number, _Allocator>& make_global_type(_Args&& ... args);
-	
+
 	template <class base_type, unsigned int id_number = static_cast<unsigned int>(-1), class _Allocator = std::allocator<base_type>>
-	inline _global_instance<base_type, id_number, _Allocator>& get_global_type() noexcept;
+	inline _global_instance<base_type, id_number, _Allocator> & get_global_type() noexcept;
 
 	template <class base_type, unsigned int id_number = static_cast<unsigned int>(-1), class _Allocator = std::allocator<base_type>>
 	inline bool is_global_type_created() noexcept;
@@ -61,7 +61,7 @@ namespace welp
 
 		template <class base_type2, unsigned int id_number2, class _Allocator2, class ... _Args>
 		friend inline _global_instance<base_type2, id_number2, _Allocator2>& make_global_type(_Args&& ... args);
-		
+
 		template <class base_type2, unsigned int id_number2, class _Allocator2>
 		friend inline _global_instance<base_type2, id_number2, _Allocator2>& get_global_type() noexcept;
 
@@ -78,7 +78,7 @@ namespace welp
 
 		template <class base_type2, unsigned int id_number2, class _Allocator2, class ... _Args>
 		friend inline _global_instance<base_type2, id_number2, _Allocator2>& make_global_type(_Args&& ... args);
-		
+
 		template <class base_type2, unsigned int id_number2, class _Allocator2>
 		friend inline _global_instance<base_type2, id_number2, _Allocator2>& get_global_type() noexcept;
 
@@ -86,7 +86,7 @@ namespace welp
 
 	private:
 
-		base_type* raw_ptr = nullptr;
+		base_type* m_raw_ptr = nullptr;
 
 		_global_pointer(base_type* const rhs_ptr);
 
@@ -108,32 +108,32 @@ welp::_global_pointer<base_type, id_number, _Allocator> welp::_global_instance<b
 template <class base_type, unsigned int id_number, class _Allocator, class ... _Args>
 inline welp::_global_instance<base_type, id_number, _Allocator>& welp::make_global_type(_Args&& ... args)
 {
-	if (welp::_global_instance<base_type, id_number, _Allocator>::_global_instance_ptr.raw_ptr != nullptr)
+	if (welp::_global_instance<base_type, id_number, _Allocator>::_global_instance_ptr.m_raw_ptr != nullptr)
 	{
 		return *static_cast<welp::_global_instance<base_type, id_number, _Allocator>*>(static_cast<void*>(
-			welp::_global_instance<base_type, id_number, _Allocator>::_global_instance_ptr.raw_ptr));
+			welp::_global_instance<base_type, id_number, _Allocator>::_global_instance_ptr.m_raw_ptr));
 	}
 	else
 	{
 		try
 		{
-			welp::_global_instance<base_type, id_number, _Allocator>::_global_instance_ptr.raw_ptr
+			welp::_global_instance<base_type, id_number, _Allocator>::_global_instance_ptr.m_raw_ptr
 				= static_cast<_global_instance<base_type, id_number, _Allocator>*>(static_cast<void*>(
 					welp::_global_instance<base_type, id_number, _Allocator>::_global_instance_ptr.allocate(1)));
 
-			if (welp::_global_instance<base_type, id_number, _Allocator>::_global_instance_ptr.raw_ptr != nullptr)
+			if (welp::_global_instance<base_type, id_number, _Allocator>::_global_instance_ptr.m_raw_ptr != nullptr)
 			{
-				new (welp::_global_instance<base_type, id_number, _Allocator>::_global_instance_ptr.raw_ptr)
+				new (welp::_global_instance<base_type, id_number, _Allocator>::_global_instance_ptr.m_raw_ptr)
 					base_type(std::forward<_Args>(args)...);
 			}
 		}
 		catch (...)
 		{
-			welp::_global_instance<base_type, id_number, _Allocator>::_global_instance_ptr.raw_ptr = nullptr;
+			welp::_global_instance<base_type, id_number, _Allocator>::_global_instance_ptr.m_raw_ptr = nullptr;
 		}
 
 		return *static_cast<welp::_global_instance<base_type, id_number, _Allocator>*>(static_cast<void*>(
-			welp::_global_instance<base_type, id_number, _Allocator>::_global_instance_ptr.raw_ptr));
+			welp::_global_instance<base_type, id_number, _Allocator>::_global_instance_ptr.m_raw_ptr));
 	}
 }
 
@@ -141,51 +141,51 @@ template <class base_type, unsigned int id_number, class _Allocator>
 inline welp::_global_instance<base_type, id_number, _Allocator>& welp::get_global_type() noexcept
 {
 	return *static_cast<welp::_global_instance<base_type, id_number, _Allocator>*>(static_cast<void*>(
-			welp::_global_instance<base_type, id_number, _Allocator>::_global_instance_ptr.raw_ptr));
+		welp::_global_instance<base_type, id_number, _Allocator>::_global_instance_ptr.m_raw_ptr));
 }
 
 template <class base_type, unsigned int id_number, class _Allocator>
 inline bool welp::is_global_type_created() noexcept
 {
-	return welp::_global_instance<base_type, id_number, _Allocator>::_global_instance_ptr.raw_ptr != nullptr;
+	return welp::_global_instance<base_type, id_number, _Allocator>::_global_instance_ptr.m_raw_ptr != nullptr;
 }
 
 template <class base_type, unsigned int id_number, class _Allocator>
 base_type& welp::_global_instance<base_type, id_number, _Allocator>::operator=(const base_type& rhs_base_object)
 {
-	*_global_instance_ptr.raw_ptr = rhs_base_object;
-	return *_global_instance_ptr.raw_ptr;
+	*_global_instance_ptr.m_raw_ptr = rhs_base_object;
+	return *_global_instance_ptr.m_raw_ptr;
 }
 
 template <class base_type, unsigned int id_number, class _Allocator>
 base_type& welp::_global_instance<base_type, id_number, _Allocator>::operator=(base_type&& rhs_base_object) noexcept
 {
-	*_global_instance_ptr.raw_ptr = std::move(rhs_base_object);
-	return *_global_instance_ptr.raw_ptr;
+	*_global_instance_ptr.m_raw_ptr = std::move(rhs_base_object);
+	return *_global_instance_ptr.m_raw_ptr;
 }
 
 template <class base_type, unsigned int id_number, class _Allocator>
 inline const base_type* welp::_global_instance<base_type, id_number, _Allocator>::base_type_ptr() const noexcept
 {
-	return _global_instance_ptr.raw_ptr;
+	return _global_instance_ptr.m_raw_ptr;
 }
 
 template <class base_type, unsigned int id_number, class _Allocator>
 inline base_type* welp::_global_instance<base_type, id_number, _Allocator>::base_type_ptr() noexcept
 {
-	return _global_instance_ptr.raw_ptr;
+	return _global_instance_ptr.m_raw_ptr;
 }
 
 template <class base_type, unsigned int id_number, class _Allocator>
 inline const base_type& welp::_global_instance<base_type, id_number, _Allocator>::base_type_ref() const noexcept
 {
-	return *_global_instance_ptr.raw_ptr;
+	return *_global_instance_ptr.m_raw_ptr;
 }
 
 template <class base_type, unsigned int id_number, class _Allocator>
 inline base_type& welp::_global_instance<base_type, id_number, _Allocator>::base_type_ref() noexcept
 {
-	return *_global_instance_ptr.raw_ptr;
+	return *_global_instance_ptr.m_raw_ptr;
 }
 
 template <class base_type, unsigned int id_number, class _Allocator>
@@ -197,16 +197,16 @@ constexpr unsigned int welp::_global_instance<base_type, id_number, _Allocator>:
 template <class base_type, unsigned int id_number, class _Allocator>
 welp::_global_pointer<base_type, id_number, _Allocator>::_global_pointer(base_type* rhs_ptr)
 {
-	raw_ptr = rhs_ptr;
+	m_raw_ptr = rhs_ptr;
 }
 
 template <class base_type, unsigned int id_number, class _Allocator>
 welp::_global_pointer<base_type, id_number, _Allocator>::~_global_pointer()
 {
-	if (raw_ptr != nullptr)
+	if (m_raw_ptr != nullptr)
 	{
-		raw_ptr->~base_type();
-		this->deallocate(raw_ptr, sizeof(base_type));
+		m_raw_ptr->~base_type();
+		this->deallocate(m_raw_ptr, sizeof(base_type));
 	}
 }
 
