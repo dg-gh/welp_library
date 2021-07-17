@@ -342,7 +342,7 @@ namespace welp
 
 #ifdef WELP_MULTIPOOL_DEBUG_MODE
 		void record_say_sub();
-		void record_reset_sub();
+		void record_reset_sub() noexcept;
 #ifdef WELP_MULTIPOOL_INCLUDE_FSTREAM
 		void record_write_sub(std::ofstream& rec_write);
 #endif // WELP_MULTIPOOL_INCLUDE_FSTREAM
@@ -1131,7 +1131,7 @@ inline std::size_t welp::multipool_resource<max_number_of_pools, sub_allocator>:
 template <std::size_t max_number_of_pools, class sub_allocator>
 inline void welp::multipool_resource<max_number_of_pools, sub_allocator>::sort_pools() noexcept
 {
-	for (std::size_t n = 0; n < number_of_pools; n++)
+	for (std::size_t n = 0; n < m_number_of_pools; n++)
 	{
 		std::sort(m_first_address_ptr[n], m_current_address_ptr[n], std::greater<char*>());
 	}
@@ -1141,7 +1141,7 @@ inline void welp::multipool_resource<max_number_of_pools, sub_allocator>::sort_p
 template <std::size_t max_number_of_pools, class sub_allocator>
 inline void welp::multipool_resource<max_number_of_pools, sub_allocator>::sort_pool(std::size_t pool_number) noexcept
 {
-	if (pool_number < number_of_pools)
+	if (pool_number < m_number_of_pools)
 	{
 		std::sort(m_first_address_ptr[pool_number], m_current_address_ptr[pool_number], std::greater<char*>());
 	}
@@ -1151,9 +1151,9 @@ inline void welp::multipool_resource<max_number_of_pools, sub_allocator>::sort_p
 template <std::size_t max_number_of_pools, class sub_allocator>
 inline void welp::multipool_resource<max_number_of_pools, sub_allocator>::sort_pool_range(std::size_t first_pool, std::size_t end_pool) noexcept
 {
-	if (first_pool < number_of_pools)
+	if (first_pool < m_number_of_pools)
 	{
-		if (end_pool > number_of_pools) { end_pool = number_of_pools; }
+		if (end_pool > m_number_of_pools) { end_pool = m_number_of_pools; }
 		for (std::size_t n = first_pool; n < end_pool; n++)
 		{
 			std::sort(m_first_address_ptr[n], m_current_address_ptr[n], std::greater<char*>());
@@ -1300,7 +1300,7 @@ bool welp::multipool_resource<max_number_of_pools, sub_allocator>::new_pools(std
 		m_block_size[n] = *iter_block_size++;
 		m_block_instances[n] = *iter_block_instances++;
 	}
-	pool_align_size = pool_align;
+	m_pool_align_size = pool_align;
 	sub_allocator _sub_allocator;
 
 	for (std::size_t n = 0; n < number_of_pools; n++)
@@ -1327,8 +1327,8 @@ bool welp::multipool_resource<max_number_of_pools, sub_allocator>::new_pools(std
 		if (m_first_address_ptr[n] == nullptr) { delete_pools(); return false; }
 		m_current_address_ptr[n] = m_first_address_ptr[n] + m_block_instances[n]; // construct pointer to current address
 #ifdef WELP_MULTIPOOL_DEBUG_MODE
-		top_address_ptr[n] = m_current_address_ptr[n]; // pointer to top address before usage
-		record_reset(); record_on = false;
+		m_DEBUG_top_address_ptr[n] = m_current_address_ptr[n]; // pointer to top address before usage
+		record_reset(); m_DEBUG_record_on = false;
 #endif // WELP_MULTIPOOL_DEBUG_MODE
 		char* ptr = m_data_ptr[n] + (m_block_instances[n] - 1) * m_block_size[n]; // pointer to last block (will iter backwards)
 		char** address_ptr_iter = m_first_address_ptr[n]; // pointer to first address (will iter forward)
@@ -1487,27 +1487,27 @@ void welp::multipool_resource<max_number_of_pools, sub_allocator>::record_write_
 	WELP_MULTIPOOL_RECORD_INT total_allocations = 0;
 	WELP_MULTIPOOL_RECORD_INT total_deallocations = 0;
 
-	for (std::size_t n = 0; n < number_of_pools; n++)
+	for (std::size_t n = 0; n < m_number_of_pools; n++)
 	{
-		total_allocations += record_allocations[n];
-		total_deallocations += record_deallocations[n];
+		total_allocations += m_DEBUG_record_allocations[n];
+		total_deallocations += m_DEBUG_record_deallocations[n];
 
-		record_max_occupancy[n] = (static_cast<std::size_t>(top_address_ptr[n] - m_current_address_ptr[n]) > record_max_occupancy[n]) ?
-			static_cast<std::size_t>(top_address_ptr[n] - m_current_address_ptr[n]) : record_max_occupancy[n];
+		m_DEBUG_record_max_occupancy[n] = (static_cast<std::size_t>(m_DEBUG_top_address_ptr[n] - m_current_address_ptr[n]) > m_DEBUG_record_max_occupancy[n]) ?
+			static_cast<std::size_t>(m_DEBUG_top_address_ptr[n] - m_current_address_ptr[n]) : m_DEBUG_record_max_occupancy[n];
 
 		rec_write << "\nPool " << n
 
 			<< "   > block size in bytes : " << m_block_size[n]
 			<< "   > number of blocks : " << m_block_instances[n]
 
-			<< "\n   > blocks currently used : " << top_address_ptr[n] - m_current_address_ptr[n]
+			<< "\n   > blocks currently used : " << m_DEBUG_top_address_ptr[n] - m_current_address_ptr[n]
 			<< "   > blocks currently available : " << m_current_address_ptr[n] - m_first_address_ptr[n]
 
-			<< "\n   > allocations : " << record_allocations[n]
-			<< "   > deallocations : " << record_deallocations[n]
+			<< "\n   > allocations : " << m_DEBUG_record_allocations[n]
+			<< "   > deallocations : " << m_DEBUG_record_deallocations[n]
 
-			<< "\n   > maximum occupancy recorded : " << record_max_occupancy[n]
-			<< "   > denied block requests : " << record_denied_block_requests[n] << std::endl;
+			<< "\n   > maximum occupancy recorded : " << m_DEBUG_record_max_occupancy[n]
+			<< "   > denied block requests : " << m_DEBUG_record_denied_block_requests[n] << std::endl;
 	}
 
 	rec_write << "\nGlobal"
@@ -1515,10 +1515,10 @@ void welp::multipool_resource<max_number_of_pools, sub_allocator>::record_write_
 		<< "   > total allocations : " << total_allocations
 		<< "   > total deallocations : " << total_deallocations
 
-		<< "\n   > failed allocations : " << record_failed_allocations
-		<< "   > failed deallocations : " << record_failed_deallocations
+		<< "\n   > failed allocations : " << m_DEBUG_record_failed_allocations
+		<< "   > failed deallocations : " << m_DEBUG_record_failed_deallocations
 
-		<< "\n   > biggest request in bytes : " << record_biggest_request << "\n" << std::endl;
+		<< "\n   > biggest request in bytes : " << m_DEBUG_record_biggest_request << "\n" << std::endl;
 }
 
 
