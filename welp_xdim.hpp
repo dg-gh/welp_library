@@ -533,7 +533,7 @@ inline void welp::xdim_view<Ty, dim>::resize_left(_size_pack&& ... sizes)
 #ifdef WELP_XDIM_DEBUG_MODE
 	assert(sizeof...(sizes) == dim);
 #endif // WELP_XDIM_DEBUG_MODE
-	std::size_t _indices[dim] = { static_cast<std::size_t>(std::forward<_index_pack>(sizes))... };
+	std::size_t _indices[dim] = { static_cast<std::size_t>(std::forward<_size_pack>(sizes))... };
 	std::size_t _total_size = 1;
 	for (std::size_t n = 0; n < dim; n++)
 	{
@@ -562,7 +562,7 @@ inline void welp::xdim_view<Ty, dim>::resize_right(_size_pack&& ... sizes)
 #ifdef WELP_XDIM_DEBUG_MODE
 	assert(sizeof...(sizes) == dim);
 #endif // WELP_XDIM_DEBUG_MODE
-	std::size_t _indices[dim] = { static_cast<std::size_t>(std::forward<_index_pack>(sizes))... };
+	std::size_t _indices[dim] = { static_cast<std::size_t>(std::forward<_size_pack>(sizes))... };
 	std::size_t _total_size = 1;
 	for (std::size_t n = 0; n < dim; n++)
 	{
@@ -663,7 +663,7 @@ inline void welp::xdim_view_const<Ty, dim>::resize_left(_size_pack&& ... sizes)
 #ifdef WELP_XDIM_DEBUG_MODE
 	assert(sizeof...(sizes) == dim);
 #endif // WELP_XDIM_DEBUG_MODE
-	std::size_t _indices[dim] = { static_cast<std::size_t>(std::forward<_index_pack>(sizes))... };
+	std::size_t _indices[dim] = { static_cast<std::size_t>(std::forward<_size_pack>(sizes))... };
 	std::size_t _total_size = 1;
 	for (std::size_t n = 0; n < dim; n++)
 	{
@@ -692,7 +692,7 @@ inline void welp::xdim_view_const<Ty, dim>::resize_right(_size_pack&& ... sizes)
 #ifdef WELP_XDIM_DEBUG_MODE
 	assert(sizeof...(sizes) == dim);
 #endif // WELP_XDIM_DEBUG_MODE
-	std::size_t _indices[dim] = { static_cast<std::size_t>(std::forward<_index_pack>(sizes))... };
+	std::size_t _indices[dim] = { static_cast<std::size_t>(std::forward<_size_pack>(sizes))... };
 	std::size_t _total_size = 1;
 	for (std::size_t n = 0; n < dim; n++)
 	{
