@@ -26,7 +26,7 @@ namespace welp
 	inline _global_instance<base_type, id_number, _Allocator>& make_global_type(_Args&& ... args);
 
 	template <class base_type, unsigned int id_number = static_cast<unsigned int>(-1), class _Allocator = std::allocator<base_type>>
-	inline _global_instance<base_type, id_number, _Allocator> & get_global_type() noexcept;
+	inline _global_instance<base_type, id_number, _Allocator>& get_global_type() noexcept;
 
 	template <class base_type, unsigned int id_number = static_cast<unsigned int>(-1), class _Allocator = std::allocator<base_type>>
 	inline bool is_global_type_created() noexcept;
