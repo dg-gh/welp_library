@@ -151,29 +151,29 @@ namespace welp
 		void delete_threads() noexcept;
 
 #ifdef WELP_THREADS_DEBUG_MODE
-		void record_start() noexcept { std::lock_guard<std::mutex> resource_lock(m_mutex); m_DEBUG_record_on = true; };
-		void record_stop() noexcept { std::lock_guard<std::mutex> resource_lock(m_mutex); m_DEBUG_record_on = false; };
-		void record_reset() noexcept;
+		void DEBUG_start_record() noexcept { std::lock_guard<std::mutex> resource_lock(m_mutex); m_DEBUG_record_on = true; };
+		void DEBUG_stop_record() noexcept { std::lock_guard<std::mutex> resource_lock(m_mutex); m_DEBUG_record_on = false; };
+		void DEBUG_reset_record() noexcept;
 
-		void record_say();
-		template <typename msg_Ty> void record_say
+		void DEBUG_say();
+		template <typename msg_Ty> void DEBUG_say
 		(const msg_Ty& msg);
-		template <typename msg_Ty1, typename msg_Ty2> void record_say
+		template <typename msg_Ty1, typename msg_Ty2> void DEBUG_say
 		(const msg_Ty1& msg1, const msg_Ty2& msg2);
-		template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3> void record_say
+		template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3> void DEBUG_say
 		(const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3);
-		template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3, typename msg_Ty4> void record_say
+		template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3, typename msg_Ty4> void DEBUG_say
 		(const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3, const msg_Ty4& msg4);
 
 #ifdef WELP_THREADS_INCLUDE_FSTREAM
-		void record_write(const char* const filename);
-		template <typename msg_Ty> void record_write
+		void DEBUG_write(const char* const filename);
+		template <typename msg_Ty> void DEBUG_write
 		(const char* const filename, const msg_Ty& msg);
-		template <typename msg_Ty1, typename msg_Ty2> void record_write
+		template <typename msg_Ty1, typename msg_Ty2> void DEBUG_write
 		(const char* const filename, const msg_Ty1& msg1, const msg_Ty2& msg2);
-		template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3> void record_write
+		template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3> void DEBUG_write
 		(const char* const filename, const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3);
-		template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3, typename msg_Ty4> void record_write
+		template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3, typename msg_Ty4> void DEBUG_write
 		(const char* const filename, const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3, const msg_Ty4& msg4);
 #endif // WELP_THREADS_INCLUDE_FSTREAM
 #endif // WELP_THREADS_DEBUG_MODE
@@ -226,8 +226,8 @@ namespace welp
 		std::atomic<WELP_THREADS_RECORD_INT> m_DEBUG_record_delayed_task_count{ 0 };
 		bool m_DEBUG_record_on = false;
 
-		void record_say_sub();
-		void record_write_sub(std::ofstream& rec_write);
+		void DEBUG_say_sub();
+		void DEBUG_write_sub(std::ofstream& rec_write);
 #endif // WELP_THREADS_DEBUG_MODE
 	};
 }
@@ -370,13 +370,13 @@ void welp::threads<_Allocator>::force_async_task(const function_Ty& task, _Args&
 {
 
 #ifdef WELP_THREADS_DEBUG_MODE
-		if (!force_async_task_sub(task, std::forward<_Args>(args)...))
-		{
-			m_DEBUG_record_delayed_task_count.fetch_add(1);
-		}
-		else { return; }
+	if (!force_async_task_sub(task, std::forward<_Args>(args)...))
+	{
+		m_DEBUG_record_delayed_task_count.fetch_add(1);
+	}
+	else { return; }
 #endif // WELP_THREADS_DEBUG_MODE
-		while (!force_async_task_sub(task, std::forward<_Args>(args)...)) {}
+	while (!force_async_task_sub(task, std::forward<_Args>(args)...)) {}
 }
 
 template <class _Allocator> template <class function_Ty, class ... _Args>
@@ -458,13 +458,13 @@ template <class _Allocator> template <class function_Ty, class ... _Args>
 void welp::threads<_Allocator>::force_priority_async_task(const function_Ty& task, _Args&& ... args)
 {
 #ifdef WELP_THREADS_DEBUG_MODE
-		if (!force_priority_async_task_sub(task, std::forward<_Args>(args)...))
-		{
-			m_DEBUG_record_delayed_task_count.fetch_add(1);
-		}
-		else { return; }
+	if (!force_priority_async_task_sub(task, std::forward<_Args>(args)...))
+	{
+		m_DEBUG_record_delayed_task_count.fetch_add(1);
+	}
+	else { return; }
 #endif // WELP_THREADS_DEBUG_MODE
-		while (!force_priority_async_task_sub(task, std::forward<_Args>(args)...)) {}
+	while (!force_priority_async_task_sub(task, std::forward<_Args>(args)...)) {}
 }
 
 
@@ -475,7 +475,7 @@ bool welp::threads<_Allocator>::async_task(welp::async_task_end& box, const func
 	std::unique_lock<std::mutex> lock(m_mutex);
 
 	if ((m_last_task_ptr + 1 != m_next_task_ptr) &&
-		((m_next_task_ptr != m_task_buffer_data_ptr) || (m_last_task_ptr + 1 != m_task_buffer_end_ptr)) && 
+		((m_next_task_ptr != m_task_buffer_data_ptr) || (m_last_task_ptr + 1 != m_task_buffer_end_ptr)) &&
 		!box.m_task_running.load(std::memory_order_acquire))
 	{
 		m_waiting_tasks.fetch_add(1, std::memory_order_acquire);
@@ -549,13 +549,13 @@ template <class _Allocator> template <class function_Ty, class ... _Args>
 void welp::threads<_Allocator>::force_async_task(welp::async_task_end& box, const function_Ty& task, _Args&& ... args)
 {
 #ifdef WELP_THREADS_DEBUG_MODE
-		if (!force_async_task_sub(box, task, std::forward<_Args>(args)...))
-		{
-			m_DEBUG_record_delayed_task_count.fetch_add(1, std::memory_order_relaxed);
-		}
-		else { return; }
+	if (!force_async_task_sub(box, task, std::forward<_Args>(args)...))
+	{
+		m_DEBUG_record_delayed_task_count.fetch_add(1, std::memory_order_relaxed);
+	}
+	else { return; }
 #endif // WELP_THREADS_DEBUG_MODE
-		while (!force_async_task_sub(box, task, std::forward<_Args>(args)...)) {}
+	while (!force_async_task_sub(box, task, std::forward<_Args>(args)...)) {}
 }
 
 template <class _Allocator> template <class function_Ty, class ... _Args>
@@ -646,13 +646,13 @@ template <class _Allocator> template <class function_Ty, class ... _Args>
 void welp::threads<_Allocator>::force_priority_async_task(welp::async_task_end& box, const function_Ty& task, _Args&& ... args)
 {
 #ifdef WELP_THREADS_DEBUG_MODE
-		if (!force_priority_async_task_sub(box, task, std::forward<_Args>(args)...))
-		{
-			m_DEBUG_record_delayed_task_count.fetch_add(1, std::memory_order_relaxed);
-		}
-		else { return; }
+	if (!force_priority_async_task_sub(box, task, std::forward<_Args>(args)...))
+	{
+		m_DEBUG_record_delayed_task_count.fetch_add(1, std::memory_order_relaxed);
+	}
+	else { return; }
 #endif // WELP_THREADS_DEBUG_MODE
-		while (!force_priority_async_task_sub(box, task, std::forward<_Args>(args)...)) {}
+	while (!force_priority_async_task_sub(box, task, std::forward<_Args>(args)...)) {}
 }
 
 
@@ -737,13 +737,13 @@ template <class _Allocator> template <class return_Ty, class function_Ty, class 
 void welp::threads<_Allocator>::force_async_task(welp::async_task_result<return_Ty>& box, const function_Ty& task, _Args&& ... args)
 {
 #ifdef WELP_THREADS_DEBUG_MODE
-		if (!force_async_task_sub(box, task, std::forward<_Args>(args)...))
-		{
-			m_DEBUG_record_delayed_task_count.fetch_add(1, std::memory_order_relaxed);
-		}
-		else { return; }
+	if (!force_async_task_sub(box, task, std::forward<_Args>(args)...))
+	{
+		m_DEBUG_record_delayed_task_count.fetch_add(1, std::memory_order_relaxed);
+	}
+	else { return; }
 #endif // WELP_THREADS_DEBUG_MODE
-		while (!force_async_task_sub(box, task, std::forward<_Args>(args)...)) {}
+	while (!force_async_task_sub(box, task, std::forward<_Args>(args)...)) {}
 }
 
 template <class _Allocator> template <class return_Ty, class function_Ty, class ... _Args>
@@ -833,13 +833,13 @@ void welp::threads<_Allocator>::force_priority_async_task(welp::async_task_resul
 {
 
 #ifdef WELP_THREADS_DEBUG_MODE
-		if (!force_priority_async_task_sub(box, task, std::forward<_Args>(args)...))
-		{
-			m_DEBUG_record_delayed_task_count.fetch_add(1, std::memory_order_relaxed);
-		}
-		else { return; }
+	if (!force_priority_async_task_sub(box, task, std::forward<_Args>(args)...))
+	{
+		m_DEBUG_record_delayed_task_count.fetch_add(1, std::memory_order_relaxed);
+	}
+	else { return; }
 #endif // WELP_THREADS_DEBUG_MODE
-		while (!force_priority_async_task_sub(box, task, std::forward<_Args>(args)...)) {}
+	while (!force_priority_async_task_sub(box, task, std::forward<_Args>(args)...)) {}
 }
 
 
@@ -1025,7 +1025,7 @@ void welp::threads<_Allocator>::delete_threads() noexcept
 
 #ifdef WELP_THREADS_DEBUG_MODE
 template <class _Allocator>
-void welp::threads<_Allocator>::record_reset() noexcept
+void welp::threads<_Allocator>::DEBUG_reset_record() noexcept
 {
 	m_DEBUG_record_max_occupancy.store(0);
 	m_DEBUG_record_completed_task_count.store(0);
@@ -1035,9 +1035,8 @@ void welp::threads<_Allocator>::record_reset() noexcept
 	m_DEBUG_record_on = false;
 }
 
-
 template <class _Allocator>
-void welp::threads<_Allocator>::record_say_sub()
+void welp::threads<_Allocator>::DEBUG_say_sub()
 {
 	std::cout << "\nThreads   > number of threads : " << m_number_of_threads
 		<< "   > task buffer size : " << ((m_task_buffer_data_ptr != nullptr) ? static_cast<std::size_t>(m_task_buffer_end_ptr - m_task_buffer_data_ptr) - 1 : 0)
@@ -1050,44 +1049,44 @@ void welp::threads<_Allocator>::record_say_sub()
 }
 
 template <class _Allocator>
-void welp::threads<_Allocator>::record_say()
+void welp::threads<_Allocator>::DEBUG_say()
 {
 	std::lock_guard<std::mutex> lock(m_mutex);
-	record_say_sub();
+	DEBUG_say_sub();
 }
 
 template <class _Allocator> template <typename msg_Ty>
-void welp::threads<_Allocator>::record_say(const msg_Ty& msg)
+void welp::threads<_Allocator>::DEBUG_say(const msg_Ty& msg)
 {
 	std::lock_guard<std::mutex> lock(m_mutex);
-	std::cout << "[ " << msg << " ]\n"; record_say_sub();
+	std::cout << "[ " << msg << " ]\n"; DEBUG_say_sub();
 }
 
 template <class _Allocator> template <typename msg_Ty1, typename msg_Ty2>
-void welp::threads<_Allocator>::record_say(const msg_Ty1& msg1, const msg_Ty2& msg2)
+void welp::threads<_Allocator>::DEBUG_say(const msg_Ty1& msg1, const msg_Ty2& msg2)
 {
 	std::lock_guard<std::mutex> lock(m_mutex);
-	std::cout << "[ " << msg1 << " " << msg2 << " ]\n"; record_say_sub();
+	std::cout << "[ " << msg1 << " " << msg2 << " ]\n"; DEBUG_say_sub();
 }
 
 template <class _Allocator> template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3>
-void welp::threads<_Allocator>::record_say(const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3)
+void welp::threads<_Allocator>::DEBUG_say(const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3)
 {
 	std::lock_guard<std::mutex> lock(m_mutex);
-	std::cout << "[ " << msg1 << " " << msg2 << " " << msg3 << " ]\n"; record_say_sub();
+	std::cout << "[ " << msg1 << " " << msg2 << " " << msg3 << " ]\n"; DEBUG_say_sub();
 }
 
 template <class _Allocator> template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3, typename msg_Ty4>
-void welp::threads<_Allocator>::record_say(const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3, const msg_Ty4& msg4)
+void welp::threads<_Allocator>::DEBUG_say(const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3, const msg_Ty4& msg4)
 {
 	std::lock_guard<std::mutex> lock(m_mutex);
-	std::cout << "[ " << msg1 << " " << msg2 << " " << msg3 << " " << msg4 << " ]\n"; record_say_sub();
+	std::cout << "[ " << msg1 << " " << msg2 << " " << msg3 << " " << msg4 << " ]\n"; DEBUG_say_sub();
 }
 
 
 #ifdef WELP_THREADS_INCLUDE_FSTREAM
 template <class _Allocator>
-void welp::threads<_Allocator>::record_write_sub(std::ofstream& rec_write)
+void welp::threads<_Allocator>::DEBUG_write_sub(std::ofstream& rec_write)
 {
 	rec_write << "\nThreads   > number of threads : " << m_number_of_threads
 		<< "   > task buffer size : " << ((m_task_buffer_data_ptr != nullptr) ? static_cast<std::size_t>(m_task_buffer_end_ptr - m_task_buffer_data_ptr) - 1 : 0)
@@ -1100,56 +1099,56 @@ void welp::threads<_Allocator>::record_write_sub(std::ofstream& rec_write)
 }
 
 template <class _Allocator>
-void welp::threads<_Allocator>::record_write(const char* const filename)
+void welp::threads<_Allocator>::DEBUG_write(const char* const filename)
 {
 	std::lock_guard<std::mutex> lock(m_mutex);
 	std::ofstream rec_write;
 	rec_write.open(filename, std::ios::app);
-	record_write_sub(rec_write);
+	DEBUG_write_sub(rec_write);
 	rec_write.close();
 }
 
 template <class _Allocator> template <typename msg_Ty>
-void welp::threads<_Allocator>::record_write(const char* const filename, const msg_Ty& msg)
+void welp::threads<_Allocator>::DEBUG_write(const char* const filename, const msg_Ty& msg)
 {
 	std::lock_guard<std::mutex> lock(m_mutex);
 	std::ofstream rec_write;
 	rec_write.open(filename, std::ios::app);
 	rec_write << "[ " << msg << " ]\n";
-	record_write_sub(rec_write);
+	DEBUG_write_sub(rec_write);
 	rec_write.close();
 }
 
 template <class _Allocator> template <typename msg_Ty1, typename msg_Ty2>
-void welp::threads<_Allocator>::record_write(const char* const filename, const msg_Ty1& msg1, const msg_Ty2& msg2)
+void welp::threads<_Allocator>::DEBUG_write(const char* const filename, const msg_Ty1& msg1, const msg_Ty2& msg2)
 {
 	std::lock_guard<std::mutex> lock(m_mutex);
 	std::ofstream rec_write;
 	rec_write.open(filename, std::ios::app);
 	rec_write << "[ " << msg1 << " " << msg2 << " ]\n";
-	record_write_sub(rec_write);
+	DEBUG_write_sub(rec_write);
 	rec_write.close();
 }
 
 template <class _Allocator> template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3>
-void welp::threads<_Allocator>::record_write(const char* const filename, const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3)
+void welp::threads<_Allocator>::DEBUG_write(const char* const filename, const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3)
 {
 	std::lock_guard<std::mutex> lock(m_mutex);
 	std::ofstream rec_write;
 	rec_write.open(filename, std::ios::app);
 	rec_write << "[ " << msg1 << " " << msg2 << " " << msg3 << " ]\n";
-	record_write_sub(rec_write);
+	DEBUG_write_sub(rec_write);
 	rec_write.close();
 }
 
 template <class _Allocator> template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3, typename msg_Ty4>
-void welp::threads<_Allocator>::record_write(const char* const filename, const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3, const msg_Ty4& msg4)
+void welp::threads<_Allocator>::DEBUG_write(const char* const filename, const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3, const msg_Ty4& msg4)
 {
 	std::lock_guard<std::mutex> lock(m_mutex);
 	std::ofstream rec_write;
 	rec_write.open(filename, std::ios::app);
 	rec_write << "[ " << msg1 << " " << msg2 << " " << msg3 << " " << msg4 << " ]\n";
-	record_write_sub(rec_write);
+	DEBUG_write_sub(rec_write);
 	rec_write.close();
 }
 #endif // WELP_THREADS_INCLUDE_FSTREAM
