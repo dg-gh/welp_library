@@ -173,29 +173,29 @@ namespace welp
 		void delete_pools() noexcept;
 
 #ifdef WELP_MULTIPOOL_DEBUG_MODE
-		void record_start() noexcept { m_DEBUG_record_on = true; };
-		void record_stop() noexcept { m_DEBUG_record_on = false; };
-		void record_reset() noexcept;
+		void DEBUG_start_record() noexcept { m_DEBUG_record_on = true; };
+		void DEBUG_stop_record() noexcept { m_DEBUG_record_on = false; };
+		void DEBUG_reset_record() noexcept;
 
-		void record_say();
-		template <typename msg_Ty> void record_say
+		void DEBUG_say();
+		template <typename msg_Ty> void DEBUG_say
 		(const msg_Ty& msg);
-		template <typename msg_Ty1, typename msg_Ty2> void record_say
+		template <typename msg_Ty1, typename msg_Ty2> void DEBUG_say
 		(const msg_Ty1& msg1, const msg_Ty2& msg2);
-		template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3> void record_say
+		template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3> void DEBUG_say
 		(const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3);
-		template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3, typename msg_Ty4> void record_say
+		template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3, typename msg_Ty4> void DEBUG_say
 		(const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3, const msg_Ty4& msg4);
 
 #ifdef WELP_MULTIPOOL_INCLUDE_FSTREAM
-		void record_write(const char* const filename);
-		template <typename msg_Ty> void record_write
+		void DEBUG_write(const char* const filename);
+		template <typename msg_Ty> void DEBUG_write
 		(const char* const filename, const msg_Ty& msg);
-		template <typename msg_Ty1, typename msg_Ty2> void record_write
+		template <typename msg_Ty1, typename msg_Ty2> void DEBUG_write
 		(const char* const filename, const msg_Ty1& msg1, const msg_Ty2& msg2);
-		template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3> void record_write
+		template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3> void DEBUG_write
 		(const char* const filename, const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3);
-		template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3, typename msg_Ty4> void record_write
+		template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3, typename msg_Ty4> void DEBUG_write
 		(const char* const filename, const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3, const msg_Ty4& msg4);
 #endif // WELP_MULTIPOOL_INCLUDE_FSTREAM
 #endif // WELP_MULTIPOOL_DEBUG_MODE
@@ -206,9 +206,9 @@ namespace welp
 	private:
 
 #ifdef WELP_MULTIPOOL_DEBUG_MODE
-		void record_say_sub();
+		void DEBUG_say_sub();
 #ifdef WELP_MULTIPOOL_INCLUDE_FSTREAM
-		void record_write_sub(std::ofstream& rec_write);
+		void DEBUG_write_sub(std::ofstream& rec_write);
 #endif // WELP_MULTIPOOL_INCLUDE_FSTREAM
 #endif // WELP_MULTIPOOL_DEBUG_MODE
 
@@ -306,29 +306,29 @@ namespace welp
 		void delete_pools() noexcept;
 
 #ifdef WELP_MULTIPOOL_DEBUG_MODE
-		void record_start() noexcept { std::lock_guard<mutex_Ty> resource_lock(m_resource_mutex); m_DEBUG_record_on = true; };
-		void record_stop() noexcept { std::lock_guard<mutex_Ty> resource_lock(m_resource_mutex); m_DEBUG_record_on = false; };
-		void record_reset() noexcept;
+		void DEBUG_start_record() noexcept { std::lock_guard<mutex_Ty> resource_lock(m_resource_mutex); m_DEBUG_record_on = true; };
+		void DEBUG_stop_record() noexcept { std::lock_guard<mutex_Ty> resource_lock(m_resource_mutex); m_DEBUG_record_on = false; };
+		void DEBUG_reset_record() noexcept;
 
-		void record_say();
-		template <typename msg_Ty> void record_say
+		void DEBUG_say();
+		template <typename msg_Ty> void DEBUG_say
 		(const msg_Ty& msg);
-		template <typename msg_Ty1, typename msg_Ty2> void record_say
+		template <typename msg_Ty1, typename msg_Ty2> void DEBUG_say
 		(const msg_Ty1& msg1, const msg_Ty2& msg2);
-		template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3> void record_say
+		template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3> void DEBUG_say
 		(const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3);
-		template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3, typename msg_Ty4> void record_say
+		template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3, typename msg_Ty4> void DEBUG_say
 		(const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3, const msg_Ty4& msg4);
 
 #ifdef WELP_MULTIPOOL_INCLUDE_FSTREAM
-		void record_write(const char* const filename);
-		template <typename msg_Ty> void record_write
+		void DEBUG_write(const char* const filename);
+		template <typename msg_Ty> void DEBUG_write
 		(const char* const filename, const msg_Ty& msg);
-		template <typename msg_Ty1, typename msg_Ty2> void record_write
+		template <typename msg_Ty1, typename msg_Ty2> void DEBUG_write
 		(const char* const filename, const msg_Ty1& msg1, const msg_Ty2& msg2);
-		template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3> void record_write
+		template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3> void DEBUG_write
 		(const char* const filename, const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3);
-		template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3, typename msg_Ty4> void record_write
+		template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3, typename msg_Ty4> void DEBUG_write
 		(const char* const filename, const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3, const msg_Ty4& msg4);
 #endif // WELP_MULTIPOOL_INCLUDE_FSTREAM
 #endif // WELP_MULTIPOOL_DEBUG_MODE
@@ -341,10 +341,10 @@ namespace welp
 		void delete_pools_sub() noexcept;
 
 #ifdef WELP_MULTIPOOL_DEBUG_MODE
-		void record_say_sub();
-		void record_reset_sub() noexcept;
+		void DEBUG_say_sub();
+		void DEBUG_reset_sub() noexcept;
 #ifdef WELP_MULTIPOOL_INCLUDE_FSTREAM
-		void record_write_sub(std::ofstream& rec_write);
+		void DEBUG_write_sub(std::ofstream& rec_write);
 #endif // WELP_MULTIPOOL_INCLUDE_FSTREAM
 #endif // WELP_MULTIPOOL_DEBUG_MODE
 
@@ -518,22 +518,22 @@ namespace welp
 		void delete_pools() noexcept;
 
 #ifdef WELP_MULTIPOOL_DEBUG_MODE
-		void record_start() noexcept { m_DEBUG_record_on = true; };
-		void record_stop() noexcept { m_DEBUG_record_on = false; };
-		void record_reset() noexcept;
+		void DEBUG_start() noexcept { m_DEBUG_record_on = true; };
+		void DEBUG_stop() noexcept { m_DEBUG_record_on = false; };
+		void DEBUG_reset() noexcept;
 
-		void record_say();
-		void record_say(const char* const msg);
-		void record_say(const char* const msg1, const char* const msg2);
-		void record_say(const char* const msg1, const char* const msg2, const char* const msg3);
-		void record_say(const char* const msg1, const char* const msg2, const char* const msg3, const char* const msg4);
+		void DEBUG_say();
+		void DEBUG_say(const char* const msg);
+		void DEBUG_say(const char* const msg1, const char* const msg2);
+		void DEBUG_say(const char* const msg1, const char* const msg2, const char* const msg3);
+		void DEBUG_say(const char* const msg1, const char* const msg2, const char* const msg3, const char* const msg4);
 
 #ifdef WELP_MULTIPOOL_INCLUDE_FSTREAM
-		void record_write(const char* const filename);
-		void record_write(const char* const filename, const char* const msg);
-		void record_write(const char* const filename, const char* const msg1, const char* const msg2);
-		void record_write(const char* const filename, const char* const msg1, const char* const msg2, const char* const msg3);
-		void record_write(const char* const filename, const char* const msg1, const char* const msg2, const char* const msg3, const char* const msg4);
+		void DEBUG_write(const char* const filename);
+		void DEBUG_write(const char* const filename, const char* const msg);
+		void DEBUG_write(const char* const filename, const char* const msg1, const char* const msg2);
+		void DEBUG_write(const char* const filename, const char* const msg1, const char* const msg2, const char* const msg3);
+		void DEBUG_write(const char* const filename, const char* const msg1, const char* const msg2, const char* const msg3, const char* const msg4);
 #endif // WELP_MULTIPOOL_INCLUDE_FSTREAM
 #endif // WELP_MULTIPOOL_DEBUG_MODE
 
@@ -1264,7 +1264,7 @@ bool welp::multipool_resource<max_number_of_pools, sub_allocator>::new_pools(std
 		m_current_address_ptr[n] = m_first_address_ptr[n] + m_block_instances[n]; // construct pointer to current address
 #ifdef WELP_MULTIPOOL_DEBUG_MODE
 		m_DEBUG_top_address_ptr[n] = m_current_address_ptr[n]; // pointer to top address before usage
-		record_reset(); m_DEBUG_record_on = false;
+		DEBUG_reset_record(); m_DEBUG_record_on = false;
 #endif // WELP_MULTIPOOL_DEBUG_MODE
 		char* ptr = m_data_ptr[n] + (m_block_instances[n] - 1) * m_block_size[n]; // pointer to last block (will iter backwards)
 		char** address_ptr_iter = m_first_address_ptr[n]; // pointer to first address (will iter forward)
@@ -1328,7 +1328,7 @@ bool welp::multipool_resource<max_number_of_pools, sub_allocator>::new_pools(std
 		m_current_address_ptr[n] = m_first_address_ptr[n] + m_block_instances[n]; // construct pointer to current address
 #ifdef WELP_MULTIPOOL_DEBUG_MODE
 		m_DEBUG_top_address_ptr[n] = m_current_address_ptr[n]; // pointer to top address before usage
-		record_reset(); m_DEBUG_record_on = false;
+		DEBUG_reset_record(); m_DEBUG_record_on = false;
 #endif // WELP_MULTIPOOL_DEBUG_MODE
 		char* ptr = m_data_ptr[n] + (m_block_instances[n] - 1) * m_block_size[n]; // pointer to last block (will iter backwards)
 		char** address_ptr_iter = m_first_address_ptr[n]; // pointer to first address (will iter forward)
@@ -1375,7 +1375,7 @@ void welp::multipool_resource<max_number_of_pools, sub_allocator>::delete_pools(
 #ifdef WELP_MULTIPOOL_DEBUG_MODE
 // RECORD RESET
 template <std::size_t max_number_of_pools, class sub_allocator>
-void welp::multipool_resource<max_number_of_pools, sub_allocator>::record_reset() noexcept
+void welp::multipool_resource<max_number_of_pools, sub_allocator>::DEBUG_reset_record() noexcept
 {
 	std::memset(m_DEBUG_record_allocations, 0, max_number_of_pools * sizeof(WELP_MULTIPOOL_RECORD_INT));
 	std::memset(m_DEBUG_record_deallocations, 0, max_number_of_pools * sizeof(WELP_MULTIPOOL_RECORD_INT));
@@ -1390,7 +1390,7 @@ void welp::multipool_resource<max_number_of_pools, sub_allocator>::record_reset(
 
 // RECORD SAY
 template <std::size_t max_number_of_pools, class sub_allocator>
-void welp::multipool_resource<max_number_of_pools, sub_allocator>::record_say_sub()
+void welp::multipool_resource<max_number_of_pools, sub_allocator>::DEBUG_say_sub()
 {
 	WELP_MULTIPOOL_RECORD_INT total_allocations = 0;
 	WELP_MULTIPOOL_RECORD_INT total_deallocations = 0;
@@ -1440,49 +1440,49 @@ void welp::multipool_resource<max_number_of_pools, sub_allocator>::record_say_su
 
 
 template <std::size_t max_number_of_pools, class sub_allocator>
-void welp::multipool_resource<max_number_of_pools, sub_allocator>::record_say()
+void welp::multipool_resource<max_number_of_pools, sub_allocator>::DEBUG_say()
 {
-	record_say_sub();
+	DEBUG_say_sub();
 }
 
 
 template <std::size_t max_number_of_pools, class sub_allocator>
-template <typename msg_Ty> void welp::multipool_resource<max_number_of_pools, sub_allocator>::record_say(const msg_Ty& msg)
+template <typename msg_Ty> void welp::multipool_resource<max_number_of_pools, sub_allocator>::DEBUG_say(const msg_Ty& msg)
 {
-	std::cout << "[ " << msg << " ]\n"; record_say_sub();
+	std::cout << "[ " << msg << " ]\n"; DEBUG_say_sub();
 }
 
 
 template <std::size_t max_number_of_pools, class sub_allocator>
-template <typename msg_Ty1, typename msg_Ty2> void welp::multipool_resource<max_number_of_pools, sub_allocator>::record_say
+template <typename msg_Ty1, typename msg_Ty2> void welp::multipool_resource<max_number_of_pools, sub_allocator>::DEBUG_say
 (const msg_Ty1& msg1, const msg_Ty2& msg2)
 {
-	std::cout << "[ " << msg1 << " " << msg2 << " ]\n"; record_say_sub();
+	std::cout << "[ " << msg1 << " " << msg2 << " ]\n"; DEBUG_say_sub();
 }
 
 
 template <std::size_t max_number_of_pools, class sub_allocator>
 template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3>
-void welp::multipool_resource<max_number_of_pools, sub_allocator>::record_say
+void welp::multipool_resource<max_number_of_pools, sub_allocator>::DEBUG_say
 (const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3)
 {
-	std::cout << "[ " << msg1 << " " << msg2 << " " << msg3 << " ]\n"; record_say_sub();
+	std::cout << "[ " << msg1 << " " << msg2 << " " << msg3 << " ]\n"; DEBUG_say_sub();
 }
 
 
 template <std::size_t max_number_of_pools, class sub_allocator>
 template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3, typename msg_Ty4>
-void welp::multipool_resource<max_number_of_pools, sub_allocator>::record_say
+void welp::multipool_resource<max_number_of_pools, sub_allocator>::DEBUG_say
 (const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3, const msg_Ty4& msg4)
 {
-	std::cout << "[ " << msg1 << " " << msg2 << " " << msg3 << " " << msg4 << " ]\n"; record_say_sub();
+	std::cout << "[ " << msg1 << " " << msg2 << " " << msg3 << " " << msg4 << " ]\n"; DEBUG_say_sub();
 }
 
 
 #ifdef WELP_MULTIPOOL_INCLUDE_FSTREAM
 // RECORD WRITE
 template <std::size_t max_number_of_pools, class sub_allocator>
-void welp::multipool_resource<max_number_of_pools, sub_allocator>::record_write_sub(std::ofstream& rec_write)
+void welp::multipool_resource<max_number_of_pools, sub_allocator>::DEBUG_write_sub(std::ofstream& rec_write)
 {
 	WELP_MULTIPOOL_RECORD_INT total_allocations = 0;
 	WELP_MULTIPOOL_RECORD_INT total_deallocations = 0;
@@ -1523,60 +1523,60 @@ void welp::multipool_resource<max_number_of_pools, sub_allocator>::record_write_
 
 
 template <std::size_t max_number_of_pools, class sub_allocator>
-void welp::multipool_resource<max_number_of_pools, sub_allocator>::record_write(const char* const filename)
+void welp::multipool_resource<max_number_of_pools, sub_allocator>::DEBUG_write(const char* const filename)
 {
 	std::ofstream rec_write;
 	rec_write.open(filename, std::ios::app);
-	record_write_sub(rec_write);
+	DEBUG_write_sub(rec_write);
 	rec_write.close();
 }
 
 
 template <std::size_t max_number_of_pools, class sub_allocator>
-template <typename msg_Ty> void welp::multipool_resource<max_number_of_pools, sub_allocator>::record_write(const char* const filename, const msg_Ty& msg)
+template <typename msg_Ty> void welp::multipool_resource<max_number_of_pools, sub_allocator>::DEBUG_write(const char* const filename, const msg_Ty& msg)
 {
 	std::ofstream rec_write;
 	rec_write.open(filename, std::ios::app);
 	rec_write << "[ " << msg << " ]\n";
-	record_write_sub(rec_write);
+	DEBUG_write_sub(rec_write);
 	rec_write.close();
 }
 
 
 template <std::size_t max_number_of_pools, class sub_allocator>
-template <typename msg_Ty1, typename msg_Ty2> void welp::multipool_resource<max_number_of_pools, sub_allocator>::record_write
+template <typename msg_Ty1, typename msg_Ty2> void welp::multipool_resource<max_number_of_pools, sub_allocator>::DEBUG_write
 (const char* const filename, const msg_Ty1& msg1, const msg_Ty2& msg2)
 {
 	std::ofstream rec_write;
 	rec_write.open(filename, std::ios::app);
 	rec_write << "[ " << msg1 << " " << msg2 << " ]\n";
-	record_write_sub(rec_write);
+	DEBUG_write_sub(rec_write);
 	rec_write.close();
 }
 
 
 template <std::size_t max_number_of_pools, class sub_allocator>
 template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3>
-void welp::multipool_resource<max_number_of_pools, sub_allocator>::record_write
+void welp::multipool_resource<max_number_of_pools, sub_allocator>::DEBUG_write
 (const char* const filename, const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3)
 {
 	std::ofstream rec_write;
 	rec_write.open(filename, std::ios::app);
 	rec_write << "[ " << msg1 << " " << msg2 << " " << msg3 << " ]\n";
-	record_write_sub(rec_write);
+	DEBUG_write_sub(rec_write);
 	rec_write.close();
 }
 
 
 template <std::size_t max_number_of_pools, class sub_allocator>
 template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3, typename msg_Ty4>
-void welp::multipool_resource<max_number_of_pools, sub_allocator>::record_write
+void welp::multipool_resource<max_number_of_pools, sub_allocator>::DEBUG_write
 (const char* const filename, const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3, const msg_Ty4& msg4)
 {
 	std::ofstream rec_write;
 	rec_write.open(filename, std::ios::app);
 	rec_write << "[ " << msg1 << " " << msg2 << " " << msg3 << " " << msg4 << " ]\n";
-	record_write_sub(rec_write);
+	DEBUG_write_sub(rec_write);
 	rec_write.close();
 }
 #endif // WELP_MULTIPOOL_INCLUDE_FSTREAM
@@ -2314,7 +2314,7 @@ bool welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>
 		m_current_address_ptr[n] = m_first_address_ptr[n] + m_block_instances[n]; // construct pointer to current address
 #ifdef WELP_MULTIPOOL_DEBUG_MODE
 		m_DEBUG_top_address_ptr[n] = m_current_address_ptr[n]; // pointer to top address before usage
-		record_reset_sub(); m_DEBUG_record_on = false;
+		DEBUG_reset_sub(); m_DEBUG_record_on = false;
 #endif // WELP_MULTIPOOL_DEBUG_MODE
 		char* ptr = m_data_ptr[n] + (m_block_instances[n] - 1) * m_block_size[n]; // pointer to last block (will iter backwards)
 		char** address_ptr_iter = m_first_address_ptr[n]; // pointer to first address (will iter forward)
@@ -2366,7 +2366,7 @@ bool welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>
 		m_current_address_ptr[n] = m_first_address_ptr[n] + m_block_instances[n]; // construct pointer to current address
 #ifdef WELP_MULTIPOOL_DEBUG_MODE
 		m_DEBUG_top_address_ptr[n] = m_current_address_ptr[n]; // pointer to top address before usage
-		record_reset_sub(); m_DEBUG_record_on = false;
+		DEBUG_reset_sub(); m_DEBUG_record_on = false;
 #endif // WELP_MULTIPOOL_DEBUG_MODE
 		char* ptr = m_data_ptr[n] + (m_block_instances[n] - 1) * m_block_size[n]; // pointer to last block (will iter backwards)
 		char** address_ptr_iter = m_first_address_ptr[n]; // pointer to first address (will iter forward)
@@ -2420,14 +2420,14 @@ void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>
 #ifdef WELP_MULTIPOOL_DEBUG_MODE
 // RECORD RESET
 template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
-void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::record_reset() noexcept
+void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::DEBUG_reset_record() noexcept
 {
 	std::lock_guard<mutex_Ty> resource_lock(m_resource_mutex);
-	record_reset_sub();
+	DEBUG_reset_sub();
 }
 
 template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
-void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::record_reset_sub() noexcept
+void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::DEBUG_reset_sub() noexcept
 {
 	std::memset(m_DEBUG_record_allocations, 0, max_number_of_pools * sizeof(WELP_MULTIPOOL_RECORD_INT));
 	std::memset(m_DEBUG_record_deallocations, 0, max_number_of_pools * sizeof(WELP_MULTIPOOL_RECORD_INT));
@@ -2442,7 +2442,7 @@ void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>
 
 // RECORD SAY
 template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
-void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::record_say_sub()
+void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::DEBUG_say_sub()
 {
 	WELP_MULTIPOOL_RECORD_INT total_allocations = 0;
 	WELP_MULTIPOOL_RECORD_INT total_deallocations = 0;
@@ -2492,54 +2492,54 @@ void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>
 
 
 template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
-void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::record_say()
+void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::DEBUG_say()
 {
 	std::lock_guard<mutex_Ty> resource_lock(m_resource_mutex);
-	record_say_sub();
+	DEBUG_say_sub();
 }
 
 
 template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
-template <typename msg_Ty> void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::record_say(const msg_Ty& msg)
+template <typename msg_Ty> void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::DEBUG_say(const msg_Ty& msg)
 {
 	std::lock_guard<mutex_Ty> resource_lock(m_resource_mutex);
-	std::cout << "[ " << msg << " ]\n"; record_say_sub();
+	std::cout << "[ " << msg << " ]\n"; DEBUG_say_sub();
 }
 
 
 template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
-template <typename msg_Ty1, typename msg_Ty2> void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::record_say
+template <typename msg_Ty1, typename msg_Ty2> void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::DEBUG_say
 (const msg_Ty1& msg1, const msg_Ty2& msg2)
 {
 	std::lock_guard<mutex_Ty> resource_lock(m_resource_mutex);
-	std::cout << "[ " << msg1 << " " << msg2 << " ]\n"; record_say_sub();
+	std::cout << "[ " << msg1 << " " << msg2 << " ]\n"; DEBUG_say_sub();
 }
 
 
 template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
 template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3>
-void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::record_say
+void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::DEBUG_say
 (const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3)
 {
 	std::lock_guard<mutex_Ty> resource_lock(m_resource_mutex);
-	std::cout << "[ " << msg1 << " " << msg2 << " " << msg3 << " ]\n"; record_say_sub();
+	std::cout << "[ " << msg1 << " " << msg2 << " " << msg3 << " ]\n"; DEBUG_say_sub();
 }
 
 
 template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
 template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3, typename msg_Ty4>
-void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::record_say
+void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::DEBUG_say
 (const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3, const msg_Ty4& msg4)
 {
 	std::lock_guard<mutex_Ty> resource_lock(m_resource_mutex);
-	std::cout << "[ " << msg1 << " " << msg2 << " " << msg3 << " " << msg4 << " ]\n"; record_say_sub();
+	std::cout << "[ " << msg1 << " " << msg2 << " " << msg3 << " " << msg4 << " ]\n"; DEBUG_say_sub();
 }
 
 
 #ifdef WELP_MULTIPOOL_INCLUDE_FSTREAM
 // RECORD WRITE
 template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
-void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::record_write_sub(std::ofstream& rec_write)
+void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::DEBUG_write_sub(std::ofstream& rec_write)
 {
 	WELP_MULTIPOOL_RECORD_INT total_allocations = 0;
 	WELP_MULTIPOOL_RECORD_INT total_deallocations = 0;
@@ -2580,65 +2580,65 @@ void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>
 
 
 template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
-void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::record_write(const char* const filename)
+void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::DEBUG_write(const char* const filename)
 {
 	std::lock_guard<mutex_Ty> resource_lock(m_resource_mutex);
 	std::ofstream rec_write;
 	rec_write.open(filename, std::ios::app);
-	record_write_sub(rec_write);
+	DEBUG_write_sub(rec_write);
 	rec_write.close();
 }
 
 
 template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
-template <typename msg_Ty> void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::record_write(const char* const filename, const msg_Ty& msg)
+template <typename msg_Ty> void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::DEBUG_write(const char* const filename, const msg_Ty& msg)
 {
 	std::lock_guard<mutex_Ty> resource_lock(m_resource_mutex);
 	std::ofstream rec_write;
 	rec_write.open(filename, std::ios::app);
 	rec_write << "[ " << msg << " ]\n";
-	record_write_sub(rec_write);
+	DEBUG_write_sub(rec_write);
 	rec_write.close();
 }
 
 
 template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
-template <typename msg_Ty1, typename msg_Ty2> void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::record_write
+template <typename msg_Ty1, typename msg_Ty2> void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::DEBUG_write
 (const char* const filename, const msg_Ty1& msg1, const msg_Ty2& msg2)
 {
 	std::lock_guard<mutex_Ty> resource_lock(m_resource_mutex);
 	std::ofstream rec_write;
 	rec_write.open(filename, std::ios::app);
 	rec_write << "[ " << msg1 << " " << msg2 << " ]\n";
-	record_write_sub(rec_write);
+	DEBUG_write_sub(rec_write);
 	rec_write.close();
 }
 
 
 template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
 template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3>
-void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::record_write
+void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::DEBUG_write
 (const char* const filename, const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3)
 {
 	std::lock_guard<mutex_Ty> resource_lock(m_resource_mutex);
 	std::ofstream rec_write;
 	rec_write.open(filename, std::ios::app);
 	rec_write << "[ " << msg1 << " " << msg2 << " " << msg3 << " ]\n";
-	record_write_sub(rec_write);
+	DEBUG_write_sub(rec_write);
 	rec_write.close();
 }
 
 
 template <std::size_t max_number_of_pools, class sub_allocator, class mutex_Ty>
 template <typename msg_Ty1, typename msg_Ty2, typename msg_Ty3, typename msg_Ty4>
-void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::record_write
+void welp::multipool_resource_sync<max_number_of_pools, sub_allocator, mutex_Ty>::DEBUG_write
 (const char* const filename, const msg_Ty1& msg1, const msg_Ty2& msg2, const msg_Ty3& msg3, const msg_Ty4& msg4)
 {
 	std::lock_guard<mutex_Ty> resource_lock(m_resource_mutex);
 	std::ofstream rec_write;
 	rec_write.open(filename, std::ios::app);
 	rec_write << "[ " << msg1 << " " << msg2 << " " << msg3 << " " << msg4 << " ]\n";
-	record_write_sub(rec_write);
+	DEBUG_write_sub(rec_write);
 	rec_write.close();
 }
 #endif // WELP_MULTIPOOL_INCLUDE_FSTREAM
@@ -3697,7 +3697,7 @@ bool welp::quadpool_resource::new_pools(std::size_t number_of_pools, const std::
 		m_current_address_ptr[n] = m_first_address_ptr[n] + m_block_instances[n]; // construct pointer to current address
 #ifdef WELP_MULTIPOOL_DEBUG_MODE
 		m_DEBUG_top_address_ptr[n] = m_current_address_ptr[n]; // pointer to top address before usage
-		record_reset(); m_DEBUG_record_on = false;
+		DEBUG_reset(); m_DEBUG_record_on = false;
 #endif // WELP_MULTIPOOL_DEBUG_MODE
 		char* ptr = m_data_ptr[n] + (m_block_instances[n] - 1) * m_block_size[n]; // pointer to last block (will iter backwards)
 		char** address_ptr_iter = m_first_address_ptr[n]; // pointer to first address (will iter forward)
@@ -3745,7 +3745,7 @@ bool welp::quadpool_resource::new_pools(std::size_t number_of_pools, std::initia
 		m_current_address_ptr[n] = m_first_address_ptr[n] + m_block_instances[n]; // construct pointer to current address
 #ifdef WELP_MULTIPOOL_DEBUG_MODE
 		m_DEBUG_top_address_ptr[n] = m_current_address_ptr[n]; // pointer to top address before usage
-		record_reset(); m_DEBUG_record_on = false;
+		DEBUG_reset(); m_DEBUG_record_on = false;
 #endif // WELP_MULTIPOOL_DEBUG_MODE
 		char* ptr = m_data_ptr[n] + (m_block_instances[n] - 1) * m_block_size[n]; // pointer to last block (will iter backwards)
 		char** address_ptr_iter = m_first_address_ptr[n]; // pointer to first address (will iter forward)
@@ -3788,7 +3788,7 @@ void welp::quadpool_resource::delete_pools() noexcept
 
 #ifdef WELP_MULTIPOOL_DEBUG_MODE
 // RECORD RESET
-void welp::quadpool_resource::record_reset() noexcept
+void welp::quadpool_resource::DEBUG_reset() noexcept
 {
 	std::memset(m_DEBUG_record_allocations, 0, 4 * sizeof(WELP_MULTIPOOL_RECORD_INT));
 	std::memset(m_DEBUG_record_deallocations, 0, 4 * sizeof(WELP_MULTIPOOL_RECORD_INT));
@@ -3851,31 +3851,31 @@ void welp::quadpool_resource::record_say_sub()
 }
 
 
-void welp::quadpool_resource::record_say()
+void welp::quadpool_resource::DEBUG_say()
 {
 	record_say_sub();
 }
 
 
-void welp::quadpool_resource::record_say(const char* msg)
+void welp::quadpool_resource::DEBUG_say(const char* msg)
 {
 	std::cout << "[ " << msg << " ]\n"; record_say_sub();
 }
 
 
-void welp::quadpool_resource::record_say(const char* msg1, const char* msg2)
+void welp::quadpool_resource::DEBUG_say(const char* msg1, const char* msg2)
 {
 	std::cout << "[ " << msg1 << " " << msg2 << " ]\n"; record_say_sub();
 }
 
 
-void welp::quadpool_resource::record_say(const char* msg1, const char* msg2, const char* msg3)
+void welp::quadpool_resource::DEBUG_say(const char* msg1, const char* msg2, const char* msg3)
 {
 	std::cout << "[ " << msg1 << " " << msg2 << " " << msg3 << " ]\n"; record_say_sub();
 }
 
 
-void welp::quadpool_resource::record_say(const char* msg1, const char* msg2, const char* msg3, const char* msg4)
+void welp::quadpool_resource::DEBUG_say(const char* msg1, const char* msg2, const char* msg3, const char* msg4)
 {
 	std::cout << "[ " << msg1 << " " << msg2 << " " << msg3 << " " << msg4 << " ]\n"; record_say_sub();
 }
@@ -3923,7 +3923,7 @@ void welp::quadpool_resource::record_write_sub(std::ofstream& rec_write)
 }
 
 
-void welp::quadpool_resource::record_write(const char* const filename)
+void welp::quadpool_resource::DEBUG_write(const char* const filename)
 {
 	std::ofstream rec_write;
 	rec_write.open(filename, std::ios::app);
@@ -3932,7 +3932,7 @@ void welp::quadpool_resource::record_write(const char* const filename)
 }
 
 
-void welp::quadpool_resource::record_write(const char* const filename, const char* const msg)
+void welp::quadpool_resource::DEBUG_write(const char* const filename, const char* const msg)
 {
 	std::ofstream rec_write;
 	rec_write.open(filename, std::ios::app);
@@ -3942,7 +3942,7 @@ void welp::quadpool_resource::record_write(const char* const filename, const cha
 }
 
 
-void welp::quadpool_resource::record_write(const char* const filename, const char* const msg1, const char* const msg2)
+void welp::quadpool_resource::DEBUG_write(const char* const filename, const char* const msg1, const char* const msg2)
 {
 	std::ofstream rec_write;
 	rec_write.open(filename, std::ios::app);
@@ -3952,7 +3952,7 @@ void welp::quadpool_resource::record_write(const char* const filename, const cha
 }
 
 
-void welp::quadpool_resource::record_write(const char* const filename, const char* const msg1,
+void welp::quadpool_resource::DEBUG_write(const char* const filename, const char* const msg1,
 	const char* const msg2, const char* const msg3)
 {
 	std::ofstream rec_write;
@@ -3963,7 +3963,7 @@ void welp::quadpool_resource::record_write(const char* const filename, const cha
 }
 
 
-void welp::quadpool_resource::record_write(const char* const filename, const char* const msg1,
+void welp::quadpool_resource::DEBUG_write(const char* const filename, const char* const msg1,
 	const char* const msg2, const char* const msg3, const char* const msg4)
 {
 	std::ofstream rec_write;
